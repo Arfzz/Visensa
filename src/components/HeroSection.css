@@ -337,9 +337,48 @@
   animation: hero-float 3.5s ease-in-out infinite;
 }
 
+.hero-pill-card--completed {
+  top: 170px;
+  left: 10px;
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  padding: 14.6px 17.04px;
+  z-index: 4;
+  animation: hero-float-rotated 3.5s ease-in-out infinite;
+  
+  /* User's Figma properties */
+  border-radius: 17.04px;
+  outline: 1.22px solid rgba(75, 168, 130, 0.22);
+  outline-offset: -1.22px;
+  background: rgba(75, 168, 130, 0.10);
+  transform-origin: top left;
+  border: none;
+}
+
+@keyframes hero-float-rotated {
+  0%, 100% {
+    transform: translateY(0px) rotate(2deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(2deg);
+  }
+}
+
+.hero-pill-card__completed-header {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 9.73px;
+  align-self: stretch;
+}
+
 .hero-pill-card__check {
   flex-shrink: 0;
   display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .hero-pill-card__title {
@@ -350,11 +389,32 @@
   white-space: nowrap;
 }
 
+.hero-pill-card--completed .hero-pill-card__title {
+  font-size: 14.6px;
+  font-weight: 600;
+  color: #4BA882;
+  line-height: 21.9px;
+  font-family: var(--font-sans);
+  margin: 0;
+  word-wrap: break-word;
+}
+
 .hero-pill-card__meta {
   font-size: 12px;
   color: #7a9490;
   margin: 2px 0 0 0;
   white-space: nowrap;
+}
+
+.hero-pill-card--completed .hero-pill-card__meta {
+  font-size: 12.17px;
+  font-family: var(--font-mono);
+  color: #A69E9A;
+  margin: 0;
+  padding-top: 4.87px;
+  line-height: 18.25px;
+  font-weight: 400;
+  word-wrap: break-word;
 }
 
 /* ── Floating Cards ── */

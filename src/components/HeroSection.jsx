@@ -102,17 +102,17 @@ export default function HeroSection() {
           </div>
 
           {/* Session complete pill — top left overlap */}
-          <div className="hero-pill-card hero-pill-card--session">
-            <span className="hero-pill-card__check">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                <circle cx="8" cy="8" r="8" fill="#4ECDC4" />
-                <path d="M4.5 8L7 10.5L11.5 5.5" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </span>
-            <div>
+          <div className="hero-pill-card hero-pill-card--completed">
+            <div className="hero-pill-card__completed-header">
+              <span className="hero-pill-card__check">
+                <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
+                  <circle cx="12.59" cy="12.59" r="12.59" fill="#4BA882" />
+                  <path d="M8 12.5L11.5 16L17.5 9" stroke="white" strokeWidth="1.52" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </span>
               <p className="hero-pill-card__title">Session complete</p>
-              <p className="hero-pill-card__meta">8/8 exercises · 11:42</p>
             </div>
+            <p className="hero-pill-card__meta">8/8 exercises · 11:42</p>
           </div>
 
           {/* Robert M. card — bottom left */}
