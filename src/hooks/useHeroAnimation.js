@@ -14,17 +14,16 @@ export function useHeroAnimation() {
       const tl = gsap.timeline({ defaults: { ease: 'power3.out' } })
 
       // ── LEFT CONTENT ──────────────────────────────────────────
+      // NOTE: .hero__heading is handled by SplitText — skip it here
       gsap.set('.hero__label', { y: 20, opacity: 0 })
-      gsap.set('.hero__heading', { y: 40, opacity: 0 })
       gsap.set('.hero__desc', { y: 30, opacity: 0 })
       gsap.set('.hero__actions', { y: 24, opacity: 0 })
       gsap.set('.hero__badges', { y: 16, opacity: 0 })
 
-      tl.to('.hero__label',   { y: 0, opacity: 1, duration: 0.6 })
-        .to('.hero__heading', { y: 0, opacity: 1, duration: 0.75 }, '-=0.35')
-        .to('.hero__desc',    { y: 0, opacity: 1, duration: 0.6  }, '-=0.45')
+      tl.to('.hero__label', { y: 0, opacity: 1, duration: 0.6 })
+        .to('.hero__desc', { y: 0, opacity: 1, duration: 0.6 }, '+=0.5')
         .to('.hero__actions', { y: 0, opacity: 1, duration: 0.55 }, '-=0.35')
-        .to('.hero__badges',  { y: 0, opacity: 1, duration: 0.5  }, '-=0.3')
+        .to('.hero__badges', { y: 0, opacity: 1, duration: 0.5 }, '-=0.3')
 
       // ── RIGHT VISUAL — main card ──────────────────────────────
       gsap.set('.hero-main-card', { y: 60, x: 30, opacity: 0, rotate: -8 })
@@ -42,7 +41,7 @@ export function useHeroAnimation() {
 
       // ── FLOAT CARDS ───────────────────────────────────────────
       gsap.set('.hero-float-card--patient', { y: 50, x: -20, opacity: 0 })
-      gsap.set('.hero-float-card--pain',    { y: 50, x: 20,  opacity: 0 })
+      gsap.set('.hero-float-card--pain', { y: 50, x: 20, opacity: 0 })
 
       tl.to('.hero-float-card--patient', {
         y: 0, x: 0, opacity: 1, duration: 0.65, ease: 'power2.out',

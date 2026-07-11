@@ -1,6 +1,7 @@
 import './HeroSection.css'
 import startIcon from '../assets/start-icon.png'
 import { useHeroAnimation } from '../hooks/useHeroAnimation'
+import SplitText from './SplitText'
 
 export default function HeroSection() {
   useHeroAnimation()
@@ -18,11 +19,51 @@ export default function HeroSection() {
             RESEARCH-BACKED MIRROR THERAPY
           </div>
 
-          {/* Heading */}
-          <h1 className="hero__heading">
-            Your hand<br />
-            still knows<br />
-            <span className="hero__heading-accent">how to move.</span>
+          {/* Heading — ReactBits SplitText (word-by-word reveal) */}
+          <h1 className="hero__heading" aria-label="Your hand still knows how to move.">
+            <SplitText
+              text="Your hand"
+              tag="span"
+              splitType="words"
+              textAlign="left"
+              delay={80}
+              duration={0.75}
+              ease="power3.out"
+              from={{ opacity: 0, y: 36 }}
+              to={{ opacity: 1, y: 0 }}
+              threshold={0}
+              rootMargin="0px"
+            />
+            <br />
+            <SplitText
+              text="still knows"
+              tag="span"
+              splitType="words"
+              textAlign="left"
+              delay={80}
+              duration={0.75}
+              ease="power3.out"
+              from={{ opacity: 0, y: 36 }}
+              to={{ opacity: 1, y: 0 }}
+              threshold={0}
+              rootMargin="0px"
+            />
+            <br />
+            <span className="hero__heading-accent">
+              <SplitText
+                text="how to move."
+                tag="span"
+                splitType="words"
+                textAlign="left"
+                delay={80}
+                duration={0.75}
+                ease="power3.out"
+                from={{ opacity: 0, y: 36 }}
+                to={{ opacity: 1, y: 0 }}
+                threshold={0}
+                rootMargin="0px"
+              />
+            </span>
           </h1>
 
           {/* Description — exact Figma copy */}

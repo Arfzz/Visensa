@@ -83,6 +83,21 @@
   display: block;
 }
 
+/* ── SplitText integration ── */
+.hero__heading .split-parent {
+  display: block;
+  overflow: visible;
+  white-space: normal;
+  word-wrap: break-word;
+  will-change: unset;
+  text-align: left;
+}
+
+.hero__heading-accent .split-parent {
+  display: inline;
+}
+
+
 .hero__desc {
   font-size: 15px;
   line-height: 1.7;
