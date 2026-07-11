@@ -1,9 +1,7 @@
-/* ============================================================
-   TRACKING SECTION
-   ============================================================ */
 .tracking {
   padding: 120px 0;
-  background: #f4fafa; /* Light teal/cyan background */
+  background: #f4fafa;
+  /* Light teal/cyan background */
 }
 
 .tracking__container {
@@ -222,19 +220,18 @@
   flex-shrink: 0;
 }
 
-/* ============================================================
-   RESPONSIVE
-   ============================================================ */
+/* responsive */
 @media (max-width: 900px) {
   .tracking__container {
     grid-template-columns: 1fr;
     gap: 80px;
   }
-  
+
   .tracking__visual {
-    order: 2; /* Move cards below text on mobile */
+    order: 2;
+    /* Move cards below text on mobile */
   }
-  
+
   .tracking__content {
     order: 1;
   }

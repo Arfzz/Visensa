@@ -1,6 +1,4 @@
-/* ============================================================
-   FEATURES SECTION
-   ============================================================ */
+/* Features Section */
 .features {
   padding: 120px 0;
   background: var(--color-surface);
@@ -278,9 +276,9 @@
   border-radius: 100px;
 }
 
-/* ============================================================
+/*  
    RESPONSIVE
-   ============================================================ */
+ */
 @media (max-width: 1024px) {
   .features__grid {
     grid-template-columns: 1fr 1fr;

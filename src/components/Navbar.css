@@ -1,17 +1,11 @@
-/* ============================================================
-   NAVBAR — Floating pill style (matches Figma node 89-537)
-   ============================================================ */
-
 .navbar {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 100;
-  /* top padding to push the pill down from the edge */
   padding: 20px 0 0;
   pointer-events: none;
-  /* let clicks pass through the transparent strip */
 }
 
 /* The floating pill bar itself */
@@ -78,11 +72,12 @@
   padding: 6px 18px;
   font-size: 14px;
   font-weight: 400;
-  color: #5a7060;
+  color: #151E2C;
   text-decoration: none;
   border-radius: 100px;
   transition: color 150ms ease, background 150ms ease;
   white-space: nowrap;
+  font-family: var(--font-sans);
 }
 
 .navbar__link:hover {

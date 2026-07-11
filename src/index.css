@@ -1,8 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
 
-/* ============================================================
-   DESIGN TOKENS
-   ============================================================ */
 :root {
   /* Colors */
   --color-bg: #e4f1ef;
@@ -10,7 +7,7 @@
   --color-surface: #ffffff;
   --color-surface-dark: #111d17;
 
-  /* Primary teal (matches Figma accent) */
+  /* Primary teal */
   --color-primary: #00B8B0;
   --color-primary-dark: #009990;
   --color-primary-light: rgba(0, 184, 176, 0.12);
@@ -43,9 +40,9 @@
   --container-padding: 0 120px;
 
   /* Effects */
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
-  --shadow-md: 0 4px 12px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.05);
-  --shadow-lg: 0 20px 40px rgba(0,0,0,0.1), 0 8px 20px rgba(0,0,0,0.06);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.1), 0 8px 20px rgba(0, 0, 0, 0.06);
   --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.08);
 
   --border-radius-sm: 6px;
@@ -58,10 +55,9 @@
   --transition-slow: 400ms cubic-bezier(0.23, 1, 0.32, 1);
 }
 
-/* ============================================================
-   RESET
-   ============================================================ */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -87,7 +83,8 @@ body {
   min-height: 100svh;
 }
 
-img, svg {
+img,
+svg {
   display: block;
   max-width: 100%;
 }
@@ -104,13 +101,12 @@ button {
   background: none;
 }
 
-ul, ol {
+ul,
+ol {
   list-style: none;
 }
 
-/* ============================================================
-   TYPOGRAPHY UTILITIES
-   ============================================================ */
+/* typhography utils*/
 .mono-label {
   font-family: var(--font-mono);
   font-size: 11px;
@@ -131,9 +127,7 @@ ul, ol {
   vertical-align: middle;
 }
 
-/* ============================================================
-   LAYOUT UTILITIES
-   ============================================================ */
+/* layout utils */
 .container {
   max-width: var(--container-max);
   margin: 0 auto;
@@ -152,19 +146,20 @@ ul, ol {
   }
 }
 
-/* ============================================================
-   SCROLLBAR
-   ============================================================ */
+/* scrollbar*/
 ::-webkit-scrollbar {
   width: 6px;
 }
+
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+
 ::-webkit-scrollbar-thumb {
   background: rgba(0, 200, 117, 0.3);
   border-radius: 3px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-primary);
 }
