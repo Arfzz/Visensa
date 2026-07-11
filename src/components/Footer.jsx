@@ -1,8 +1,8 @@
 import './Footer.css'
 
 const LINKS = {
-  Akses: ['Beranda', 'Fitur', 'Tentang Kami', 'FAQ'],
-  Support: ['link.supportvisensa'],
+  Akses: ['Beranda', 'How It Works', 'Tentang Kami'],
+  Support: ['link.supportkaloada'],
 }
 
 export default function Footer() {
@@ -12,41 +12,40 @@ export default function Footer() {
         {/* Brand */}
         <div className="footer__brand">
           <div className="footer__logo">
-            <svg width="22" height="28" viewBox="0 0 24 30" fill="none">
-              <path d="M12 0L24 6V15C24 22.5 18.6 28.5 12 30C5.4 28.5 0 22.5 0 15V6L12 0Z" fill="#00C875"/>
-              <path d="M8 15L11 18L16 12" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            <span>VISENSA</span>
+            <h2>VISENSA</h2>
           </div>
           <p className="footer__brand-desc">
-            Browser-based mirror therapy for phantom limb pain. Clinically validated, 
-            zero hardware required. Start in under 4 minutes.
+            Empowering neurorehabilitation through accessible digital therapy. 
+            Visensa helps patients perform interactive mirror therapy anytime 
+            using only a web browser and a standard webcam.
           </p>
         </div>
 
         {/* Links */}
-        {Object.entries(LINKS).map(([group, items]) => (
-          <div key={group} className="footer__col">
-            <h4 className="footer__col-heading">{group}</h4>
-            <ul className="footer__links">
-              {items.map((item) => (
-                <li key={item}>
-                  <a href="#" className="footer__link" id={`footer-${item.toLowerCase().replace(/\s+/g, '-')}`}>
-                    {item.startsWith('>') ? item : `> ${item}`}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
+        <div className="footer__navs">
+          {Object.entries(LINKS).map(([group, items]) => (
+            <div key={group} className="footer__col">
+              <h4 className="footer__col-heading">{group}</h4>
+              <ul className="footer__links">
+                {items.map((item) => (
+                  <li key={item}>
+                    <a href="#" className="footer__link" id={`footer-${item.toLowerCase().replace(/\s+/g, '-')}`}>
+                      {item.startsWith('link.') ? item : `> ${item}`}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
 
         {/* Newsletter */}
         <div className="footer__newsletter">
-          <h4 className="footer__col-heading">Subscribe to our newsletter</h4>
+          <h4 className="footer__newsletter-heading">Subscribe to our newsletter</h4>
           <p className="footer__newsletter-desc">
-            Latest news from VISENSA, updates, and insights on mirror therapy delivered to your inbox.
+            Receive product updates, rehabilitation insights, research highlights, and the latest innovations in digital healthcare.
           </p>
-          <div className="footer__newsletter-form">
+          <form className="footer__newsletter-form" onSubmit={(e) => e.preventDefault()}>
             <input
               type="email"
               placeholder="Enter your email"
@@ -54,10 +53,10 @@ export default function Footer() {
               id="newsletter-email"
               aria-label="Email address"
             />
-          </div>
-          <button className="footer__newsletter-btn" id="newsletter-subscribe">
-            Subscribe
-          </button>
+            <button type="submit" className="footer__newsletter-btn" id="newsletter-subscribe">
+              Subscribe
+            </button>
+          </form>
         </div>
       </div>
 
@@ -65,11 +64,11 @@ export default function Footer() {
       <div className="footer__bottom">
         <div className="footer__bottom-inner container">
           <div className="footer__copyright">
-            <svg width="18" height="22" viewBox="0 0 24 30" fill="none">
-              <path d="M12 0L24 6V15C24 22.5 18.6 28.5 12 30C5.4 28.5 0 22.5 0 15V6L12 0Z" fill="#00C875"/>
-              <path d="M8 15L11 18L16 12" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M12 21C12 21 5 13 5 7C5 4.5 7 2.5 9.5 2.5C11 2.5 12 3.5 12 3.5C12 3.5 13 2.5 14.5 2.5C17 2.5 19 4.5 19 7C19 13 12 21 12 21Z" fill="#E67E22" fillOpacity="0.8"/>
+              <path d="M12 21C12 21 8 16 8 10C8 7.5 9 5.5 10.5 5.5C11.5 5.5 12 6 12 6V21Z" fill="#3BB8B0"/>
             </svg>
-            <span>© 2026 VISENSA Health Ltd.</span>
+            <span>© 2026 VISENSA | PRIVACY POLICY | TERMS OF SERVICES</span>
           </div>
           <div className="footer__socials">
             {/* Facebook */}
