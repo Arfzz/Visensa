@@ -33,13 +33,13 @@ export default function HeroSection() {
             <a href="#" className="hero__btn-primary" id="hero-start-free">
               Start free session
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                <path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </a>
             <a href="#how-it-works" className="hero__btn-secondary" id="hero-how-it-works">
               <span className="hero__btn-secondary__play" aria-hidden="true">
                 <svg width="10" height="12" viewBox="0 0 10 12" fill="none">
-                  <path d="M1 1L9 6L1 11V1Z" fill="currentColor"/>
+                  <path d="M1 1L9 6L1 11V1Z" fill="currentColor" />
                 </svg>
               </span>
               How it works
@@ -51,8 +51,8 @@ export default function HeroSection() {
             {['No hardware needed', 'Camera stays on-device', 'Free first session'].map((text) => (
               <span key={text} className="hero__badge">
                 <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
-                  <circle cx="6.5" cy="6.5" r="6.5" fill="#4ECDC4" opacity="0.2"/>
-                  <path d="M3.5 6.5L5.5 8.5L9.5 4.5" stroke="#00A99D" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <circle cx="6.5" cy="6.5" r="6.5" fill="#4ECDC4" opacity="0.2" />
+                  <path d="M3.5 6.5L5.5 8.5L9.5 4.5" stroke="#00A99D" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
                 {text}
               </span>
@@ -82,9 +82,9 @@ export default function HeroSection() {
             {/* Joints pill — inside card */}
             <div className="hero-main-card__joints-pill">
               <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-                <path d="M1 6C1 3.24 3.24 1 6 1" stroke="#4ECDC4" strokeWidth="1.5" strokeLinecap="round"/>
-                <path d="M11 6C11 8.76 8.76 11 6 11" stroke="#4ECDC4" strokeWidth="1.5" strokeLinecap="round"/>
-                <circle cx="6" cy="6" r="2" fill="#4ECDC4"/>
+                <path d="M1 6C1 3.24 3.24 1 6 1" stroke="#4ECDC4" strokeWidth="1.5" strokeLinecap="round" />
+                <path d="M11 6C11 8.76 8.76 11 6 11" stroke="#4ECDC4" strokeWidth="1.5" strokeLinecap="round" />
+                <circle cx="6" cy="6" r="2" fill="#4ECDC4" />
               </svg>
               21 JOINTS TRACKED
             </div>
@@ -105,8 +105,8 @@ export default function HeroSection() {
           <div className="hero-pill-card hero-pill-card--session">
             <span className="hero-pill-card__check">
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                <circle cx="8" cy="8" r="8" fill="#4ECDC4"/>
-                <path d="M4.5 8L7 10.5L11.5 5.5" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                <circle cx="8" cy="8" r="8" fill="#4ECDC4" />
+                <path d="M4.5 8L7 10.5L11.5 5.5" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </span>
             <div>
@@ -162,7 +162,7 @@ function TwoHandsSVG() {
       {/* === LEFT HAND (solid / gray — the physical hand) === */}
       <g className="hand-solid">
         {/* Palm */}
-        <ellipse cx="145" cy="190" rx="52" ry="46" fill="#4a5568"/>
+        <ellipse cx="145" cy="190" rx="52" ry="46" fill="#4a5568" />
         {/* Thumb */}
         <path
           d="M98 175 C88 158 86 138 90 120 C94 102 106 98 114 110 C119 120 116 145 110 168"
@@ -193,7 +193,7 @@ function TwoHandsSVG() {
       {/* === RIGHT HAND (teal outline — the mirror/virtual hand) === */}
       <g className="hand-outline">
         {/* Palm */}
-        <ellipse cx="285" cy="190" rx="52" ry="46" fill="none" stroke="#4ECDC4" strokeWidth="2"/>
+        <ellipse cx="285" cy="190" rx="52" ry="46" fill="none" stroke="#4ECDC4" strokeWidth="2" />
         {/* Thumb */}
         <path
           d="M238 175 C228 158 226 138 230 120 C234 102 246 98 254 110 C259 120 256 145 250 168"
@@ -228,8 +228,8 @@ function TwoHandsSVG() {
 function DownTrendIcon() {
   return (
     <svg width="22" height="16" viewBox="0 0 22 16" fill="none" aria-hidden="true">
-      <path d="M2 3L8 9L13 5L20 12" stroke="#4ECDC4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M15 12H20V7" stroke="#4ECDC4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M2 3L8 9L13 5L20 12" stroke="#4ECDC4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M15 12H20V7" stroke="#4ECDC4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   )
 }
