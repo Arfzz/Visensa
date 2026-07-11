@@ -1,0 +1,141 @@
+/* ============================================================
+   HOW IT WORKS SECTION
+   ============================================================ */
+.how-it-works {
+  padding: 120px 0;
+  background: var(--color-bg);
+}
+
+.how-it-works__container {
+  display: flex;
+  flex-direction: column;
+  gap: 64px;
+}
+
+/* Header */
+.how-it-works__header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+
+.how-it-works__header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.how-it-works__heading {
+  font-size: clamp(32px, 4vw, 52px);
+  font-weight: 600;
+  letter-spacing: -1.5px;
+  line-height: 1.1;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.how-it-works__cta {
+  flex-shrink: 0;
+  align-self: flex-start;
+}
+
+/* Steps */
+.how-it-works__steps {
+  display: flex;
+  flex-direction: column;
+}
+
+.step-row {
+  position: relative;
+}
+
+.step-row__divider {
+  height: 1px;
+  background: var(--color-border);
+  width: 100%;
+}
+
+.step-row__inner {
+  display: grid;
+  grid-template-columns: 100px 1fr auto;
+  align-items: center;
+  gap: 40px;
+  padding: 40px 0;
+  transition: background var(--transition-fast);
+}
+
+.step-row:hover .step-row__inner {
+  background: transparent;
+}
+
+.step-row__num {
+  font-size: 64px;
+  font-weight: 700;
+  color: rgba(0,0,0,0.07);
+  letter-spacing: -2px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  transition: color var(--transition-normal);
+}
+
+.step-row:hover .step-row__num {
+  color: rgba(0,200,117,0.2);
+}
+
+.step-row__content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.step-row__title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.step-row__desc {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--color-text-muted);
+  max-width: 700px;
+  margin: 0;
+}
+
+.step-row__time {
+  flex-shrink: 0;
+  text-align: right;
+}
+
+.step-row__time-label {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--color-text-muted);
+  background: rgba(0,0,0,0.05);
+  padding: 6px 14px;
+  border-radius: 100px;
+  white-space: nowrap;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 768px) {
+  .step-row__inner {
+    grid-template-columns: 60px 1fr;
+    gap: 20px;
+  }
+  .step-row__num {
+    font-size: 44px;
+  }
+  .step-row__time {
+    grid-column: 2;
+    text-align: left;
+  }
+  .how-it-works__cta {
+    display: none;
+  }
+}

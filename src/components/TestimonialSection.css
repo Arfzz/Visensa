@@ -1,0 +1,162 @@
+/* ============================================================
+   TESTIMONIAL SECTION
+   ============================================================ */
+.testimonial {
+  padding: 120px 0;
+  background: #0d1a14;
+}
+
+.testimonial__container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+}
+
+/* ---- Quote Side ---- */
+.testimonial__quote-side {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.testimonial__quote-side .mono-label {
+  color: rgba(255,255,255,0.35);
+}
+
+.testimonial__quote {
+  font-size: clamp(22px, 3vw, 32px);
+  font-weight: 400;
+  line-height: 1.45;
+  color: rgba(255,255,255,0.92);
+  font-style: normal;
+  letter-spacing: -0.3px;
+  border: none;
+  padding: 0;
+  margin: 0;
+  quotes: '"' '"';
+}
+
+.testimonial__author {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.testimonial__avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #00C875, #0a8c55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 700;
+  color: white;
+  flex-shrink: 0;
+}
+
+.testimonial__author-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.testimonial__author-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.9);
+}
+
+.testimonial__author-desc {
+  font-size: 13px;
+  color: rgba(255,255,255,0.4);
+}
+
+/* ---- Chart Side ---- */
+.testimonial__chart-side {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: var(--border-radius-xl);
+  padding: 36px;
+}
+
+.testimonial__chart-side .mono-label {
+  color: rgba(255,255,255,0.35);
+}
+
+/* Pain Chart */
+.pain-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pain-chart__row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.pain-chart__week {
+  font-size: 13px;
+  color: rgba(255,255,255,0.45);
+  width: 56px;
+  flex-shrink: 0;
+  font-weight: 400;
+}
+
+.pain-chart__bar-wrap {
+  flex: 1;
+  height: 20px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.pain-chart__bar {
+  height: 100%;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #00C875, #00e88a);
+  transition: width 1.2s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* Color code by progress */
+.pain-chart__row:nth-child(1) .pain-chart__bar { background: #e74c3c; }
+.pain-chart__row:nth-child(2) .pain-chart__bar { background: #e67e22; }
+.pain-chart__row:nth-child(3) .pain-chart__bar { background: #f1c40f; }
+.pain-chart__row:nth-child(4) .pain-chart__bar { background: #27ae60; }
+.pain-chart__row:nth-child(5) .pain-chart__bar { background: #00C875; }
+
+.pain-chart__score {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: rgba(255,255,255,0.5);
+  width: 36px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.testimonial__result {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: rgba(255,255,255,0.5);
+  padding-top: 16px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 900px) {
+  .testimonial__container {
+    grid-template-columns: 1fr;
+    gap: 48px;
+  }
+}

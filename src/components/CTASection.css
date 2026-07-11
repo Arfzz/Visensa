@@ -1,0 +1,78 @@
+/* ============================================================
+   CTA SECTION
+   ============================================================ */
+.cta {
+  padding: 140px 0;
+  background: var(--color-bg);
+  text-align: center;
+}
+
+.cta__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+.cta__mono-label {
+  margin-bottom: 8px;
+}
+
+.cta__heading {
+  font-size: clamp(36px, 5vw, 64px);
+  font-weight: 600;
+  letter-spacing: -2px;
+  line-height: 1.05;
+  color: var(--color-text);
+  max-width: 700px;
+  margin: 0;
+}
+
+.cta__heading-accent {
+  color: var(--color-primary);
+}
+
+.cta__sub {
+  font-size: 16px;
+  color: var(--color-text-muted);
+  max-width: 440px;
+}
+
+.cta__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 36px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--color-text);
+  border-radius: 100px;
+  text-decoration: none;
+  margin-top: 8px;
+  transition: background var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
+  box-shadow: 0 6px 24px rgba(26,46,34,0.25);
+}
+
+.cta__btn:hover {
+  background: #0a2016;
+  transform: translateY(-2px);
+  box-shadow: 0 12px 36px rgba(26,46,34,0.35);
+}
+
+.cta__clinician {
+  font-size: 14px;
+  color: var(--color-text-muted);
+}
+
+.cta__clinician a {
+  color: var(--color-primary);
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: opacity var(--transition-fast);
+}
+
+.cta__clinician a:hover {
+  opacity: 0.75;
+}

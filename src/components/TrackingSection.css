@@ -1,0 +1,195 @@
+/* ============================================================
+   TRACKING SECTION
+   ============================================================ */
+.tracking {
+  padding: 120px 0;
+  background: var(--color-surface);
+}
+
+.tracking__container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+}
+
+/* ---- Visual (left) ---- */
+.tracking__visual {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Dashboard Card */
+.dashboard-card {
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-lg);
+  padding: 28px;
+  box-shadow: var(--shadow-card);
+}
+
+.dashboard-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.dashboard-card__title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.dashboard-card__badge {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+  padding: 3px 10px;
+  border-radius: 100px;
+}
+
+.dashboard-card__sub {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  margin-bottom: 16px;
+}
+
+.dashboard-card__chart {
+  height: 80px;
+  margin-bottom: 20px;
+}
+
+.dashboard-sparkline {
+  width: 100%;
+  height: 100%;
+}
+
+.dashboard-card__compare {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border);
+}
+
+.dashboard-card__week {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dashboard-card__week-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--color-text-muted);
+}
+
+.dashboard-card__week-val {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--color-text);
+  letter-spacing: -1px;
+  line-height: 1.1;
+}
+
+.dashboard-card__arrow {
+  font-size: 20px;
+  color: var(--color-text-muted);
+  flex: 1;
+  text-align: center;
+}
+
+/* Weekly Card */
+.weekly-card {
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-md);
+  padding: 20px 24px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.weekly-card__label {
+  display: block;
+}
+
+.weekly-card__value {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-text);
+  letter-spacing: -0.5px;
+}
+
+.weekly-card__trend {
+  font-size: 13px;
+  color: var(--color-primary);
+  font-weight: 500;
+}
+
+/* ---- Content (right) ---- */
+.tracking__content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.tracking__heading {
+  font-size: clamp(36px, 4vw, 56px);
+  font-weight: 600;
+  letter-spacing: -1.5px;
+  line-height: 1.1;
+  color: var(--color-text);
+}
+
+.tracking__heading-accent {
+  color: var(--color-primary);
+}
+
+.tracking__desc {
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--color-text-muted);
+  max-width: 520px;
+}
+
+.tracking__features {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tracking__feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 15px;
+  color: var(--color-text);
+  line-height: 1.5;
+}
+
+.tracking__feature-icon {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 900px) {
+  .tracking__container {
+    grid-template-columns: 1fr;
+    gap: 48px;
+  }
+}
