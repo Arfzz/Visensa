@@ -6,7 +6,7 @@ export default function CTASection() {
       <div className="cta__inner container">
         <p className="mono-label cta__mono-label">Ready when you are</p>
         <h2 className="cta__heading">
-          Begin your recovery today.<br />
+          Begin your recovery today.
           <span className="cta__heading-accent">No appointment needed.</span>
         </h2>
         <p className="cta__sub">
