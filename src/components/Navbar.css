@@ -71,7 +71,7 @@
   display: block;
   padding: 6px 18px;
   font-size: 14px;
-  font-weight: 400;
+  font-weight: 500;
   color: #151E2C;
   text-decoration: none;
   border-radius: 100px;
@@ -98,8 +98,8 @@
   align-items: center;
   padding: 6px 14px;
   font-size: 14px;
-  font-weight: 400;
-  color: #5a7060;
+  font-weight: 500;
+  color: #151E2C;
   text-decoration: none;
   border-radius: 100px;
   transition: color 150ms ease;

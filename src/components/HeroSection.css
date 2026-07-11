@@ -64,7 +64,7 @@
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: #00B8B0;
+  background: #3BB8B0;
   flex-shrink: 0;
   box-shadow: 0 0 0 3px rgba(0, 184, 176, 0.22);
 }
@@ -342,7 +342,7 @@
   padding: 14.6px 17.04px;
   z-index: 4;
   animation: hero-float-rotated 3.5s ease-in-out infinite;
-  
+
   /* User's Figma properties */
   border-radius: 17.04px;
   outline: 1.22px solid rgba(75, 168, 130, 0.22);
@@ -353,9 +353,12 @@
 }
 
 @keyframes hero-float-rotated {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0px) rotate(2deg);
   }
+
   50% {
     transform: translateY(-8px) rotate(2deg);
   }

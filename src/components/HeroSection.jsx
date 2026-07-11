@@ -1,7 +1,10 @@
 import './HeroSection.css'
 import startIcon from '../assets/start-icon.png'
+import { useHeroAnimation } from '../hooks/useHeroAnimation'
 
 export default function HeroSection() {
+  useHeroAnimation()
+
   return (
     <section className="hero" id="hero">
       <div className="hero__container container">

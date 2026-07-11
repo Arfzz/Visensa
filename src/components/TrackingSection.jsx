@@ -1,6 +1,62 @@
+import { useEffect, useRef } from 'react'
+import { gsap } from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import './TrackingSection.css'
 
+gsap.registerPlugin(ScrollTrigger)
+
 export default function TrackingSection() {
+  const sectionRef = useRef(null)
+
+  useEffect(() => {
+    if (!sectionRef.current) return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+
+    const ctx = gsap.context(() => {
+      // Dashboard card slides in from left
+      gsap.fromTo('.dashboard-card',
+        { x: -60, opacity: 0 },
+        {
+          x: 0, opacity: 1, duration: 0.8, ease: 'power3.out',
+          scrollTrigger: { trigger: '.dashboard-card', start: 'top 80%' },
+        }
+      )
+
+      // Weekly card with slight delay + pop
+      gsap.fromTo('.weekly-card',
+        { x: -40, y: 20, opacity: 0, scale: 0.92 },
+        {
+          x: 0, y: 0, opacity: 1, scale: 1, duration: 0.7, ease: 'back.out(1.3)',
+          scrollTrigger: { trigger: '.weekly-card', start: 'top 82%' },
+          delay: 0.2,
+        }
+      )
+
+      // Sparkline stroke draw animation
+      const path = document.querySelector('.dashboard-sparkline path:first-child')
+      if (path) {
+        const len = path.getTotalLength()
+        gsap.set(path, { strokeDasharray: len, strokeDashoffset: len })
+        gsap.to(path, {
+          strokeDashoffset: 0, duration: 1.4, ease: 'power2.inOut',
+          scrollTrigger: { trigger: '.dashboard-card__chart', start: 'top 82%' },
+        })
+      }
+
+      // Heading + desc slide in from right
+      gsap.fromTo('.tracking__heading',
+        { x: 40, opacity: 0 },
+        {
+          x: 0, opacity: 1, duration: 0.7, ease: 'power3.out',
+          scrollTrigger: { trigger: '.tracking__heading', start: 'top 82%' },
+        }
+      )
+    }, sectionRef)
+
+    return () => ctx.revert()
+  }, [])
+
+
   const features = [
     'Pain score tracked before and after every session',
     'Weekly summary in plain English, not data tables',
@@ -9,7 +65,7 @@ export default function TrackingSection() {
   ]
 
   return (
-    <section className="tracking" id="tracking">
+    <section className="tracking" id="tracking" ref={sectionRef}>
       <div className="tracking__container container">
         {/* Left — Dashboard Preview */}
         <div className="tracking__visual">
