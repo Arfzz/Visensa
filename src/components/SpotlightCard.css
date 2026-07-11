@@ -1,7 +1,5 @@
 .card-spotlight {
   position: relative;
-  border-radius: inherit; /* Let the parent define border-radius */
-  overflow: hidden; /* Prevent the glow from spilling out */
   --mouse-x: 50%;
   --mouse-y: 50%;
   --spotlight-color: rgba(255, 255, 255, 0.05);
@@ -14,6 +12,7 @@
   left: 0;
   right: 0;
   bottom: 0;
+  border-radius: inherit; /* Ensure the ::before respects the card's border-radius */
   background: radial-gradient(circle at var(--mouse-x) var(--mouse-y), var(--spotlight-color), transparent 80%);
   opacity: 0;
   transition: opacity 0.5s ease;
