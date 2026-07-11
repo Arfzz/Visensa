@@ -3,19 +3,19 @@
    ============================================================ */
 .how-it-works {
   padding: 120px 0;
-  background: var(--color-bg);
+  background: #ffffff;
 }
 
 .how-it-works__container {
   display: flex;
   flex-direction: column;
-  gap: 64px;
+  gap: 60px;
 }
 
 /* Header */
 .how-it-works__header {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
   gap: 32px;
   flex-wrap: wrap;
@@ -24,118 +24,162 @@
 .how-it-works__header-text {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
+}
+
+.how-it-works__mono-label {
+  color: #4ECDC4; /* Light teal to match Figma */
+  margin: 0;
 }
 
 .how-it-works__heading {
-  font-size: clamp(32px, 4vw, 52px);
-  font-weight: 600;
-  letter-spacing: -1.5px;
+  font-size: clamp(36px, 4.5vw, 56px);
+  font-weight: 700;
+  letter-spacing: -2px;
   line-height: 1.1;
-  color: var(--color-text);
+  color: #0d1117;
   margin: 0;
 }
 
 .how-it-works__cta {
-  flex-shrink: 0;
-  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #ffffff;
+  background: #00B8B0;
+  border-radius: 100px;
+  text-decoration: none;
+  white-space: nowrap;
+  box-shadow: 0 8px 24px rgba(0, 184, 176, 0.25);
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal), background var(--transition-normal);
 }
 
-/* Steps */
+.how-it-works__cta:hover {
+  background: #00a69e;
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(0, 184, 176, 0.35);
+}
+
+/* Steps Container */
 .how-it-works__steps {
   display: flex;
   flex-direction: column;
+  gap: 16px;
 }
 
-.step-row {
-  position: relative;
-}
-
-.step-row__divider {
-  height: 1px;
-  background: var(--color-border);
-  width: 100%;
-}
-
-.step-row__inner {
-  display: grid;
-  grid-template-columns: 100px 1fr auto;
+/* Step Cards */
+.step-card {
+  display: flex;
   align-items: center;
-  gap: 40px;
-  padding: 40px 0;
-  transition: background var(--transition-fast);
+  gap: 32px;
+  padding: 32px 40px;
+  border-radius: 20px;
+  border: 1px solid rgba(0,0,0,0.04);
+  transition: transform var(--transition-normal);
 }
 
-.step-row:hover .step-row__inner {
-  background: transparent;
+.step-card:hover {
+  transform: translateY(-2px);
 }
 
-.step-row__num {
-  font-size: 64px;
-  font-weight: 700;
-  color: rgba(0,0,0,0.07);
-  letter-spacing: -2px;
+/* Card Variants */
+.step-card--blue {
+  background: #f4f5f9;
+  border-color: #eaebf2;
+}
+.step-card--teal {
+  background: #f0faf6;
+  border-color: #e4f4ed;
+}
+.step-card--green {
+  background: #f6fbf0;
+  border-color: #ebf3e2;
+}
+
+.step-card__num {
+  font-size: 72px;
+  font-weight: 800;
+  color: rgba(0,0,0,0.06);
+  letter-spacing: -3px;
   line-height: 1;
   font-variant-numeric: tabular-nums;
-  transition: color var(--transition-normal);
+  flex-shrink: 0;
+  width: 90px;
 }
 
-.step-row:hover .step-row__num {
-  color: rgba(0,200,117,0.2);
-}
-
-.step-row__content {
+.step-card__content {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  flex: 1;
 }
 
-.step-row__title {
+.step-card__title {
   font-size: 20px;
-  font-weight: 600;
-  color: var(--color-text);
+  font-weight: 700;
+  color: #0d1117;
   margin: 0;
+  letter-spacing: -0.5px;
 }
 
-.step-row__desc {
+.step-card__desc {
   font-size: 15px;
   line-height: 1.6;
-  color: var(--color-text-muted);
-  max-width: 700px;
+  color: #6a7c78;
   margin: 0;
+  max-width: 680px;
 }
 
-.step-row__time {
+.step-card__time {
   flex-shrink: 0;
-  text-align: right;
 }
 
-.step-row__time-label {
+.step-card__time-label {
   font-family: var(--font-mono);
-  font-size: 13px;
-  color: var(--color-text-muted);
-  background: rgba(0,0,0,0.05);
-  padding: 6px 14px;
+  font-size: 11px;
+  color: #9aa8a6;
+  padding: 8px 16px;
   border-radius: 100px;
+  border: 1px solid rgba(0,0,0,0.06);
   white-space: nowrap;
 }
 
 /* ============================================================
    RESPONSIVE
    ============================================================ */
-@media (max-width: 768px) {
-  .step-row__inner {
-    grid-template-columns: 60px 1fr;
-    gap: 20px;
+@media (max-width: 900px) {
+  .step-card {
+    flex-wrap: wrap;
+    gap: 24px;
+    padding: 32px;
   }
-  .step-row__num {
-    font-size: 44px;
+  
+  .step-card__time {
+    width: 100%;
+    margin-top: 8px;
   }
-  .step-row__time {
-    grid-column: 2;
-    text-align: left;
+}
+
+@media (max-width: 600px) {
+  .how-it-works__header {
+    flex-direction: column;
+    align-items: flex-start;
   }
-  .how-it-works__cta {
-    display: none;
+  
+  .step-card {
+    padding: 24px;
+    gap: 16px;
+  }
+  
+  .step-card__num {
+    font-size: 56px;
+    width: 70px;
+  }
+  
+  .how-it-works__heading {
+    font-size: 40px;
   }
 }
