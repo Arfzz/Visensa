@@ -3,12 +3,27 @@ import startIcon from '../assets/start-icon.png'
 import { useHeroAnimation } from '../hooks/useHeroAnimation'
 import TextType from './TextType'
 import SplitText from './SplitText'
+import DotField from './DotField'
 
 export default function HeroSection() {
   useHeroAnimation()
 
   return (
     <section className="hero" id="hero">
+      {/* ── Interactive Background Grid ── */}
+      <DotField
+        dotRadius={1.5}
+        dotSpacing={20}
+        bulgeStrength={80}
+        cursorRadius={300}
+        glowRadius={250}
+        sparkle={true}
+        waveAmplitude={0}
+        gradientFrom="rgba(0, 184, 176, 0.4)"
+        gradientTo="rgba(0, 184, 176, 0.1)"
+        glowColor="rgba(0, 184, 176, 0.15)"
+      />
+
       <div className="hero__container container">
 
         {/* ── Left Content ── */}
