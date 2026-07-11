@@ -83,6 +83,16 @@
   display: block;
 }
 
+/* ── SplitText integration ── */
+.hero__heading .split-parent {
+  display: block;
+  overflow: visible;
+  white-space: normal;
+  word-wrap: break-word;
+  will-change: unset;
+  text-align: left;
+}
+
 /* ── TextType cursor — matches teal accent ── */
 .hero__cursor {
   color: #00B8B0;
