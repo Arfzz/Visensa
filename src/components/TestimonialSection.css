@@ -3,7 +3,7 @@
    ============================================================ */
 .testimonial {
   padding: 120px 0;
-  background: #0d1a14;
+  background: #141A23; /* Matching the deep slate blue from screenshot */
 }
 
 .testimonial__container {
@@ -21,79 +21,82 @@
 }
 
 .testimonial__quote-side .mono-label {
-  color: rgba(255,255,255,0.35);
+  color: rgba(255, 255, 255, 0.4);
 }
 
 .testimonial__quote {
-  font-size: clamp(22px, 3vw, 32px);
+  font-size: clamp(28px, 3.5vw, 42px);
   font-weight: 400;
-  line-height: 1.45;
-  color: rgba(255,255,255,0.92);
+  line-height: 1.35;
+  color: #ffffff;
   font-style: normal;
-  letter-spacing: -0.3px;
+  letter-spacing: -0.5px;
   border: none;
   padding: 0;
   margin: 0;
-  quotes: '"' '"';
+  quotes: none;
 }
 
 .testimonial__author {
   display: flex;
   align-items: center;
   gap: 16px;
+  margin-top: 8px;
 }
 
 .testimonial__avatar {
-  width: 52px;
-  height: 52px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #00C875, #0a8c55);
+  background: #20D3B0; /* The cyan/teal from the image */
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
-  font-weight: 700;
-  color: white;
+  font-size: 18px;
+  font-weight: 600;
+  color: #ffffff;
   flex-shrink: 0;
 }
 
 .testimonial__author-info {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
 }
 
 .testimonial__author-name {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
-  color: rgba(255,255,255,0.9);
+  color: #ffffff;
 }
 
 .testimonial__author-desc {
-  font-size: 13px;
-  color: rgba(255,255,255,0.4);
+  font-size: 14px;
+  color: #6C7A8C;
 }
 
 /* ---- Chart Side ---- */
 .testimonial__chart-side {
   display: flex;
   flex-direction: column;
-  gap: 24px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: var(--border-radius-xl);
-  padding: 36px;
+  gap: 28px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
 }
 
 .testimonial__chart-side .mono-label {
-  color: rgba(255,255,255,0.35);
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 11px;
 }
 
 /* Pain Chart */
 .pain-chart {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
 }
 
 .pain-chart__row {
@@ -103,39 +106,38 @@
 }
 
 .pain-chart__week {
+  font-family: var(--font-mono);
   font-size: 13px;
-  color: rgba(255,255,255,0.45);
-  width: 56px;
+  color: #6C7A8C;
+  width: 50px;
   flex-shrink: 0;
-  font-weight: 400;
 }
 
 .pain-chart__bar-wrap {
   flex: 1;
   height: 20px;
-  background: rgba(255,255,255,0.06);
-  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 40px;
   overflow: hidden;
 }
 
 .pain-chart__bar {
   height: 100%;
-  border-radius: 4px;
-  background: linear-gradient(90deg, #00C875, #00e88a);
+  border-radius: 40px;
   transition: width 1.2s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 /* Color code by progress */
-.pain-chart__row:nth-child(1) .pain-chart__bar { background: #e74c3c; }
-.pain-chart__row:nth-child(2) .pain-chart__bar { background: #e67e22; }
-.pain-chart__row:nth-child(3) .pain-chart__bar { background: #f1c40f; }
-.pain-chart__row:nth-child(4) .pain-chart__bar { background: #27ae60; }
-.pain-chart__row:nth-child(5) .pain-chart__bar { background: #00C875; }
+.pain-chart__row:nth-child(1) .pain-chart__bar { background: #BA5D55; }
+.pain-chart__row:nth-child(2) .pain-chart__bar { background: #BA5D55; }
+.pain-chart__row:nth-child(3) .pain-chart__bar { background: #C6A446; }
+.pain-chart__row:nth-child(4) .pain-chart__bar { background: #C6A446; }
+.pain-chart__row:nth-child(5) .pain-chart__bar { background: #63A77C; }
 
 .pain-chart__score {
   font-family: var(--font-mono);
   font-size: 13px;
-  color: rgba(255,255,255,0.5);
+  color: #6C7A8C;
   width: 36px;
   text-align: right;
   flex-shrink: 0;
@@ -146,17 +148,56 @@
   align-items: center;
   gap: 10px;
   font-size: 14px;
-  color: rgba(255,255,255,0.5);
-  padding-top: 16px;
-  border-top: 1px solid rgba(255,255,255,0.08);
+  color: #6C7A8C;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.testimonial__result svg {
+  color: #20D3B0;
+  width: 16px;
+  height: 16px;
+}
+
+.testimonial__result span {
+  color: #94A3B8;
+}
+
+.testimonial__result strong {
+  color: #ffffff;
+  font-weight: 500;
 }
 
 /* ============================================================
    RESPONSIVE
    ============================================================ */
+@media (max-width: 1024px) {
+  .testimonial__container {
+    gap: 40px;
+  }
+  
+  .testimonial__quote {
+    font-size: clamp(24px, 3vw, 32px);
+  }
+}
+
 @media (max-width: 900px) {
   .testimonial__container {
     grid-template-columns: 1fr;
-    gap: 48px;
+    gap: 56px;
+  }
+  
+  .testimonial__chart-side {
+    padding: 32px;
+  }
+}
+
+@media (max-width: 600px) {
+  .testimonial__chart-side {
+    padding: 24px;
+  }
+  
+  .pain-chart__week {
+    width: 44px;
   }
 }

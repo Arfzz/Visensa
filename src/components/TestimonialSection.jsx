@@ -1,11 +1,11 @@
 import './TestimonialSection.css'
 
 const PAIN_DATA = [
-  { week: 'Week 1', score: '8/10', pct: 100 },
-  { week: 'Week 2', score: '7/10', pct: 87.5 },
-  { week: 'Week 4', score: '5/10', pct: 62.5 },
-  { week: 'Week 6', score: '3/10', pct: 37.5 },
-  { week: 'Week 8', score: '2/10', pct: 25 },
+  { week: 'Week 1', score: '8/10', pct: 80 },
+  { week: 'Week 2', score: '7/10', pct: 70 },
+  { week: 'Week 4', score: '5/10', pct: 50 },
+  { week: 'Week 6', score: '3/10', pct: 30 },
+  { week: 'Week 8', score: '2/10', pct: 20 },
 ]
 
 export default function TestimonialSection() {
@@ -47,9 +47,9 @@ export default function TestimonialSection() {
           </div>
           <div className="testimonial__result">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M2 8L6 12L14 4" stroke="#00C875" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M4 4L12 12M12 12V6M12 12H6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-            <span>Pain reduced from 8/10 → 2/10 over 8 weeks</span>
+            <span>Pain reduced from <strong>8/10 &rarr; 2/10</strong> over 8 weeks</span>
           </div>
         </div>
       </div>
