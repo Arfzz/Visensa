@@ -1,58 +1,54 @@
 /* ============================================================
-   HERO SECTION — Matches Figma node 89-560
+   HERO SECTION
    ============================================================ */
-
-/* Background: light mint-teal gradient */
 .hero {
   min-height: 100vh;
   display: flex;
   align-items: center;
-  background: linear-gradient(160deg, #ddf0ee 0%, #e9f5f3 40%, #d8eceb 100%);
+  background: linear-gradient(160deg, #ddf0ee 0%, #e9f5f3 50%, #d8eceb 100%);
   padding: 120px 0 80px;
   position: relative;
   overflow: hidden;
 }
 
-/* Subtle radial glow top-right */
 .hero::after {
   content: '';
   position: absolute;
-  top: -80px;
-  right: 5%;
-  width: 600px;
-  height: 600px;
-  background: radial-gradient(circle, rgba(78, 205, 196, 0.12) 0%, transparent 68%);
+  top: -100px;
+  right: 0;
+  width: 700px;
+  height: 700px;
+  background: radial-gradient(circle, rgba(78,205,196,0.1) 0%, transparent 65%);
   pointer-events: none;
 }
 
-/* ── Two-column layout ── */
+/* ── Layout: flexbox, NOT grid ── */
 .hero__container {
-  display: grid;
-  /* Left col: fixed width. Right col: takes remaining space */
-  grid-template-columns: 460px 1fr;
-  gap: 60px;
+  display: flex;
   align-items: center;
+  gap: 60px;
   position: relative;
   z-index: 1;
+  width: 100%;
 }
 
 /* ============================================================
-   LEFT CONTENT
+   LEFT CONTENT — fixed width, never shrinks
    ============================================================ */
 .hero__content {
+  flex: 0 0 420px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
 }
 
-/* Pill label */
 .hero__label {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   padding: 6px 14px 6px 10px;
-  border: 1px solid rgba(0, 169, 157, 0.35);
-  background: rgba(0, 169, 157, 0.07);
+  border: 1px solid rgba(0,169,157,0.35);
+  background: rgba(0,169,157,0.07);
   border-radius: 100px;
   font-family: var(--font-mono);
   font-size: 10px;
@@ -70,17 +66,16 @@
   border-radius: 50%;
   background: #00B8B0;
   flex-shrink: 0;
-  box-shadow: 0 0 0 3px rgba(0, 184, 176, 0.2);
+  box-shadow: 0 0 0 3px rgba(0,184,176,0.22);
 }
 
-/* Heading */
 .hero__heading {
-  font-size: clamp(52px, 5.5vw, 76px);
+  font-size: clamp(48px, 4.5vw, 72px);
   font-weight: 800;
   line-height: 1.0;
   letter-spacing: -3px;
   color: #0d1117;
-  margin: 0 0 24px 0;
+  margin: 0 0 22px 0;
 }
 
 .hero__heading-accent {
@@ -88,16 +83,13 @@
   display: block;
 }
 
-/* Description */
 .hero__desc {
-  font-size: 16px;
-  line-height: 1.65;
+  font-size: 15px;
+  line-height: 1.7;
   color: #4a6b65;
   margin-bottom: 32px;
-  font-weight: 400;
 }
 
-/* CTAs */
 .hero__actions {
   display: flex;
   align-items: center;
@@ -106,7 +98,6 @@
   flex-wrap: wrap;
 }
 
-/* Primary — lime-yellow pill */
 .hero__btn-primary {
   display: inline-flex;
   align-items: center;
@@ -120,18 +111,17 @@
   text-decoration: none;
   border: none;
   cursor: pointer;
+  box-shadow: 0 2px 12px rgba(205,220,40,0.35);
   transition: background 150ms ease, transform 150ms ease, box-shadow 150ms ease;
-  box-shadow: 0 2px 12px rgba(205, 220, 40, 0.35);
   white-space: nowrap;
 }
 
 .hero__btn-primary:hover {
   background: #bfce18;
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(205, 220, 40, 0.45);
+  box-shadow: 0 6px 20px rgba(205,220,40,0.45);
 }
 
-/* Secondary — white pill */
 .hero__btn-secondary {
   display: inline-flex;
   align-items: center;
@@ -140,8 +130,8 @@
   font-size: 15px;
   font-weight: 500;
   color: #1a2e22;
-  background: rgba(255, 255, 255, 0.75);
-  border: 1.5px solid rgba(255, 255, 255, 0.9);
+  background: rgba(255,255,255,0.75);
+  border: 1.5px solid rgba(255,255,255,0.9);
   border-radius: 100px;
   text-decoration: none;
   backdrop-filter: blur(8px);
@@ -149,9 +139,7 @@
   white-space: nowrap;
 }
 
-.hero__btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.95);
-}
+.hero__btn-secondary:hover { background: rgba(255,255,255,0.95); }
 
 .hero__btn-secondary__play {
   display: flex;
@@ -160,16 +148,15 @@
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.06);
+  background: rgba(0,0,0,0.06);
   color: #2a4a3e;
   flex-shrink: 0;
 }
 
-/* Trust badges row */
 .hero__badges {
   display: flex;
   flex-wrap: wrap;
-  gap: 20px;
+  gap: 18px;
 }
 
 .hero__badge {
@@ -177,37 +164,34 @@
   align-items: center;
   gap: 6px;
   font-size: 13px;
-  font-weight: 400;
   color: #4a6b65;
 }
 
 /* ============================================================
    RIGHT — VISUAL AREA
-   The container is a fixed-size box; all children are absolute.
+   flex: 1 so it takes all remaining space.
+   Everything inside uses absolute positioning relative to this box.
    ============================================================ */
 .hero__visual {
+  flex: 1;
   position: relative;
-  /* Explicit dimensions so absolute children have a reference */
-  width: 100%;
   height: 540px;
-  min-width: 0;
+  min-width: 500px; /* never collapse below 500px */
 }
 
 /* ── Main Session Card (top-right, tilted) ── */
 .hero-main-card {
   position: absolute;
-  top: 20px;
+  top: 0;
   right: 0;
-  width: 380px;
+  width: 370px;
   background: #0e1e20;
   border-radius: 20px;
   padding: 20px 22px 18px;
-  box-shadow:
-    0 24px 60px rgba(0, 0, 0, 0.25),
-    0 8px 24px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 24px 60px rgba(0,0,0,0.25), 0 8px 24px rgba(0,0,0,0.15);
   transform: rotate(-4deg);
   transform-origin: top right;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255,255,255,0.06);
   z-index: 2;
 }
 
@@ -218,101 +202,81 @@
   margin-bottom: 12px;
 }
 
-.hero-main-card__status {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-}
+.hero-main-card__status { display: flex; align-items: center; gap: 7px; }
 
 .hero-main-card__dot {
-  width: 8px;
-  height: 8px;
+  width: 8px; height: 8px;
   border-radius: 50%;
   background: #4ECDC4;
-  box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.25);
+  box-shadow: 0 0 0 3px rgba(78,205,196,0.25);
   animation: hero-pulse 2s ease-in-out infinite;
 }
 
 @keyframes hero-pulse {
-  0%, 100% { box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.25); }
-  50%       { box-shadow: 0 0 0 6px rgba(78, 205, 196, 0.1); }
+  0%,100% { box-shadow: 0 0 0 3px rgba(78,205,196,0.25); }
+  50%      { box-shadow: 0 0 0 6px rgba(78,205,196,0.1); }
 }
 
 .hero-main-card__status-text {
   font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: 500;
+  font-size: 10px; font-weight: 500;
   letter-spacing: 0.12em;
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255,255,255,0.5);
   text-transform: uppercase;
 }
 
 .hero-main-card__counter {
   font-family: var(--font-mono);
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.3);
+  color: rgba(255,255,255,0.3);
 }
 
-/* Two hands area */
 .hero-main-card__hands {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 180px;
+  height: 175px;
 }
 
-.two-hands-svg {
-  width: 100%;
-  height: 100%;
-}
+.two-hands-svg { width: 100%; height: 100%; }
 
-/* Joints pill — inside card, right-aligned */
 .hero-main-card__joints-pill {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   padding: 5px 12px;
-  background: rgba(78, 205, 196, 0.12);
-  border: 1px solid rgba(78, 205, 196, 0.2);
+  background: rgba(78,205,196,0.12);
+  border: 1px solid rgba(78,205,196,0.2);
   border-radius: 100px;
   font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: 500;
+  font-size: 10px; font-weight: 500;
   letter-spacing: 0.1em;
   color: #4ECDC4;
-  margin: 8px 0 12px auto;
+  margin: 6px 0 12px auto;
   width: fit-content;
 }
 
-/* Footer */
 .hero-main-card__footer {
-  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  border-top: 1px solid rgba(255,255,255,0.07);
   padding-top: 12px;
 }
 
 .hero-main-card__instruction {
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.65);
+  color: rgba(255,255,255,0.65);
   margin: 0 0 10px 0;
 }
 
-.hero-main-card__progress {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
+.hero-main-card__progress { display: flex; align-items: center; gap: 10px; }
 
 .hero-main-card__progress-track {
-  flex: 1;
-  height: 5px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 3px;
-  overflow: hidden;
+  flex: 1; height: 5px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 3px; overflow: hidden;
 }
 
 .hero-main-card__progress-fill {
-  width: 37.5%;
-  height: 100%;
+  width: 37.5%; height: 100%;
   background: linear-gradient(90deg, #4ECDC4, #00e5d8);
   border-radius: 3px;
 }
@@ -320,25 +284,24 @@
 .hero-main-card__progress-num {
   font-family: var(--font-mono);
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.35);
+  color: rgba(255,255,255,0.35);
   flex-shrink: 0;
 }
 
-/* ── Session Complete Pill (overlaps left side of main card) ── */
+/* ── Session Complete Pill — left of main card, mid height ── */
 .hero-pill-card {
   position: absolute;
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255,255,255,0.95);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  border: 1px solid rgba(255,255,255,0.8);
 }
 
-/* Positioned: mid-left, overlapping the main card */
 .hero-pill-card--session {
-  top: 200px;
-  left: 20px;
+  top: 190px;
+  left: 0;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -347,211 +310,128 @@
   animation: hero-float 3.5s ease-in-out infinite;
 }
 
-.hero-pill-card__check {
-  flex-shrink: 0;
-  display: flex;
-}
+.hero-pill-card__check { flex-shrink: 0; display: flex; }
 
 .hero-pill-card__title {
-  font-size: 14px;
-  font-weight: 600;
-  color: #1a2e22;
-  margin: 0;
+  font-size: 14px; font-weight: 600;
+  color: #1a2e22; margin: 0;
   white-space: nowrap;
 }
 
 .hero-pill-card__meta {
-  font-size: 12px;
-  color: #7a9490;
-  margin: 2px 0 0 0;
-  white-space: nowrap;
+  font-size: 12px; color: #7a9490;
+  margin: 2px 0 0 0; white-space: nowrap;
 }
 
-/* ── Floating Cards base ── */
+/* ── Floating Cards ── */
 .hero-float-card {
   position: absolute;
   background: #fff;
   border-radius: 16px;
-  box-shadow:
-    0 6px 24px rgba(0, 0, 0, 0.09),
-    0 2px 8px rgba(0, 0, 0, 0.05);
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 6px 24px rgba(0,0,0,0.09), 0 2px 8px rgba(0,0,0,0.05);
+  border: 1px solid rgba(0,0,0,0.06);
   padding: 14px 16px;
 }
 
 /* Robert M. — bottom left */
 .hero-float-card--patient {
   bottom: 0;
-  left: 20px;
+  left: 0;
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  width: 230px;
+  width: 220px;
   z-index: 3;
   animation: hero-float 4s ease-in-out 0.5s infinite;
 }
 
 .hero-float-card__avatar {
-  width: 40px;
-  height: 40px;
+  width: 40px; height: 40px;
   border-radius: 50%;
   background: linear-gradient(135deg, #4ECDC4, #00a99d);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-  font-weight: 700;
-  color: white;
-  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 700; color: white; flex-shrink: 0;
 }
 
-.hero-float-card__info {
-  flex: 1;
-  min-width: 0;
-}
+.hero-float-card__info { flex: 1; min-width: 0; }
 
 .hero-float-card__name {
-  font-size: 14px;
-  font-weight: 700;
-  color: #0d1117;
-  margin: 0 0 2px 0;
+  font-size: 14px; font-weight: 700; color: #0d1117; margin: 0 0 2px 0;
 }
 
-.hero-float-card__sub {
-  font-size: 12px;
-  color: #7a9490;
-  margin: 0 0 8px 0;
-}
+.hero-float-card__sub { font-size: 12px; color: #7a9490; margin: 0 0 8px 0; }
 
-/* Week progress pills */
-.hero-float-card__weeks {
-  display: flex;
-  gap: 3px;
-  margin-bottom: 5px;
-}
+.hero-float-card__weeks { display: flex; gap: 3px; margin-bottom: 5px; }
 
 .hero-float-card__week {
-  flex: 1;
-  height: 6px;
-  border-radius: 3px;
-  background: rgba(0, 0, 0, 0.08);
+  flex: 1; height: 6px; border-radius: 3px; background: rgba(0,0,0,0.08);
 }
 
-.hero-float-card__week--done {
-  background: #4ECDC4;
-}
+.hero-float-card__week--done { background: #4ECDC4; }
 
 .hero-float-card__weeks-label {
-  font-size: 11px;
-  font-family: var(--font-mono);
-  color: #7a9490;
-  margin: 0;
+  font-size: 11px; font-family: var(--font-mono); color: #7a9490; margin: 0;
 }
 
 /* Pain Score card — bottom right */
 .hero-float-card--pain {
   bottom: 0;
   right: 0;
-  width: 170px;
+  width: 165px;
   z-index: 3;
   animation: hero-float 4.5s ease-in-out 1s infinite;
 }
 
 .hero-float-card__pain-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 4px;
+  display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;
 }
 
 .hero-float-card__pain-label {
-  font-family: var(--font-mono);
-  font-size: 9px;
-  font-weight: 500;
-  letter-spacing: 0.12em;
-  color: #8aaba5;
-  text-transform: uppercase;
+  font-family: var(--font-mono); font-size: 9px; font-weight: 500;
+  letter-spacing: 0.12em; color: #8aaba5; text-transform: uppercase;
 }
 
 .hero-float-card__pain-value {
-  font-size: 34px;
-  font-weight: 700;
-  color: #00B8B0;
-  letter-spacing: -2px;
-  line-height: 1;
-  margin: 0 0 4px 0;
+  font-size: 32px; font-weight: 700; color: #00B8B0;
+  letter-spacing: -2px; line-height: 1; margin: 0 0 4px 0;
 }
 
-.hero-float-card__pain-sub {
-  font-size: 12px;
-  color: #7a9490;
-  margin: 0 0 8px 0;
-}
+.hero-float-card__pain-sub { font-size: 12px; color: #7a9490; margin: 0 0 8px 0; }
 
-.hero-float-card__sparkline {
-  width: 100%;
-  height: 40px;
-  display: block;
-}
+.hero-float-card__sparkline { width: 100%; height: 38px; display: block; }
 
-/* Float animation */
 @keyframes hero-float {
-  0%, 100% { transform: translateY(0px); }
-  50%       { transform: translateY(-8px); }
+  0%,100% { transform: translateY(0px); }
+  50%      { transform: translateY(-8px); }
 }
 
 /* ============================================================
    RESPONSIVE
    ============================================================ */
-@media (max-width: 1200px) {
-  .hero__container {
-    grid-template-columns: 400px 1fr;
-    gap: 40px;
-  }
-
-  .hero-main-card {
-    width: 340px;
-  }
+@media (max-width: 1100px) {
+  .hero__content { flex: 0 0 360px; }
+  .hero-main-card { width: 320px; }
+  .hero__visual { min-width: 440px; }
+  .hero__heading { font-size: 52px; }
 }
 
-@media (max-width: 960px) {
+@media (max-width: 900px) {
   .hero__container {
-    grid-template-columns: 1fr;
-    gap: 60px;
+    flex-direction: column;
+    gap: 56px;
   }
-
+  .hero__content { flex: none; width: 100%; max-width: 560px; }
   .hero__visual {
-    height: 500px;
+    width: 100%;
+    min-width: 0;
     max-width: 520px;
     margin: 0 auto;
-  }
-
-  .hero-main-card {
-    right: 0;
-    left: auto;
-    top: 0;
-    width: 320px;
-    transform: rotate(-3deg);
-    transform-origin: top right;
   }
 }
 
 @media (max-width: 600px) {
-  .hero {
-    padding: 120px 0 80px;
-  }
-
-  .hero__heading {
-    font-size: 48px;
-    letter-spacing: -2px;
-  }
-
-  .hero__visual {
-    display: none;
-  }
-
-  .hero__actions {
-    flex-direction: column;
-    align-items: flex-start;
-  }
+  .hero { padding: 110px 0 60px; }
+  .hero__heading { font-size: 44px; letter-spacing: -2px; }
+  .hero__visual { display: none; }
+  .hero__actions { flex-direction: column; align-items: flex-start; }
 }
