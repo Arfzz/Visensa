@@ -1,5 +1,5 @@
 import './Footer.css'
-
+import visensaLogo from '../assets/visensa-logo.png'
 const LINKS = {
   Akses: ['Beranda', 'How It Works', 'Tentang Kami'],
   Support: ['link.supportkaloada'],
@@ -12,6 +12,11 @@ export default function Footer() {
         {/* Brand */}
         <div className="footer__brand">
           <div className="footer__logo">
+            <img 
+              src={visensaLogo} 
+              alt="VISENSA logo" 
+              style={{ width: '22px', height: 'auto', display: 'block' }} 
+            />
             <h2>VISENSA</h2>
           </div>
           <p className="footer__brand-desc">
@@ -64,10 +69,11 @@ export default function Footer() {
       <div className="footer__bottom">
         <div className="footer__bottom-inner container">
           <div className="footer__copyright">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path d="M12 21C12 21 5 13 5 7C5 4.5 7 2.5 9.5 2.5C11 2.5 12 3.5 12 3.5C12 3.5 13 2.5 14.5 2.5C17 2.5 19 4.5 19 7C19 13 12 21 12 21Z" fill="#E67E22" fillOpacity="0.8"/>
-              <path d="M12 21C12 21 8 16 8 10C8 7.5 9 5.5 10.5 5.5C11.5 5.5 12 6 12 6V21Z" fill="#3BB8B0"/>
-            </svg>
+            <img 
+              src={visensaLogo} 
+              alt="VISENSA logo" 
+              style={{ width: '24px', height: 'auto', display: 'block' }} 
+            />
             <span>© 2026 VISENSA | PRIVACY POLICY | TERMS OF SERVICES</span>
           </div>
           <div className="footer__socials">

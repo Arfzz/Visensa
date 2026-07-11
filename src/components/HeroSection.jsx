@@ -1,4 +1,5 @@
 import './HeroSection.css'
+import startIcon from '../assets/start-icon.png'
 
 export default function HeroSection() {
   return (
@@ -38,9 +39,7 @@ export default function HeroSection() {
             </a>
             <a href="#how-it-works" className="hero__btn-secondary" id="hero-how-it-works">
               <span className="hero__btn-secondary__play" aria-hidden="true">
-                <svg width="10" height="12" viewBox="0 0 10 12" fill="none">
-                  <path d="M1 1L9 6L1 11V1Z" fill="currentColor" />
-                </svg>
+                <img src={startIcon} alt="Play icon" style={{ width: '17px', height: '17px' }} />
               </span>
               How it works
             </a>

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import './Navbar.css'
+import visensaLogo from '../assets/visensa-logo.png'
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
@@ -19,27 +20,12 @@ export default function Navbar() {
 
         {/* Logo */}
         <a href="#" className="navbar__logo" id="nav-logo" aria-label="VISENSA home">
-          <svg
+          <img
             className="navbar__logo-icon"
-            width="22"
-            height="27"
-            viewBox="0 0 24 30"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            aria-hidden="true"
-          >
-            <path
-              d="M12 0L24 6V15C24 22.5 18.6 28.5 12 30C5.4 28.5 0 22.5 0 15V6L12 0Z"
-              fill="#00B8B0"
-            />
-            <path
-              d="M8 15L11 18L16 12"
-              stroke="white"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+            src={visensaLogo}
+            alt="VISENSA logo"
+            style={{ width: '22px', height: 'auto', display: 'block' }}
+          />
           <span className="navbar__logo-text">VISENSA</span>
         </a>
 
