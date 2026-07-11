@@ -5,14 +5,19 @@
    ============================================================ */
 :root {
   /* Colors */
-  --color-bg: #f0f4f2;
+  --color-bg: #e4f1ef;
   --color-bg-dark: #0d1a14;
   --color-surface: #ffffff;
   --color-surface-dark: #111d17;
 
-  --color-primary: #00c875;
-  --color-primary-dark: #00a35e;
-  --color-primary-light: rgba(0, 200, 117, 0.12);
+  /* Primary teal (matches Figma accent) */
+  --color-primary: #00B8B0;
+  --color-primary-dark: #009990;
+  --color-primary-light: rgba(0, 184, 176, 0.12);
+
+  /* Lime-yellow CTA */
+  --color-cta: #CDDC28;
+  --color-cta-dark: #bfce18;
 
   --color-text: #1a2e22;
   --color-text-muted: #5a7060;

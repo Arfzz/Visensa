@@ -12,21 +12,25 @@ export default function Navbar() {
   }, [])
 
   return (
-    <nav className={`navbar ${scrolled ? 'navbar--scrolled' : ''}`}>
-      <div className="navbar__inner container">
+    /* The <nav> is the full-width transparent strip fixed at the top */
+    <nav className={`navbar${scrolled ? ' navbar--scrolled' : ''}`} role="navigation" aria-label="Main navigation">
+      {/* The pill pill is the inner element */}
+      <div className="navbar__inner">
+
         {/* Logo */}
-        <a href="#" className="navbar__logo" id="nav-logo">
+        <a href="#" className="navbar__logo" id="nav-logo" aria-label="VISENSA home">
           <svg
             className="navbar__logo-icon"
-            width="24"
-            height="30"
+            width="22"
+            height="27"
             viewBox="0 0 24 30"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true"
           >
             <path
               d="M12 0L24 6V15C24 22.5 18.6 28.5 12 30C5.4 28.5 0 22.5 0 15V6L12 0Z"
-              fill="#00C875"
+              fill="#00B8B0"
             />
             <path
               d="M8 15L11 18L16 12"
@@ -39,8 +43,8 @@ export default function Navbar() {
           <span className="navbar__logo-text">VISENSA</span>
         </a>
 
-        {/* Nav Links */}
-        <ul className={`navbar__links ${menuOpen ? 'navbar__links--open' : ''}`}>
+        {/* Nav Links — centered via margin: 0 auto on the <ul> */}
+        <ul className={`navbar__links${menuOpen ? ' navbar__links--open' : ''}`}>
           <li><a href="#technology" className="navbar__link" id="nav-technology">Technology</a></li>
           <li><a href="#how-it-works" className="navbar__link" id="nav-how-it-works">How It Works</a></li>
           <li><a href="#for-clinicians" className="navbar__link" id="nav-for-clinicians">For Clinicians</a></li>
@@ -51,7 +55,7 @@ export default function Navbar() {
           <a href="#" className="navbar__signin" id="nav-signin">Sign in</a>
           <a href="#" className="navbar__cta btn-primary" id="nav-get-started">
             Get started
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
               <path d="M2 7H12M12 7L8 3M12 7L8 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </a>
@@ -61,10 +65,13 @@ export default function Navbar() {
         <button
           className="navbar__hamburger"
           onClick={() => setMenuOpen(!menuOpen)}
-          aria-label="Toggle menu"
+          aria-label="Toggle navigation menu"
+          aria-expanded={menuOpen}
           id="nav-hamburger"
         >
-          <span></span><span></span><span></span>
+          <span></span>
+          <span></span>
+          <span></span>
         </button>
       </div>
     </nav>
