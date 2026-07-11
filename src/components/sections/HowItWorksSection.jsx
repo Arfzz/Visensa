@@ -1,4 +1,4 @@
-import './HowItWorksSection.css'
+import '../../styles/sections/HowItWorksSection.css'
 
 const STEPS = [
   {

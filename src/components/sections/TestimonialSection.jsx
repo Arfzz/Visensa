@@ -1,4 +1,4 @@
-import './TestimonialSection.css'
+import '../../styles/sections/TestimonialSection.css'
 
 const PAIN_DATA = [
   { week: 'Week 1', score: '8/10', pct: 80 },

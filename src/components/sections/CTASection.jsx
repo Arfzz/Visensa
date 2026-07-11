@@ -1,4 +1,4 @@
-import './CTASection.css'
+import '../../styles/sections/CTASection.css'
 
 export default function CTASection() {
   return (

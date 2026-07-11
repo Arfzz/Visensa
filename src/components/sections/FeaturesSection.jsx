@@ -1,5 +1,5 @@
-import './FeaturesSection.css'
-import SpotlightCard from './SpotlightCard'
+import '../../styles/sections/FeaturesSection.css'
+import SpotlightCard from '../reactbits/SpotlightCard'
 
 export default function FeaturesSection() {
   return (

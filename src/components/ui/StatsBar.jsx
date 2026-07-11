@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import './StatsBar.css'
+import '../../styles/ui/StatsBar.css'
 
 gsap.registerPlugin(ScrollTrigger)
 

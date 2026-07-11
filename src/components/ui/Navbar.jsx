@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import './Navbar.css'
-import visensaLogo from '../assets/visensa-logo.png'
+import '../../styles/ui/Navbar.css'
+import visensaLogo from '../../assets/visensa-logo.png'
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)

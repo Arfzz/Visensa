@@ -1,5 +1,5 @@
-import './Footer.css'
-import visensaLogo from '../assets/visensa-logo.png'
+import '../../styles/ui/Footer.css'
+import visensaLogo from '../../assets/visensa-logo.png'
 const LINKS = {
   Akses: ['Beranda', 'How It Works', 'Tentang Kami'],
   Support: ['link.supportkaloada'],

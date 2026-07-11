@@ -1,9 +1,9 @@
-import './HeroSection.css'
-import startIcon from '../assets/start-icon.png'
-import { useHeroAnimation } from '../hooks/useHeroAnimation'
-import TextType from './TextType'
-import SplitText from './SplitText'
-import DotField from './DotField'
+import '../../styles/sections/HeroSection.css'
+import startIcon from '../../assets/start-icon.png'
+import { useHeroAnimation } from '../../hooks/useHeroAnimation'
+import TextType from '../reactbits/TextType'
+import SplitText from '../reactbits/SplitText'
+import DotField from '../reactbits/DotField'
 
 export default function HeroSection() {
   useHeroAnimation()
