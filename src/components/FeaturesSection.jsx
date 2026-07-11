@@ -1,4 +1,5 @@
 import './FeaturesSection.css'
+import SpotlightCard from './SpotlightCard'
 
 export default function FeaturesSection() {
   return (
@@ -15,7 +16,7 @@ export default function FeaturesSection() {
         {/* Grid */}
         <div className="features__grid">
           {/* Card 1 — AI Hand Tracking (large, dark) */}
-          <div className="feature-card feature-card--dark feature-card--top-left">
+          <SpotlightCard className="feature-card feature-card--dark feature-card--top-left" spotlightColor="rgba(0, 184, 176, 0.18)">
             <div className="feature-card__content">
               <div className="feature-card__mono-label mono-label">
                 REAL-TIME HAND TRACKING
@@ -32,10 +33,10 @@ export default function FeaturesSection() {
             <div className="feature-card__hands">
               <FeatureHandViz />
             </div>
-          </div>
+          </SpotlightCard>
 
           {/* Card 2 — Zero Hardware */}
-          <div className="feature-card feature-card--white feature-card--top-right">
+          <SpotlightCard className="feature-card feature-card--white feature-card--top-right" spotlightColor="rgba(0, 184, 176, 0.09)">
             <div className="feature-card__icon-wrap">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                 <rect x="3" y="4" width="18" height="12" rx="2" fill="#d1e0e8" stroke="#1d2d35" strokeWidth="1.5" />
@@ -47,10 +48,10 @@ export default function FeaturesSection() {
             <p className="feature-card__desc">
               Any webcam works. No VR headset. No sensors. Just open your browser.
             </p>
-          </div>
+          </SpotlightCard>
 
           {/* Card 3 — Progress you can see */}
-          <div className="feature-card feature-card--yellow feature-card--bottom-left">
+          <SpotlightCard className="feature-card feature-card--yellow feature-card--bottom-left" spotlightColor="rgba(205, 220, 40, 0.12)">
             <h3 className="feature-card__heading-sm">Progress you can see</h3>
             <div className="feature-card__chart-wrapper">
               <ProgressChart />
@@ -59,10 +60,10 @@ export default function FeaturesSection() {
               <span>Week 1</span>
               <span>Week 8</span>
             </div>
-          </div>
+          </SpotlightCard>
 
           {/* Card 4 — Clinical Foundation */}
-          <div className="feature-card feature-card--white feature-card--bottom-right">
+          <SpotlightCard className="feature-card feature-card--white feature-card--bottom-right" spotlightColor="rgba(0, 184, 176, 0.09)">
             <div className="feature-card__mono-label mono-label">CLINICAL FOUNDATION</div>
             <div className="feature-card__clinical-layout">
               <div className="feature-card__clinical-left">
@@ -80,7 +81,7 @@ export default function FeaturesSection() {
               <span className="feature-card__badge">CE Mark pending</span>
               <span className="feature-card__badge">GDPR Compliant</span>
             </div>
-          </div>
+          </SpotlightCard>
         </div>
       </div>
     </section>
