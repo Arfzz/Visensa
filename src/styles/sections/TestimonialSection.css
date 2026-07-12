@@ -32,6 +32,17 @@
   padding: 0;
   margin: 0;
   quotes: none;
+  /* min height so layout doesn't jump as text cycles */
+  min-height: 10rem;
+  display: flex;
+  align-items: flex-start;
+}
+
+/* TextType cursor on dark bg */
+.testimonial__cursor {
+  color: #00B8B0;
+  font-weight: 300;
+  opacity: 1;
 }
 
 .testimonial__author {
@@ -82,6 +93,15 @@
   border-radius: 20px;
   padding: 40px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+
+  /* 3-D tilt support */
+  transform-style: preserve-3d;
+  cursor: default;
+  transition: box-shadow 0.35s ease;
+}
+
+.testimonial__chart-side:hover {
+  box-shadow: 0 28px 56px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255,255,255,0.1);
 }
 
 .testimonial__chart-side .mono-label {

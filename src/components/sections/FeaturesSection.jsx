@@ -3,7 +3,7 @@ import SpotlightCard from '../reactbits/SpotlightCard'
 
 export default function FeaturesSection() {
   return (
-    <section className="features" id="technology">
+    <section className="features" id="features">
       <div className="features__container container">
         {/* Header */}
         <div className="features__header">

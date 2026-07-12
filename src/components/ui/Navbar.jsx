@@ -1,42 +1,113 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import '../../styles/ui/Navbar.css'
 import visensaLogo from '../../assets/visensa-logo.png'
 
-export default function Navbar() {
-  const [scrolled, setScrolled] = useState(false)
-  const [menuOpen, setMenuOpen] = useState(false)
+const menuItems = [
+  { id: 'hero',          label: 'Home',          href: '#hero' },
+  { id: 'features',      label: 'Features',      href: '#features' },
+  { id: 'how-it-works',  label: 'How It Works',  href: '#how-it-works' },
+  { id: 'tracking',      label: 'Progress',      href: '#tracking' },
+  { id: 'testimonial',   label: 'Results',       href: '#testimonial' },
+]
 
+export default function Navbar() {
+  const [activeSection, setActiveSection] = useState('hero')
+  const [scrolled, setScrolled]           = useState(false)
+  const [menuOpen, setMenuOpen]           = useState(false)
+  const isClickScrolling                  = useRef(false)
+  const clickTimerRef                     = useRef(null)
+
+  // ── Scroll state (for subtle shadow bump) ──────────────────────────
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20)
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  return (
-    /* The <nav> is the full-width transparent strip fixed at the top */
-    <nav className={`navbar${scrolled ? ' navbar--scrolled' : ''}`} role="navigation" aria-label="Main navigation">
-      {/* The pill pill is the inner element */}
-      <div className="navbar__inner">
+  // ── IntersectionObserver for active section ─────────────────────────
+  useEffect(() => {
+    const handler = (entries) => {
+      if (isClickScrolling.current) return
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) setActiveSection(entry.target.id)
+      })
+    }
 
-        {/* Logo */}
-        <a href="#" className="navbar__logo" id="nav-logo" aria-label="VISENSA home">
+    const observer = new IntersectionObserver(handler, {
+      root: null,
+      rootMargin: '-20% 0px -50% 0px',
+      threshold: 0.1,
+    })
+
+    menuItems.forEach(({ id }) => {
+      const el = document.getElementById(id)
+      if (el) observer.observe(el)
+    })
+
+    return () => {
+      observer.disconnect()
+      if (clickTimerRef.current) clearTimeout(clickTimerRef.current)
+    }
+  }, [])
+
+  function handleNavClick(id) {
+    setActiveSection(id)
+    setMenuOpen(false)
+    isClickScrolling.current = true
+    if (clickTimerRef.current) clearTimeout(clickTimerRef.current)
+    clickTimerRef.current = setTimeout(() => {
+      isClickScrolling.current = false
+    }, 1000)
+  }
+
+  return (
+    <header
+      className={`navbar${scrolled ? ' navbar--scrolled' : ''}`}
+      role="navigation"
+      aria-label="Main navigation"
+    >
+      <nav className="navbar__inner">
+
+        {/* ── Logo ──────────────────────────────────────────────── */}
+        <a
+          href="#hero"
+          className="navbar__logo"
+          id="nav-logo"
+          aria-label="VISENSA home"
+          onClick={() => handleNavClick('hero')}
+        >
           <img
             className="navbar__logo-icon"
             src={visensaLogo}
             alt="VISENSA logo"
-            style={{ width: '22px', height: 'auto', display: 'block' }}
           />
           <span className="navbar__logo-text">VISENSA</span>
         </a>
 
-        {/* Nav Links — centered via margin: 0 auto on the <ul> */}
+        <div className="navbar__divider" aria-hidden="true" />
+
+        {/* ── Nav Links ─────────────────────────────────────────── */}
         <ul className={`navbar__links${menuOpen ? ' navbar__links--open' : ''}`}>
-          <li><a href="#technology" className="navbar__link" id="nav-technology">Technology</a></li>
-          <li><a href="#how-it-works" className="navbar__link" id="nav-how-it-works">How It Works</a></li>
-          <li><a href="#for-clinicians" className="navbar__link" id="nav-for-clinicians">For Clinicians</a></li>
+          {menuItems.map(({ id, label, href }) => {
+            const isActive = activeSection === id
+            return (
+              <li key={id}>
+                <a
+                  href={href}
+                  id={`nav-${id}`}
+                  className={`navbar__link${isActive ? ' navbar__link--active' : ''}`}
+                  onClick={() => handleNavClick(id)}
+                >
+                  {/* sliding active pill (CSS-driven, no Framer Motion) */}
+                  {isActive && <span className="navbar__link-pill" aria-hidden="true" />}
+                  <span className="navbar__link-text">{label}</span>
+                </a>
+              </li>
+            )
+          })}
         </ul>
 
-        {/* Actions */}
+        {/* ── Actions ───────────────────────────────────────────── */}
         <div className="navbar__actions">
           <a href="#" className="navbar__signin" id="nav-signin">Sign in</a>
           <a href="#" className="navbar__cta btn-primary" id="nav-get-started">
@@ -47,19 +118,19 @@ export default function Navbar() {
           </a>
         </div>
 
-        {/* Mobile hamburger */}
+        {/* ── Mobile hamburger ──────────────────────────────────── */}
         <button
-          className="navbar__hamburger"
+          className={`navbar__hamburger${menuOpen ? ' navbar__hamburger--open' : ''}`}
           onClick={() => setMenuOpen(!menuOpen)}
           aria-label="Toggle navigation menu"
           aria-expanded={menuOpen}
           id="nav-hamburger"
         >
-          <span></span>
-          <span></span>
-          <span></span>
+          <span />
+          <span />
+          <span />
         </button>
-      </div>
-    </nav>
+      </nav>
+    </header>
   )
 }

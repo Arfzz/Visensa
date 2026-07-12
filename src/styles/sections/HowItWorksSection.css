@@ -99,6 +99,16 @@
   border-color: #ebf3e2;
 }
 
+/* Num wrapper holds both the number and the ripple */
+.step-card__num-wrap {
+  position: relative;
+  flex-shrink: 0;
+  width: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
 .step-card__num {
   font-size: 72px;
   font-weight: 800;
@@ -106,9 +116,28 @@
   letter-spacing: -3px;
   line-height: 1;
   font-variant-numeric: tabular-nums;
-  flex-shrink: 0;
-  width: 90px;
+  position: relative;
+  z-index: 1;
+  transition: color 0.3s ease;
 }
+
+/* Ripple circle — starts invisible, GSAP animates it outward */
+.step-card__ripple {
+  position: absolute;
+  inset: 50% auto auto 20px;
+  transform: translate(-50%, -50%) scale(0.4);
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.step-card--blue  .step-card__ripple { color: #2563eb; }
+.step-card--teal  .step-card__ripple { color: #00B8B0; }
+.step-card--green .step-card__ripple { color: #4BA84E; }
 
 .step-card__content {
   display: flex;

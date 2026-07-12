@@ -12,26 +12,36 @@
 .navbar__inner {
   display: flex;
   align-items: center;
-  /* center the pill horizontally */
   max-width: 1100px;
   margin: 0 auto;
   padding: 0 40px;
   height: 58px;
-  background: rgba(255, 255, 255, 0.82);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+
+  /* ── Glassmorphism ── */
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
   border-radius: 100px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.09), 0 1px 4px rgba(0, 0, 0, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.9);
+
+  /* gradient border via box-shadow + outline trick */
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.08),
+    0 1px 4px rgba(0, 0, 0, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+
   pointer-events: all;
-  /* re-enable clicks on the pill */
-  transition: box-shadow 250ms ease, background 250ms ease;
+  transition: box-shadow 300ms ease, background 300ms ease, border-color 300ms ease;
 }
 
-/* Slightly more opaque when scrolled */
+/* More solid when scrolled */
 .navbar--scrolled .navbar__inner {
-  background: rgba(255, 255, 255, 0.95);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.80);
+  border-color: rgba(255, 255, 255, 0.9);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.12),
+    0 2px 8px rgba(0, 0, 0, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 1);
 }
 
 /* ── Logo ── */
@@ -85,12 +95,47 @@
   background: rgba(0, 0, 0, 0.04);
 }
 
+/* Active state — sliding teal pill behind the text */
+.navbar__link--active {
+  color: #ffffff;
+  position: relative;
+}
+
+.navbar__link-pill {
+  position: absolute;
+  inset: 0;
+  border-radius: 100px;
+  background: var(--color-primary, #00B8B0);
+  z-index: -1;
+  /* Smooth slide-in when it appears */
+  animation: pillIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes pillIn {
+  from { opacity: 0; transform: scale(0.85); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.navbar__link-text {
+  position: relative;
+  z-index: 1;
+}
+
 /* ── Actions (right side) ── */
 .navbar__actions {
   display: flex;
   align-items: center;
   gap: 4px;
   flex-shrink: 0;
+}
+
+/* ── Logo / nav divider ── */
+.navbar__divider {
+  width: 1px;
+  height: 22px;
+  background: rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+  margin: 0 4px;
 }
 
 .navbar__signin {
@@ -161,6 +206,12 @@
   border-radius: 2px;
   transition: transform 250ms ease, opacity 250ms ease;
 }
+
+/* X state when menu is open */
+.navbar__hamburger--open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.navbar__hamburger--open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+.navbar__hamburger--open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
 
 /* ── Mobile Dropdown ── */
 @media (max-width: 860px) {

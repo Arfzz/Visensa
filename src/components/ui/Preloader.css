@@ -1,0 +1,75 @@
+/* ── Preloader Overlay ─────────────────────────────────────────────── */
+.preloader {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+
+  /* Visensa brand teal background */
+  background: #00B8B0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* subtle grain texture via pseudo-element */
+  overflow: hidden;
+}
+
+/* very subtle radial glow in the center */
+.preloader::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 60% 50% at 50% 50%,
+    rgba(255, 255, 255, 0.12) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+}
+
+/* ── Word clip region ──────────────────────────────────────────────── */
+.preloader__clip {
+  overflow: hidden;
+  height: 10rem;           /* tall enough for the largest word */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 2rem;
+}
+
+/* ── The cycling word ──────────────────────────────────────────────── */
+.preloader__word {
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-size: clamp(3rem, 10vw, 7rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  white-space: nowrap;
+
+  /* GSAP will drive opacity/transform */
+  will-change: transform, opacity;
+  transition: color 0.2s ease;
+}
+
+.preloader__dot {
+  color: rgba(255, 255, 255, 0.5);
+  opacity: 1;
+}
+
+/* ── Progress bar ──────────────────────────────────────────────────── */
+.preloader__bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.preloader__bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, rgba(255,255,255,0.9), #CDDC28);
+  border-radius: 0 2px 2px 0;
+  transition: width 0.28s cubic-bezier(0.23, 1, 0.32, 1);
+}

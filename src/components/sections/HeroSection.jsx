@@ -1,12 +1,69 @@
+import { useEffect, useRef } from 'react'
 import '../../styles/sections/HeroSection.css'
 import startIcon from '../../assets/start-icon.png'
 import { useHeroAnimation } from '../../hooks/useHeroAnimation'
 import TextType from '../reactbits/TextType'
 import SplitText from '../reactbits/SplitText'
 import DotField from '../reactbits/DotField'
+import { gsap } from 'gsap'
 
 export default function HeroSection() {
   useHeroAnimation()
+
+  const visualRef = useRef(null)
+
+  // ── Mouse Parallax on hero visual cards ─────────────────────────
+  useEffect(() => {
+    const visual = visualRef.current
+    if (!visual) return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+
+    // quickTo gives us spring-like smooth interpolation without RAF loops
+    const targets = [
+      { el: '.hero-main-card',            depth: 0.012 }, // subtle — large card
+      { el: '.hero-pill-card--completed', depth: 0.020 }, // medium
+      { el: '.hero-float-card--patient',  depth: 0.028 }, // most parallax
+      { el: '.hero-float-card--pain',     depth: 0.024 },
+    ]
+
+    // Pre-build quickTo setters for each target
+    const movers = targets.map(({ el, depth }) => {
+      const node = document.querySelector(el)
+      if (!node) return null
+      return {
+        x: gsap.quickTo(node, 'x', { duration: 0.6, ease: 'power2.out' }),
+        y: gsap.quickTo(node, 'y', { duration: 0.6, ease: 'power2.out' }),
+        depth,
+      }
+    }).filter(Boolean)
+
+    function onMouseMove(e) {
+      const rect = visual.getBoundingClientRect()
+      // Normalise cursor to -1 … 1 relative to visual centre
+      const cx = rect.left + rect.width  / 2
+      const cy = rect.top  + rect.height / 2
+      const nx = e.clientX - cx
+      const ny = e.clientY - cy
+
+      movers.forEach(({ x, y, depth }) => {
+        x(nx * depth * 28)
+        y(ny * depth * 28)
+      })
+    }
+
+    function onMouseLeave() {
+      // Spring back to GSAP-controlled base position
+      movers.forEach(({ x, y }) => { x(0); y(0) })
+    }
+
+    visual.addEventListener('mousemove', onMouseMove)
+    visual.addEventListener('mouseleave', onMouseLeave)
+
+    return () => {
+      visual.removeEventListener('mousemove', onMouseMove)
+      visual.removeEventListener('mouseleave', onMouseLeave)
+    }
+  }, [])
 
   return (
     <section className="hero" id="hero">
@@ -123,7 +180,7 @@ export default function HeroSection() {
         </div>
 
         {/* ── Right Visual ── */}
-        <div className="hero__visual">
+        <div className="hero__visual" ref={visualRef}>
 
           {/* Main session card — tilted */}
           <div className="hero-main-card" aria-label="Active therapy session preview">

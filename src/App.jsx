@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import Preloader from './components/ui/Preloader'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import './App.css'
@@ -48,6 +49,7 @@ function App() {
 
   return (
     <>
+      <Preloader />
       <Navbar />
       <main>
         <HeroSection />

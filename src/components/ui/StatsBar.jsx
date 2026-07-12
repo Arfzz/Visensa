@@ -6,10 +6,10 @@ import '../../styles/ui/StatsBar.css'
 gsap.registerPlugin(ScrollTrigger)
 
 const STATS = [
-  { raw: 94, display: '94%',  suffix: '%', label: 'Session completion rate' },
-  { raw: 42, display: '42%',  suffix: '%', label: 'Average pain reduction' },
-  { raw: 200, display: '200+', suffix: '+', label: 'Peer-reviewed studies' },
-  { raw: 0,  display: '0',    suffix: '',  label: 'Hardware required' },
+  { from: 0, to: 94,  format: (v) => `${Math.round(v)}%`,  label: 'Session completion rate' },
+  { from: 0, to: 42,  format: (v) => `${Math.round(v)}%`,  label: 'Average pain reduction' },
+  { from: 0, to: 200, format: (v) => `${Math.round(v)}+`,  label: 'Peer-reviewed studies' },
+  { from: 0, to: 0,   format: ()  => '0',                   label: 'Hardware required' },
 ]
 
 export default function StatsBar() {
@@ -19,34 +19,46 @@ export default function StatsBar() {
     if (!ref.current) return
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
 
-    const valueEls = ref.current.querySelectorAll('.stats-bar__value')
+    const items   = ref.current.querySelectorAll('.stats-bar__item')
     const triggers = []
 
-    valueEls.forEach((el, i) => {
-      const stat = STATS[i]
-      gsap.set(el, { opacity: 0, y: 16 })
+    // Stagger-reveal the whole bar first, then count up each number
+    const reveal = ScrollTrigger.create({
+      trigger: ref.current,
+      start: 'top 88%',
+      once: true,
+      onEnter: () => {
+        // Reveal items with stagger
+        gsap.fromTo(items,
+          { opacity: 0, y: 20 },
+          { opacity: 1, y: 0, duration: 0.55, stagger: 0.12, ease: 'power2.out' }
+        )
 
-      const st = ScrollTrigger.create({
-        trigger: el,
-        start: 'top 88%',
-        onEnter: () => {
-          gsap.to(el, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' })
-          // Skip count-up for 0 and non-numeric
-          if (stat.raw === 0 || isNaN(stat.raw)) return
-          const obj = { val: 0 }
+        // Count each value up independently
+        STATS.forEach((stat, i) => {
+          if (stat.to === 0) return // "0 Hardware" stays at 0
+
+          const valEl = items[i]?.querySelector('.stats-bar__value')
+          if (!valEl) return
+
+          const obj = { val: stat.from }
           gsap.to(obj, {
-            val: stat.raw,
-            duration: 1.6,
+            val: stat.to,
+            duration: 1.8,
+            delay: i * 0.1,
             ease: 'power2.out',
             onUpdate() {
-              el.textContent = Math.round(obj.val) + stat.suffix
+              valEl.textContent = stat.format(obj.val)
+            },
+            onComplete() {
+              valEl.textContent = stat.format(stat.to)
             },
           })
-        },
-      })
-      triggers.push(st)
+        })
+      },
     })
 
+    triggers.push(reveal)
     return () => triggers.forEach((t) => t?.kill())
   }, [])
 
@@ -54,8 +66,8 @@ export default function StatsBar() {
     <section className="stats-bar" id="stats" aria-label="Key statistics" ref={ref}>
       <div className="stats-bar__inner container">
         {STATS.map((stat, i) => (
-          <div key={i} className="stats-bar__item">
-            <span className="stats-bar__value">{stat.display}</span>
+          <div key={i} className="stats-bar__item" style={{ opacity: 0 }}>
+            <span className="stats-bar__value">{stat.format(stat.from)}</span>
             <span className="stats-bar__label">{stat.label}</span>
           </div>
         ))}

@@ -105,8 +105,37 @@ export default function TrackingSection() {
 }
 
 function DashboardCard() {
+  const cardRef   = useRef(null)
+  const score4Ref = useRef(null)
+
+  useEffect(() => {
+    if (!cardRef.current || !score4Ref.current) return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+
+    const obj = { val: 8.0 }
+    ScrollTrigger.create({
+      trigger: cardRef.current,
+      start: 'top 80%',
+      once: true,
+      onEnter: () => {
+        gsap.to(obj, {
+          val: 4.0,
+          duration: 1.8,
+          ease: 'power2.out',
+          onUpdate() {
+            if (score4Ref.current)
+              score4Ref.current.textContent = obj.val.toFixed(1)
+          },
+          onComplete() {
+            if (score4Ref.current) score4Ref.current.textContent = '4.0'
+          },
+        })
+      },
+    })
+  }, [])
+
   return (
-    <div className="dashboard-card">
+    <div className="dashboard-card" ref={cardRef}>
       <div className="dashboard-card__header">
         <span className="dashboard-card__title">Pain Progress</span>
         <span className="dashboard-card__badge">
@@ -155,7 +184,14 @@ function DashboardCard() {
         </span>
         <div className="dashboard-card__week dashboard-card__week--current">
           <span className="dashboard-card__week-label">WEEK 4</span>
-          <span className="dashboard-card__week-val" style={{ color: '#00B8B0' }}>4.0</span>
+          {/* Score starts at 8.0, GSAP counts it down to 4.0 */}
+          <span
+            ref={score4Ref}
+            className="dashboard-card__week-val"
+            style={{ color: '#00B8B0' }}
+          >
+            8.0
+          </span>
         </div>
       </div>
     </div>

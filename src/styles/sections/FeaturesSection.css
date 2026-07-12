@@ -166,6 +166,29 @@
   height: 100%;
 }
 
+/* ── Hand animations ── */
+/* Solid (physical) hand: very subtle pulse suggesting real movement */
+.feature-card__hands .hand-solid {
+  animation: hand-bob 4s ease-in-out infinite;
+  transform-origin: center bottom;
+}
+
+/* Teal outline (mirrored/virtual) hand: floats independently — slightly out of phase */
+.feature-card__hands .hand-outline {
+  animation: hand-float 3.6s ease-in-out 0.4s infinite;
+  transform-origin: center bottom;
+}
+
+@keyframes hand-bob {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-5px); }
+}
+
+@keyframes hand-float {
+  0%, 100% { transform: translateY(0px) rotate(0.5deg); }
+  50%       { transform: translateY(-12px) rotate(-0.5deg); }
+}
+
 /* ---- Card 2: Zero Hardware ---- */
 .feature-card__icon-wrap {
   width: 48px;
