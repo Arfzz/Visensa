@@ -1,9 +1,11 @@
 import { useEffect } from 'react'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import Preloader from './components/ui/Preloader'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import './App.css'
 
+// Import Komponen Halaman Utama (Landing Page)
 import Navbar from './components/ui/Navbar'
 import HeroSection from './components/sections/HeroSection'
 import StatsBar from './components/ui/StatsBar'
@@ -14,46 +16,16 @@ import TestimonialSection from './components/sections/TestimonialSection'
 import CTASection from './components/sections/CTASection'
 import Footer from './components/ui/Footer'
 
+// Import Komponen Halaman Login Kamu
+import Login from './pages/login/Login'
+
 import { useLenis } from './hooks/useLenis'
 import { useScrollReveal } from './hooks/useGsapAnimations'
 
-gsap.registerPlugin(ScrollTrigger)
-
-// ── LANGKAH A: Import halaman Login kamu di sini ──────────────────
-import Login from './pages/login/Login'
-
-function App() {
-  // ── 1. Lenis smooth scroll ──────────────────────────────────────
-  useLenis()
-
-  // ── 2. Generic section reveals ─────────────────────────────────
-  // Features cards
-  useScrollReveal('.features__grid', '.feature-card', { stagger: 0.1 })
-  // How it works steps
-  useScrollReveal('.hiw__steps', '.hiw__step', { stagger: 0.15 })
-  // Testimonial cards
-  useScrollReveal('.testimonial__grid', '.testimonial-card', { stagger: 0.1 })
-  // Footer columns
-  useScrollReveal('.footer__grid', '.footer__col', { stagger: 0.08, duration: 0.55 })
-  // CTA section
-  useScrollReveal('.cta', '.cta__content > *', { stagger: 0.1, duration: 0.65 })
-  // Stats bar items
-  useScrollReveal('.stats-bar', '.stats-bar__item', { stagger: 0.08 })
-  // Tracking content blocks
-  useScrollReveal('.tracking__content', '.tracking__feature-item', { stagger: 0.1 })
-
-  // ── 3. Respect prefers-reduced-motion ──────────────────────────
-  useEffect(() => {
-    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
-    if (mq.matches) {
-      gsap.globalTimeline.timeScale(100) // instant for a11y
-    }
-  }, [])
-
+// Komponen Pembungkus Landing Page agar rapi
+const LandingPage = () => {
   return (
     <>
-    <Login />
-    {/*
       <Preloader />
       <Navbar />
       <main>
@@ -66,8 +38,25 @@ function App() {
         <CTASection />
       </main>
       <Footer />
-      */}
     </>
+  )
+}
+
+function App() {
+  // Aktifkan hook animasi bawaan jika ada
+  // useLenis();
+  // useScrollReveal();
+
+  return (
+    <Router>
+      <Routes>
+        {/* Jalur ke Landing Page (Halaman Utama) */}
+        <Route path="/" element={<LandingPage />} />
+        
+        {/* Jalur ke Halaman Login Kamu */}
+        <Route path="/login" element={<Login />} />
+      </Routes>
+    </Router>
   )
 }
 

@@ -6,6 +6,8 @@ import TextType from '../reactbits/TextType'
 import SplitText from '../reactbits/SplitText'
 import DotField from '../reactbits/DotField'
 import { gsap } from 'gsap'
+import { Link } from 'react-router-dom';
+
 
 export default function HeroSection() {
   useHeroAnimation()
@@ -151,12 +153,14 @@ export default function HeroSection() {
 
           {/* CTAs */}
           <div className="hero__actions">
-            <a href="#" className="hero__btn-primary" id="hero-start-free">
+            {/* SEKARANG PAKAI LINK DAN TO="/login" */}
+            <Link to="/login" className="hero__btn-primary" id="hero-start-free" style={{ textDecoration: 'none' }}>
               Start free session
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                 <path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
-            </a>
+            </Link>
+
             <a href="#how-it-works" className="hero__btn-secondary" id="hero-how-it-works">
               <span className="hero__btn-secondary__play" aria-hidden="true">
                 <img src={startIcon} alt="Play icon" style={{ width: '17px', height: '17px' }} />

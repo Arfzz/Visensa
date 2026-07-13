@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import '../../styles/ui/Navbar.css'
 import visensaLogo from '../../assets/visensa-logo.png'
+import { Link } from 'react-router-dom';
 
 const menuItems = [
   { id: 'hero',          label: 'Home',          href: '#hero' },
@@ -108,15 +109,20 @@ export default function Navbar() {
         </ul>
 
         {/* ── Actions ───────────────────────────────────────────── */}
-        <div className="navbar__actions">
-          <a href="#" className="navbar__signin" id="nav-signin">Sign in</a>
-          <a href="#" className="navbar__cta btn-primary" id="nav-get-started">
-            Get started
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-              <path d="M2 7H12M12 7L8 3M12 7L8 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </a>
-        </div>
+          <div className="navbar__actions">
+            {/* SIGN IN SEKARANG BISA DIKLIK */}
+            <Link to="/login" className="navbar__signin" id="nav-signin" style={{ textDecoration: 'none' }}>
+              Sign in
+            </Link>
+            
+            {/* GET STARTED JUGA BISA DIKLIK */}
+            <Link to="/login" className="navbar__cta btn-primary" id="nav-get-started" style={{ textDecoration: 'none' }}>
+              Get started
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                <path d="M2 7H12M12 7L8 3M12 7L8 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </Link>
+          </div>
 
         {/* ── Mobile hamburger ──────────────────────────────────── */}
         <button
