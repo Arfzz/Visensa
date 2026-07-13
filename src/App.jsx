@@ -19,6 +19,9 @@ import { useScrollReveal } from './hooks/useGsapAnimations'
 
 gsap.registerPlugin(ScrollTrigger)
 
+// ── LANGKAH A: Import halaman Login kamu di sini ──────────────────
+import Login from './pages/login/Login'
+
 function App() {
   // ── 1. Lenis smooth scroll ──────────────────────────────────────
   useLenis()
@@ -49,6 +52,8 @@ function App() {
 
   return (
     <>
+    <Login />
+    {/*
       <Preloader />
       <Navbar />
       <main>
@@ -61,6 +66,7 @@ function App() {
         <CTASection />
       </main>
       <Footer />
+      */}
     </>
   )
 }
