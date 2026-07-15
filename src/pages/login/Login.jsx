@@ -1,17 +1,25 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 // Import asset gambar asli dari folder assets kamu
 import visensaLogo from "../../assets/visensa-logo.png";
 import avatarHands from "../../assets/avatar-hands.png";
 
 const Login = () => {
+  const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false); // Tambahan state untuk icon mata
+
   return (
     <div
       style={{
-        width: "100%",
-        minHeight: "100vh",
+        width: "100vw", // Disamakan dengan Register
+        height: "100vh", // Disamakan dengan Register
         display: "flex",
         flexDirection: "row",
         backgroundColor: "#F1F7F7",
-        overflowX: "hidden",
+        overflow: "hidden", // Disamakan dengan Register
+        margin: 0,
+        padding: 0,
       }}
     >
       {/* SISI KIRI: Dark Branding Panel */}
@@ -19,6 +27,7 @@ const Login = () => {
         style={{
           width: "40%",
           minWidth: "480px",
+          height: "100vh", // Disamakan dengan Register
           background: "#0C1119",
           position: "relative",
           display: "flex",
@@ -84,7 +93,6 @@ const Login = () => {
             margin: "auto 0",
           }}
         >
-          {/* CONTAINER DUA TANGAN BERHADAPAN (FIXED 100% SESUAI FIGMA) */}
           <div
             style={{
               width: "240px",
@@ -93,7 +101,7 @@ const Login = () => {
               marginBottom: "45.72px",
             }}
           >
-            {/* Tangan Kiri: Gambar asli (jempol di kiri) + miring sedikit ke kiri */}
+            {/* Tangan Kiri */}
             <img
               src={avatarHands}
               alt="Left Hand"
@@ -108,7 +116,7 @@ const Login = () => {
               }}
             />
 
-            {/* Tangan Kanan: Di-mirror (jempol jadi di kanan) + miring sedikit ke kanan + Filter Toska */}
+            {/* Tangan Kanan: Di-mirror + Filter Toska */}
             <img
               src={avatarHands}
               alt="Right Hand"
@@ -118,7 +126,7 @@ const Login = () => {
                 position: "absolute",
                 right: "15px",
                 top: "5px",
-                transform: "scaleX(-1) rotate(-6deg)", // Mirror horizontal + rotasi penyeimbang agar sejajar figma
+                transform: "scaleX(-1) rotate(-6deg)",
                 filter:
                   "invert(52%) sepia(87%) saturate(1832%) hue-rotate(141deg) brightness(95%) contrast(101%)",
                 opacity: 0.85,
@@ -243,27 +251,33 @@ const Login = () => {
         </div>
       </div>
 
-      {/* SISI KANAN: Login Form */}
+      {/* SISI KANAN: Login / Register Form */}
       <div
         style={{
           flex: 1,
+          height: "100vh",
+          overflowY: "scroll", // <--- UBAH "auto" JADI "scroll" DI SINI
           display: "flex",
-          justifyContent: "center",
+          flexDirection: "column",
           alignItems: "center",
-          padding: "54.86px 27.43px",
+          justifyContent: "flex-start",
+          paddingTop: "120px",
+          paddingBottom: "120px",
           boxSizing: "border-box",
         }}
       >
         <div
           style={{
             width: "100%",
-            maxWidth: "480.06px",
+            maxWidth: "480px", // Disamakan dengan Register
             display: "flex",
             flexDirection: "column",
+            padding: "0 27px", // Disamakan dengan Register
           }}
         >
           {/* Back to Home Link */}
           <div
+            onClick={() => navigate("/")}
             style={{
               color: "#7AAAB4",
               fontSize: "14.86px",
@@ -287,8 +301,10 @@ const Login = () => {
               display: "flex",
               boxSizing: "border-box",
               marginBottom: "36.58px",
+              flexShrink: 0,
             }}
           >
+            {/* Tab Sign In (Aktif) */}
             <div
               style={{
                 flex: 1,
@@ -298,7 +314,7 @@ const Login = () => {
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
-                cursor: "pointer",
+                cursor: "default",
               }}
             >
               <div
@@ -313,7 +329,10 @@ const Login = () => {
                 Sign in
               </div>
             </div>
+
+            {/* Tab Create Account (Gak Aktif, Menuju Halaman Register) */}
             <div
+              onClick={() => navigate("/register")}
               style={{
                 flex: 1,
                 display: "flex",
@@ -337,7 +356,7 @@ const Login = () => {
           </div>
 
           {/* Form Header */}
-          <div style={{ marginBottom: "36.58px" }}>
+          <div style={{ marginBottom: "36.58px", flexShrink: 0 }}>
             <div
               style={{
                 color: "#1C1816",
@@ -370,6 +389,7 @@ const Login = () => {
               flexDirection: "column",
               gap: "22.86px",
               marginBottom: "36.58px",
+              flexShrink: 0,
             }}
           >
             {/* Input Email */}
@@ -425,7 +445,7 @@ const Login = () => {
               </div>
               <div style={{ position: "relative", width: "100%" }}>
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"} // Fungsi toggle tipe password
                   placeholder="••••••••"
                   style={{
                     width: "100%",
@@ -445,6 +465,7 @@ const Login = () => {
                 />
                 {/* Icon Eye */}
                 <div
+                  onClick={() => setShowPassword(!showPassword)} // Klik icon mata merubah state
                   style={{
                     position: "absolute",
                     right: "18.29px",
@@ -469,7 +490,7 @@ const Login = () => {
                         left: "1.52px",
                         top: "3.81px",
                         position: "absolute",
-                        outline: "1.52px #7AAAB4 solid",
+                        outline: `1.52px ${showPassword ? "#0099A6" : "#7AAAB4"} solid`,
                         outlineOffset: "-0.76px",
                       }}
                     />
@@ -480,7 +501,7 @@ const Login = () => {
                         left: "6.86px",
                         top: "6.86px",
                         position: "absolute",
-                        outline: "1.52px #7AAAB4 solid",
+                        outline: `1.52px ${showPassword ? "#0099A6" : "#7AAAB4"} solid`,
                         outlineOffset: "-0.76px",
                       }}
                     />
@@ -507,74 +528,20 @@ const Login = () => {
           </div>
 
           {/* Action Button & Bottom Link */}
-          <div
-            style={{ display: "flex", flexDirection: "column", gap: "27.43px" }}
-          >
-            <button
-              style={{
-                width: "100%",
-                height: "57.72px",
-                background: "#0099A6",
-                border: "none",
-                borderRadius: "38px",
-                boxShadow: "0px 4.57px 18.28px rgba(200, 112, 74, 0.28)",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                gap: "9.14px",
-                cursor: "pointer",
-              }}
+          <button
+              onClick={() => navigate('/intro')} // <--- TAMBAHKAN BARIS INI
+              style={{ width: "100%", height: "57.72px", background: "#0099A6", border: "none", borderRadius: "38px", boxShadow: "0px 4.57px 18.28px rgba(200, 112, 74, 0.28)", display: "flex", justifyContent: "center", alignItems: "center", gap: "9.14px", cursor: "pointer" }}
             >
-              <span
-                style={{
-                  color: "white",
-                  fontSize: "17.15px",
-                  fontFamily: "Space Grotesk, sans-serif",
-                  fontWeight: "600",
-                  lineHeight: "25.72px",
-                }}
-              >
+              <span style={{ color: "white", fontSize: "17.15px", fontFamily: "Space Grotesk, sans-serif", fontWeight: "600", lineHeight: "25.72px" }}>
                 Sign in to VISENSA
               </span>
-              <span
-                style={{
-                  color: "white",
-                  fontSize: "17.15px",
-                  fontFamily: "Space Grotesk, sans-serif",
-                  fontWeight: "600",
-                }}
-              >
+              <span style={{ color: "white", fontSize: "17.15px", fontFamily: "Space Grotesk, sans-serif", fontWeight: "600" }}>
                 →
               </span>
             </button>
-
-            <div
-              style={{
-                textAlign: "center",
-                color: "#7AAAB4",
-                fontSize: "16px",
-                fontFamily: "Space Grotesk, sans-serif",
-                fontWeight: "400",
-                lineHeight: "24px",
-              }}
-            >
-              New to VISENSA?{" "}
-              <span
-                style={{
-                  color: "#0099A6",
-                  fontWeight: "600",
-                  fontSize: "18.29px",
-                  lineHeight: "27.43px",
-                  cursor: "pointer",
-                }}
-              >
-                Create account →
-              </span>
-            </div>
           </div>
         </div>
       </div>
-    </div>
   );
 };
 
