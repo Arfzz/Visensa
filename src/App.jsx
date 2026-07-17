@@ -23,6 +23,7 @@ import Camera from "./pages/camera/Camera";
 import SessionComplete from "./pages/session-complete/SessionComplete";
 
 import LoginDoctor from './pages/login/LoginDoctor';
+import RegisterDoctor from './pages/register/RegisterDoctor';
 import Dashboard from "./pages/admin-dashboard/Dashboard";
 
 import { useLenis } from "./hooks/useLenis";
@@ -76,6 +77,9 @@ function App() {
 
         {/* Jalur ke Halaman Login Dokter */}
         <Route path="/login-doctor" element={<LoginDoctor />} />
+
+        {/* Jalur ke Halaman Register Dokter */}
+        <Route path="/register-doctor" element={<RegisterDoctor />} />
 
         {/* Jalur ke Halaman Dashboard Admin */}
         <Route path="/admin-dashboard" element={<Dashboard />} />
