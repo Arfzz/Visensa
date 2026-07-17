@@ -465,7 +465,7 @@ const Login = () => {
                 />
                 {/* Icon Eye */}
                 <div
-                  onClick={() => setShowPassword(!showPassword)} // Klik icon mata merubah state
+                  onClick={() => setShowPassword(!showPassword)}
                   style={{
                     position: "absolute",
                     right: "18.29px",
@@ -475,37 +475,10 @@ const Login = () => {
                     alignItems: "center",
                   }}
                 >
-                  <div
-                    style={{
-                      width: "18.29px",
-                      height: "18.29px",
-                      position: "relative",
-                      overflow: "hidden",
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: "15.24px",
-                        height: "10.67px",
-                        left: "1.52px",
-                        top: "3.81px",
-                        position: "absolute",
-                        outline: `1.52px ${showPassword ? "#0099A6" : "#7AAAB4"} solid`,
-                        outlineOffset: "-0.76px",
-                      }}
-                    />
-                    <div
-                      style={{
-                        width: "4.57px",
-                        height: "4.57px",
-                        left: "6.86px",
-                        top: "6.86px",
-                        position: "absolute",
-                        outline: `1.52px ${showPassword ? "#0099A6" : "#7AAAB4"} solid`,
-                        outlineOffset: "-0.76px",
-                      }}
-                    />
-                  </div>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={showPassword ? "#0099A6" : "#7AAAB4"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
                 </div>
               </div>
             </div>
@@ -534,9 +507,6 @@ const Login = () => {
             >
               <span style={{ color: "white", fontSize: "17.15px", fontFamily: "Space Grotesk, sans-serif", fontWeight: "600", lineHeight: "25.72px" }}>
                 Sign in to VISENSA
-              </span>
-              <span style={{ color: "white", fontSize: "17.15px", fontFamily: "Space Grotesk, sans-serif", fontWeight: "600" }}>
-                →
               </span>
             </button>
           </div>
