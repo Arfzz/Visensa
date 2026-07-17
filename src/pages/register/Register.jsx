@@ -136,10 +136,10 @@ const Register = () => {
               <div style={{ position: "relative", width: "100%" }}>
                 <input type={showPassword ? "text" : "password"} placeholder="Min. 8 characters" style={{ width: "100%", height: "55.44px", paddingLeft: "18.29px", paddingRight: "50.29px", background: "#F0FAFB", border: "1.14px solid #C4E8EC", borderRadius: "13.72px", color: "#1C1816", fontSize: "17.15px", fontFamily: "Space Grotesk, sans-serif", outline: "none", boxSizing: "border-box" }} />
                 <div onClick={() => setShowPassword(!showPassword)} style={{ position: "absolute", right: "18.29px", top: "18.57px", cursor: "pointer", display: "flex", alignItems: "center" }}>
-                  <div style={{ width: "18.29px", height: "18.29px", position: "relative", overflow: "hidden" }}>
-                    <div style={{ width: "15.24px", height: "10.67px", left: "1.52px", top: "3.81px", position: "absolute", outline: `1.52px ${showPassword ? '#0099A6' : '#7AAAB4'} solid`, outlineOffset: "-0.76px" }} />
-                    <div style={{ width: "4.57px", height: "4.57px", left: "6.86px", top: "6.86px", position: "absolute", outline: `1.52px ${showPassword ? '#0099A6' : '#7AAAB4'} solid`, outlineOffset: "-0.76px" }} />
-                  </div>
+                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={showPassword ? "#0099A6" : "#7AAAB4"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
                 </div>
               </div>
             </div>
@@ -168,7 +168,6 @@ const Register = () => {
               style={{ width: "100%", height: "57.72px", background: "#0099A6", border: "none", borderRadius: "38px", boxShadow: "0px 4.57px 18.28px rgba(200, 112, 74, 0.28)", display: "flex", justifyContent: "center", alignItems: "center", gap: "9.14px", cursor: "pointer" }}
             >
               <span style={{ color: "white", fontSize: "17.15px", fontFamily: "Space Grotesk, sans-serif", fontWeight: "600", lineHeight: "25.72px" }}>Create account</span>
-              <span style={{ color: "white", fontSize: "17.15px", fontFamily: "Space Grotesk, sans-serif", fontWeight: "600" }}>→</span>
             </button>
             <div style={{ textAlign: "center", color: "#7AAAB4", fontSize: "13px", fontFamily: "Space Grotesk, sans-serif", lineHeight: "18px", maxWidth: "400px", margin: "0 auto" }}>
               By creating an account you agree to our <span style={{ textDecoration: "underline", cursor: "pointer" }}>Terms of Service</span> and <span style={{ textDecoration: "underline", cursor: "pointer" }}>Privacy Policy</span>.
