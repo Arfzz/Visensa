@@ -3,9 +3,12 @@ import reactLogo from './assets/react.svg'
 import viteLogo from './assets/vite.svg'
 import heroImg from './assets/hero.png'
 import './App.css'
+import { useVisionStore } from './store/zustand/visionStore'
+import VisionTracker from './components/VisionTracker'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [count, setCount] = useState(0);
+  const { isCalibrated, calibrationProgress, calibrationWarning } = useVisionStore();
 
   return (
     <>
