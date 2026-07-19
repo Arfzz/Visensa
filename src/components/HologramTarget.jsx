@@ -1,6 +1,6 @@
 import React, { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
-import { useHandStore } from "../store/useHandStore";
+import { useHandStore } from "../store/zustand/useHandStore";
 
 export function HologramTarget() {
   const torusRef = useRef();

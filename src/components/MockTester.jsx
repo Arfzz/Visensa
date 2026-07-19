@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useHandStore } from "../store/useHandStore";
+import { useHandStore } from "../store/zustand/useHandStore";
 
 /**
  * Floating glassmorphism testing panel to simulate real-time CV pipeline stream.
