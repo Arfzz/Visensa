@@ -28,8 +28,56 @@ const boneMap = {
 
 const BONE_KEYS = Object.keys(boneMap);
 
-const DAMPING_FACTOR = 0.15;
 const CURL_MULTIPLIER = 2.0;
+
+// ═══════════════════════════════════════════════════════════════════
+// TWEAK POSISI PERGELANGAN (WRIST OFFSET)
+// Jika gerakan sudah benar tapi telapak tangan tampak "melintir", 
+// ubah angka di bawah ini (dalam radian). 
+// Bantuan: Math.PI/2 = 90 derajat, Math.PI = 180 derajat.
+// ═══════════════════════════════════════════════════════════════════
+const WRIST_OFFSET = {
+  x: 0,
+  y: -0.8, // Coba sesuaikan ini (misal: 0, -0.8, Math.PI/2, -Math.PI/2)
+  z: 0
+};
+
+// Per-bone damping — higher = faster but twitchier
+const DAMPING = {
+  lower_arm: 0.22,
+  wrist: 0.18,
+  default: 0.15,
+};
+
+// ═══════════════════════════════════════════════════════════════════
+// LIVE AXIS TUNER — press W to cycle wrist, L to cycle lower_arm
+// Setelah ketemu mapping yang benar, hardcode dan hapus tuner ini.
+// ═══════════════════════════════════════════════════════════════════
+const MAPPING_OPTIONS = [
+  { label: "A: default (z,x,-y)", fn: (r) => ({ x: r.z, y: r.x, z: -r.y }) },
+  { label: "B: swap XZ (z,y,x)", fn: (r) => ({ x: r.z, y: r.y, z: r.x }) },
+  { label: "C: Blender Z-up (x,z,-y)", fn: (r) => ({ x: r.x, y: r.z, z: -r.y }) },
+  { label: "D: raw (x,y,z)", fn: (r) => ({ x: r.x, y: r.y, z: r.z }) },
+  { label: "E: neg-swap (-z,x,y)", fn: (r) => ({ x: -r.z, y: r.x, z: r.y }) },
+  { label: "F: (y,-x,z)", fn: (r) => ({ x: r.y, y: -r.x, z: r.z }) },
+];
+
+// Mutable indices — keyboard handler updates these
+let wristMappingIdx = 0;  // starts at A (default, same as fingers)
+let lowerArmMappingIdx = 2;  // starts at C (Blender Z-up)
+
+if (typeof window !== "undefined") {
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "w" || e.key === "W") {
+      wristMappingIdx = (wristMappingIdx + 1) % MAPPING_OPTIONS.length;
+      console.log(`🔧 WRIST mapping → ${MAPPING_OPTIONS[wristMappingIdx].label}`);
+    }
+    if (e.key === "l" || e.key === "L") {
+      lowerArmMappingIdx = (lowerArmMappingIdx + 1) % MAPPING_OPTIONS.length;
+      console.log(`🔧 LOWER_ARM mapping → ${MAPPING_OPTIONS[lowerArmMappingIdx].label}`);
+    }
+  });
+}
 
 const axisMapping = {
   default: (rot) => ({
@@ -37,29 +85,9 @@ const axisMapping = {
     y: rot.x,
     z: -rot.y,
   }),
-// Opsi 1: Sumbu Y & Z ketuker (Kasus Blender paling umum)
-  // lower_arm: (rot) => ({ x: rot.x, y: rot.z, z: -rot.y }),
-  
-  // Opsi 2: Engselnya ada di sumbu Z Kalidokit, tapi X di Blender
-  // lower_arm: (rot) => ({ x: rot.z, y: rot.y, z: rot.x }),
-  
-  // Opsi 3: Melintir 90 derajat (X ketuker sama Y)
-  // lower_arm: (rot) => ({ x: rot.y, y: -rot.x, z: rot.z }),
-
-  // Opsi 4: Data mentah Kalidokit (Siapa tau temen lu bikin rigging Y-Up murni)
-  lower_arm: (rot) => ({ x: rot.x, y: rot.y, z: rot.z }),
-
-
-// wrist: (rot) => ({ x: rot.x, y: rot.y, z: rot.z }),
-
-  // OPSI A: Samain kayak jari-jari (Biasanya ini yang paling bener kalau rigging-nya rapi)
-  // wrist: (rot) => ({ x: rot.z, y: rot.x, z: -rot.y }),
-
-  // OPSI B: Sumbu X dan Z ketuker
-  wrist: (rot) => ({ x: rot.z, y: rot.y, z: rot.x }),
-
-  // OPSI C: Lawan arah dari Opsi A
-  // wrist: (rot) => ({ x: -rot.z, y: -rot.x, z: rot.y }),
+  // Wrist & lower_arm: resolved at runtime via tuner indices
+  get wrist() { return MAPPING_OPTIONS[wristMappingIdx].fn; },
+  get lower_arm() { return MAPPING_OPTIONS[lowerArmMappingIdx].fn; },
 };
 
 const tempEuler = new THREE.Euler();
@@ -145,14 +173,14 @@ export function Model(props) {
 
     const inversionMap = {
       lower_arm: { x: -1, y: 1, z: 1 },
-      thumb:  { x: 1, y: -1, z: 1 },
-      index:  { x: 1, y: 1, z: -1 },
+      thumb: { x: 1, y: -1, z: 1 },
+      index: { x: 1, y: 1, z: -1 },
       middle: { x: 1, y: 1, z: -1 },
-      ring:   { x: 1, y: 1, z: -1 },
-      pinky:  { x: 1, y: 1, z: -1 },
-      
-      wrist:  { x: 1, y: -1, z: -1 },
-      default:{ x: 1, y: 1, z: 1 }
+      ring: { x: 1, y: 1, z: -1 },
+      pinky: { x: 1, y: 1, z: -1 },
+
+      wrist: { x: 1, y: 1, z: -1 },  // Sama dengan jari — mirror fix sudah handle handedness
+      default: { x: 1, y: 1, z: 1 }
     };
 
     // --- Bone Rotation Loop ---
@@ -167,21 +195,21 @@ export function Model(props) {
       const initial = initialRotations[key];
 
       if (bone && rotation && initial) {
+        const isWrist = key === "wrist";
+        const isLowerArm = key === "lower_arm";
+
         const mapper = axisMapping[key] || axisMapping.default;
         const swizzled = mapper(rotation);
 
-        if (key === "lower_arm") {
-          const wristSwizzled = axisMapping.default(pose.wrist);
-          
-          swizzled.z = wristSwizzled.x; // Copas sumbu pelintiran dari pergelangan
-          swizzled.y = 0;               // Gembok sumbu belok biar lengan ga lari ke kiri
+        // lower_arm: menggunakan data posanya sendiri (dari Pose Landmarker),
+        // tidak meminjam dari wrist. Sumbu Y di-lock ke 0 mencegah arm lari ke samping.
+        if (isLowerArm) {
+          swizzled.y = 0; // lock lateral yaw — normal untuk setup first-person
         }
-        
+
         const fingerName = key.split('_')[0];
         const { x: multX, y: multY, z: multZ } = inversionMap[fingerName] || inversionMap.default;
 
-        const isWrist = key === "wrist";
-        const isLowerArm = key === "lower_arm";
         const currentCurlMultiplier = isWrist ? 1 : CURL_MULTIPLIER;
         const isTracking = rotation.x !== 0 || rotation.y !== 0 || rotation.z !== 0;
 
@@ -190,36 +218,21 @@ export function Model(props) {
           swizzled.y * multY * currentCurlMultiplier,
           swizzled.z * multZ
         );
-        if (isTracking) {
-          if (isLowerArm) {
-            // Math.PI / 2 itu 90 derajat. 
-            // Kalo pas lu save dia malah muter ke arah sebaliknya (malah makin miring), 
-            // lu tinggal ganti tandanya jadi minus: -Math.PI / 2
-            tempEuler.set(
-              tempEuler.x,
-              tempEuler.y,
-              tempEuler.z+ -(Math.PI / 2)
-            );
-          }
-
-          if (isWrist) {
-            // --- FOKUS BENERIN OFFSET PERGELANGAN DI SINI ---
-            const xOffset = 0; 
-            // Mainkan yOffset ini (misal -0.5, -0.8, atau 0.5) sampai pergelangan 3D lu sejajar lurus
-            const yOffset = -0.5; 
-            const zOffset = 0; 
-
-            tempEuler.set(
-              tempEuler.x + xOffset,
-              tempEuler.y + yOffset,
-              tempEuler.z + zOffset
-            );
-          }
-        }
 
         tempQuaternion.setFromEuler(tempEuler);
+
+        // Terapkan offset khusus untuk pergelangan tangan agar model selaras
+        if (isWrist) {
+          const offsetEuler = new THREE.Euler(WRIST_OFFSET.x, WRIST_OFFSET.y, WRIST_OFFSET.z);
+          const offsetQuat = new THREE.Quaternion().setFromEuler(offsetEuler);
+          tempQuaternion.multiply(offsetQuat);
+        }
+
         targetQuaternion.copy(initial).multiply(tempQuaternion);
-        bone.quaternion.slerp(targetQuaternion, DAMPING_FACTOR);
+
+        // Per-bone damping: lengan lebih responsif, jari lebih stabil
+        const damping = DAMPING[key] || DAMPING.default;
+        bone.quaternion.slerp(targetQuaternion, damping);
         bone.updateMatrixWorld(true);
       }
     }
@@ -228,7 +241,7 @@ export function Model(props) {
     // --- Precision Pinch Logic ---
     const thumbBone = boneMap.thumb_dip;
     const indexBone = boneMap.index_dip;
-    
+
     if (thumbBone && indexBone) {
       thumbBone.getWorldPosition(thumbPos);
       indexBone.getWorldPosition(indexPos);

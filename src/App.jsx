@@ -1,7 +1,7 @@
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import { Suspense } from "react";
-import { Model } from "./models/Robotic_prosthetic_arm";
+import { Model } from "./models/Visensa3d";
 import { MockTester } from "./components/MockTester";
 import { VisensaCanvas } from "./components/VisensaCanvas";
 import { useState } from 'react'
@@ -34,7 +34,7 @@ export default function App() {
         gap: "10px"
       }}>
         <VisionTracker showCanvas={true} />
-        
+
         <div style={{
           padding: "16px",
           background: "rgba(20, 20, 20, 0.7)",
@@ -49,8 +49,8 @@ export default function App() {
         }}>
           <div style={{ display: "flex", alignItems: "center", justifyBetween: "space-between", gap: "8px" }}>
             <span style={{ fontWeight: 600 }}>Tracking Status</span>
-            <span style={{ 
-              fontWeight: "bold", 
+            <span style={{
+              fontWeight: "bold",
               color: isCalibrated ? "#10b981" : "#f59e0b",
               marginLeft: "auto"
             }}>
@@ -65,9 +65,9 @@ export default function App() {
                 <span>{Math.round(calibrationProgress)}%</span>
               </div>
               <div style={{ width: "100%", height: "4px", background: "rgba(255,255,255,0.1)", borderRadius: "2px", overflow: "hidden" }}>
-                <div style={{ 
-                  width: `${calibrationProgress}%`, 
-                  height: "100%", 
+                <div style={{
+                  width: `${calibrationProgress}%`,
+                  height: "100%",
                   background: "linear-gradient(90deg, #3b82f6 0%, #10b981 100%)",
                   transition: "width 0.1s linear"
                 }} />
@@ -76,13 +76,13 @@ export default function App() {
           )}
 
           {calibrationWarning && (
-            <div style={{ 
-              marginTop: "8px", 
-              color: "#ef4444", 
-              fontWeight: 600, 
-              display: "flex", 
-              alignItems: "center", 
-              gap: "4px" 
+            <div style={{
+              marginTop: "8px",
+              color: "#ef4444",
+              fontWeight: 600,
+              display: "flex",
+              alignItems: "center",
+              gap: "4px"
             }}>
               ⚠️ Keep hand visible in frame!
             </div>

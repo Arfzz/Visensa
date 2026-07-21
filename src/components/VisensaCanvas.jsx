@@ -1,59 +1,77 @@
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Environment, ContactShadows, PerspectiveCamera } from "@react-three/drei";
-import { Suspense } from "react";
-import { Model } from "../models/Robotic_prosthetic_arm";
+import { Suspense, useState } from "react";
+import { Model } from "../models/Visensa3d";
 import { HologramTarget } from "./HologramTarget";
 
 export function VisensaCanvas() {
+  // Live Tuner State
+  const [posX, setPosX] = useState(0);
+  const [posY, setPosY] = useState(-16);
+  const [posZ, setPosZ] = useState(30);
+  const [modelScale, setModelScale] = useState(12);
+  const [rotY, setRotY] = useState(90); // Slider rotasi dalam derajat (0-360)
+
   return (
     <div style={{ width: "100%", height: "100%", position: "absolute", top: 0, left: 0 }}>
+      {/* Live Tuner UI */}
+      <div style={{
+        position: "absolute",
+        bottom: "24px",
+        left: "50%",
+        transform: "translateX(-50%)",
+        background: "rgba(0,0,0,0.8)",
+        padding: "16px",
+        borderRadius: "12px",
+        color: "white",
+        zIndex: 1000,
+        display: "flex",
+        gap: "16px",
+        fontFamily: "monospace"
+      }}>
+        <div>
+          <label>X: {posX}</label><br/>
+          <input type="range" min="-50" max="50" value={posX} onChange={(e) => setPosX(Number(e.target.value))} />
+        </div>
+        <div>
+          <label>Y: {posY}</label><br/>
+          <input type="range" min="-50" max="50" value={posY} onChange={(e) => setPosY(Number(e.target.value))} />
+        </div>
+        <div>
+          <label>Z: {posZ}</label><br/>
+          <input type="range" min="-50" max="50" value={posZ} onChange={(e) => setPosZ(Number(e.target.value))} />
+        </div>
+        <div>
+          <label>Rot (Derajat): {rotY}</label><br/>
+          <input type="range" min="-180" max="180" value={rotY} onChange={(e) => setRotY(Number(e.target.value))} />
+        </div>
+        <div>
+          <label>Scale: {modelScale}</label><br/>
+          <input type="range" min="1" max="30" value={modelScale} onChange={(e) => setModelScale(Number(e.target.value))} />
+        </div>
+      </div>
+
       <Canvas
-        shadows={false} // Performance: Disable WebGL shadow mapping to minimize shader complexity and draw calls
+        shadows={false}
         style={{ width: "100%", height: "100%" }}
       >
-        {/* First-person camera: positioned above and behind the patient's shoulder */}
-        <PerspectiveCamera
-          makeDefault
-          position={[0, 8, 35]} 
-          fov={50}
-        />
-
-        {/* Soft, bright clinical off-white background to maximize contrast for future gamification overlays */}
+        <PerspectiveCamera makeDefault position={[0, 8, 35]} fov={50} />
         <color attach="background" args={["#f8f9fa"]} />
-
-        {/* Lower fill light intensity to prevent high-key flat lighting against the white background */}
         <ambientLight intensity={0.4} />
-
-        {/* Calibrated directional key light to preserve highlight-to-shadow ratio and metallic detail definition */}
         <directionalLight position={[10, 15, 10]} intensity={1.0} />
-
-        {/* High-fidelity city environment preset to drive clean metallic and plastic specular reflections */}
         <Environment preset="city" />
 
         <Suspense fallback={null}>
-          {/* 
-            First-Person POV shoulder group wrapper.
-            Anchors the forearm base at the bottom edge of the viewport, pointing forward along the Z axis.
-          */}
           <group
-            // POSITION: Anchor the shoulder/elbow at the bottom edge of the screen
-            position={[0, -8, 2]} 
-            // ROTATION: Orient the forearm to point straight forward (away from the camera, into the Z-axis)
-            // [x, y, z] index mapping:
-            //   rotation[0] = X axis -> controls "Tilt Up/Down" (Pitch)
-            //   rotation[1] = Y axis -> controls "Pan Left/Right" (Yaw)
-            //   rotation[2] = Z axis -> controls "Forearm Twist" (Roll)
-            rotation={[-Math.PI / 2, 0, 0]} 
+            position={[posX, posY, posZ]}
+            rotation={[0, rotY * (Math.PI / 180), 0]} // Konversi derajat ke radian
+            scale={modelScale}
           >
             <Model />
           </group>
 
           <HologramTarget />
 
-          {/* 
-            Grounds the skeletal structure dynamically on the bright surface.
-            Positioned at Y=-16 to sit just below the horizontally laid arm.
-          */}
           <ContactShadows
             position={[0, -20, 0]}
             opacity={0.35}
@@ -63,10 +81,6 @@ export function VisensaCanvas() {
           />
         </Suspense>
 
-        {/* 
-          Strict camera constraints optimized for patients:
-          - target={[0, -5, -10]} aligns rotation center with the forward hand interaction zone
-        */}
         <OrbitControls
           enablePan={false}
           minDistance={10}

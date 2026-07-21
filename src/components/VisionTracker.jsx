@@ -67,8 +67,8 @@ export default function VisionTracker({ showCanvas = true }) {
     
     // --- TAMBAHAN OPTIMASI: REM KHUSUS BUAT POSE ---
     let lastPoseDetectTime = 0;
-    const POSE_FPS = 12; // Turunin ke 12 atau 15 FPS
-    const POSE_THROTTLE_MS = 1000 / POSE_FPS; 
+    const POSE_FPS = 10; // Sweet spot: responsif tapi tetap hemat GPU
+    const POSE_THROTTLE_MS = 1000 / POSE_FPS;
 
     const renderLoop = () => {
       let startTimeMs = performance.now();
