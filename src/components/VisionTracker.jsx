@@ -64,13 +64,27 @@ export default function VisionTracker({ showCanvas = true }) {
     let lastVideoTime = -1;
     let frameCount = 0; 
     const REQUIRED_FRAMES = 60; 
+    
+    // --- TAMBAHAN OPTIMASI: REM KHUSUS BUAT POSE ---
+    let lastPoseDetectTime = 0;
+    const POSE_FPS = 12; // Turunin ke 12 atau 15 FPS
+    const POSE_THROTTLE_MS = 1000 / POSE_FPS; 
 
     const renderLoop = () => {
       let startTimeMs = performance.now();
       
       if (video.currentTime !== lastVideoTime) {
         lastVideoTime = video.currentTime;
-        const results = landmarker.detectForVideo(video, startTimeMs);
+        
+        // 1. HAND TETEP GASPOL (Ngikutin FPS kamera lu, biasanya 30 FPS)
+        const handResults = landmarker.hand.detectForVideo(video, startTimeMs);
+        
+        // 2. POSE DI-REM (Cuma jalan tiap ~83ms)
+        let poseResults = null;
+        if (startTimeMs - lastPoseDetectTime >= POSE_THROTTLE_MS) {
+          poseResults = landmarker.pose.detectForVideo(video, startTimeMs);
+          lastPoseDetectTime = startTimeMs;
+        }
         
         if (showCanvas && ctx && canvas) {
           ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -78,23 +92,20 @@ export default function VisionTracker({ showCanvas = true }) {
         
         const visionState = useVisionStore.getState();
         
-        if (results.landmarks && results.landmarks.length > 0) {
-          // Reset warning kalau tangan balik
+        // --- BLOK HAND (Sama persis kayak sebelumnya) ---
+        if (handResults.landmarks && handResults.landmarks.length > 0) {
           if (visionState.calibrationWarning) {
             visionState.setCalibrationWarning(false);
           }
-
-          // Simpan koordinat ke Zustand buat dipake di 3D
-          visionState.setLandmarks(results.landmarks[0]);
+          visionState.setLandmarks(handResults.landmarks[0]);
           
-          if (results.handedness && results.handedness[0] && results.handedness[0][0]) {
-            const side = results.handedness[0][0].categoryName || results.handedness[0][0].label;
+          if (handResults.handedness && handResults.handedness[0] && handResults.handedness[0][0]) {
+            const side = handResults.handedness[0][0].categoryName || handResults.handedness[0][0].label;
             visionState.setHandedness(side);
           }
 
-          // Gambar titik di canvas (hanya kalau showCanvas true)
           if (showCanvas && ctx && canvas) {
-            for (const landmark of results.landmarks[0]) {
+            for (const landmark of handResults.landmarks[0]) {
               const x = landmark.x * canvas.width;
               const y = landmark.y * canvas.height;
               ctx.beginPath();
@@ -103,18 +114,16 @@ export default function VisionTracker({ showCanvas = true }) {
               ctx.fill();
             }
           }
-          // Proses Kalibrasi
+          
           if (!visionState.isCalibrated) {
             frameCount++;
             let progress = Math.min((frameCount / REQUIRED_FRAMES) * 100, 100);
             visionState.setCalibrationProgress(progress);
-            
             if (frameCount >= REQUIRED_FRAMES) {
               visionState.setCalibrated(true);
             }
           }
         } else {
-          // Logika saat tangan hilang
           if (!visionState.isCalibrated) {
             if (frameCount > 0 && !visionState.calibrationWarning) {
               visionState.setCalibrationWarning(true);
@@ -124,8 +133,35 @@ export default function VisionTracker({ showCanvas = true }) {
               visionState.setCalibrationProgress(0);
             }
           } else {
-            // (Opsional) Kalau di tengah exercise 3D tangan hilang, kirim sinyal null
             visionState.setLandmarks(null);
+          }
+        }
+
+        // --- BLOK POSE (Update Zustand cuma kalau AI-nya pas lagi jalan) ---
+        if (poseResults) { 
+          if (poseResults.landmarks && poseResults.landmarks.length > 0) {
+            visionState.setPoseLandmarks(
+              poseResults.landmarks[0], 
+              poseResults.worldLandmarks[0]
+            );
+            
+            if (showCanvas && ctx && canvas) {
+              const lenganLandmarks = [14, 16]; 
+              for (const index of lenganLandmarks) {
+                const landmark = poseResults.landmarks[0][index];
+                if (landmark) {
+                  const x = landmark.x * canvas.width;
+                  const y = landmark.y * canvas.height;
+                  ctx.beginPath();
+                  ctx.arc(x, y, 6, 0, 2 * Math.PI);
+                  ctx.fillStyle = "#FF0000"; 
+                  ctx.fill();
+                }
+              }
+            }
+          } else {
+            // Kalau pas lagi ngecek ternyata badan lu ilang dari kamera
+            visionState.setPoseLandmarks(null, null);
           }
         }
       }

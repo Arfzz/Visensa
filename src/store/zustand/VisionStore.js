@@ -5,9 +5,15 @@ export const useVisionStore = create((set) => ({
   isCalibrated: false,
   calibrationProgress: 0, // 0 sampai 100
   handLandmarks: null,    // Koordinat titik tangan buat dilempar ke 3D
+  poseLandmarks: null,
+  poseWorldLandmarks: null,
   handedness: 'Left',    // Sisi tangan (Left/Right)
   calibrationWarning: false,
     
+  setPoseLandmarks: (landmarks, worldLandmarks) => set({ 
+    poseLandmarks: landmarks, 
+    poseWorldLandmarks: worldLandmarks 
+  }),
   setCalibrationWarning: (status) => set({ calibrationWarning: status }),
   setModelReady: (status) => set({ isModelReady: status }),
   setCalibrationProgress: (progress) => set({ calibrationProgress: progress }),

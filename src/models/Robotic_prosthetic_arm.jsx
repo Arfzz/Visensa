@@ -5,9 +5,9 @@ import { SkeletonUtils } from "three-stdlib";
 import * as THREE from "three";
 import { useHandStore } from "../store/zustand/useHandStore";
 
-// Static mapping of logical bones to reference holders in module scope.
-// Prevents GC churn by avoiding repeated array/object creation.
+// Typo duplikat udah gua bersihin dan upper_arm udah dimasukin
 const boneMap = {
+  lower_arm: null,
   wrist: null,
   thumb_mcp: null,
   thumb_pip: null,
@@ -28,30 +28,45 @@ const boneMap = {
 
 const BONE_KEYS = Object.keys(boneMap);
 
-// Pre-allocated dampening factor to govern slerp transition speed.
 const DAMPING_FACTOR = 0.15;
-
-// Configurable multiplier to amplify finger bending/curling motion.
-// Increase or decrease this value to fine-tune the tightness of the fist and the pinch.
 const CURL_MULTIPLIER = 2.0;
 
-// Remapping configuration to resolve coordinate system axis mismatches between Kalidokit and the GLTF bone structure.
 const axisMapping = {
-  // Default swizzling applied to all joints to match standard local bone orientations.
   default: (rot) => ({
     x: rot.z,
     y: rot.x,
     z: -rot.y,
   }),
+// Opsi 1: Sumbu Y & Z ketuker (Kasus Blender paling umum)
+  // lower_arm: (rot) => ({ x: rot.x, y: rot.z, z: -rot.y }),
+  
+  // Opsi 2: Engselnya ada di sumbu Z Kalidokit, tapi X di Blender
+  // lower_arm: (rot) => ({ x: rot.z, y: rot.y, z: rot.x }),
+  
+  // Opsi 3: Melintir 90 derajat (X ketuker sama Y)
+  // lower_arm: (rot) => ({ x: rot.y, y: -rot.x, z: rot.z }),
+
+  // Opsi 4: Data mentah Kalidokit (Siapa tau temen lu bikin rigging Y-Up murni)
+  lower_arm: (rot) => ({ x: rot.x, y: rot.y, z: rot.z }),
+
+
+// wrist: (rot) => ({ x: rot.x, y: rot.y, z: rot.z }),
+
+  // OPSI A: Samain kayak jari-jari (Biasanya ini yang paling bener kalau rigging-nya rapi)
+  // wrist: (rot) => ({ x: rot.z, y: rot.x, z: -rot.y }),
+
+  // OPSI B: Sumbu X dan Z ketuker
+  wrist: (rot) => ({ x: rot.z, y: rot.y, z: rot.x }),
+
+  // OPSI C: Lawan arah dari Opsi A
+  // wrist: (rot) => ({ x: -rot.z, y: -rot.x, z: rot.y }),
 };
 
-// Pre-allocated reusable mathematical variables to prevent garbage collection churn inside the R3F loop.
 const tempEuler = new THREE.Euler();
 const tempQuaternion = new THREE.Quaternion();
 const targetQuaternion = new THREE.Quaternion();
 const initialRotations = {};
 
-// Pre-allocated vector variables for zero-instantiation collision distance calculations.
 const thumbPos = new THREE.Vector3();
 const indexPos = new THREE.Vector3();
 const pinchPos = new THREE.Vector3();
@@ -63,7 +78,6 @@ export function Model(props) {
   const clone = React.useMemo(() => SkeletonUtils.clone(scene), [scene]);
   const { nodes, materials } = useGraph(clone);
 
-  // Traverse materials once when clone changes to fix backface culling.
   useEffect(() => {
     clone.traverse((child) => {
       if (child.isMesh && child.material) {
@@ -76,9 +90,9 @@ export function Model(props) {
     });
   }, [clone]);
 
-  // Bind local nodes to the boneMap external reference dictionary and cache rest pose orientations.
   useEffect(() => {
     if (nodes) {
+      boneMap.lower_arm = nodes.Bone001_01;
       boneMap.wrist = nodes.Bone002_02;
       boneMap.thumb_mcp = nodes.Bone003_03;
       boneMap.thumb_pip = nodes.Bone004_05;
@@ -110,13 +124,10 @@ export function Model(props) {
   const warnedKeysRef = React.useRef(new Set());
   const lastLogTimeRef = React.useRef(0);
 
-  // High-frequency transient update loop. Reads from the Zustand store
-  // imperatively to maintain a steady 60fps and bypass React's virtual DOM.
- useFrame((state) => {
+  useFrame((state) => {
     const pose = useHandStore.getState().handPose;
     if (!pose) return;
 
-    // --- Transient Pose Logging ---
     if (!hasLoggedRef.current && pose.index_mcp && pose.index_mcp.x > 0) {
       console.log("Model - useFrame transient pose read (index_mcp.x > 0):", pose);
       hasLoggedRef.current = true;
@@ -125,7 +136,6 @@ export function Model(props) {
       hasLoggedRef.current = false;
     }
 
-    // --- Missing Bone Validation ---
     for (const poseKey in pose) {
       if (!(poseKey in boneMap) && !warnedKeysRef.current.has(poseKey)) {
         console.warn(`Bone key "${poseKey}" exists in Zustand but is missing from boneMap.`);
@@ -133,15 +143,15 @@ export function Model(props) {
       }
     }
 
-    // --- AXIS INVERSION MAP ---
-    // Change 1 to -1 for x, y, or z to invert the bending direction for a specific finger.
     const inversionMap = {
-      thumb:  { x: -1, y: 1, z: -1 },
-      index:  { x: -1, y: -1, z: 1 },
-      middle: { x: -1, y: -1, z: 1 },
-      ring:   { x: -1, y: -1, z: 1 },
-      pinky:  { x: -1, y: -1, z: 1 },
-      wrist:  { x: 1, y: 1, z: 1 },
+      lower_arm: { x: -1, y: 1, z: 1 },
+      thumb:  { x: 1, y: -1, z: 1 },
+      index:  { x: 1, y: 1, z: -1 },
+      middle: { x: 1, y: 1, z: -1 },
+      ring:   { x: 1, y: 1, z: -1 },
+      pinky:  { x: 1, y: 1, z: -1 },
+      
+      wrist:  { x: 1, y: -1, z: -1 },
       default:{ x: 1, y: 1, z: 1 }
     };
 
@@ -150,46 +160,70 @@ export function Model(props) {
       const key = BONE_KEYS[i];
       const bone = boneMap[key];
       const rotation = pose[key];
+      // if (key === "lower_arm") {
+      //     bone.rotation.set(0, 0, 0);
+      //     continue;
+      // }
       const initial = initialRotations[key];
 
       if (bone && rotation && initial) {
         const mapper = axisMapping[key] || axisMapping.default;
         const swizzled = mapper(rotation);
 
-        // 1. Extract prefix (e.g., "index" from "index_mcp") and fetch inversion config
+        if (key === "lower_arm") {
+          const wristSwizzled = axisMapping.default(pose.wrist);
+          
+          swizzled.z = wristSwizzled.x; // Copas sumbu pelintiran dari pergelangan
+          swizzled.y = 0;               // Gembok sumbu belok biar lengan ga lari ke kiri
+        }
+        
         const fingerName = key.split('_')[0];
         const { x: multX, y: multY, z: multZ } = inversionMap[fingerName] || inversionMap.default;
 
         const isWrist = key === "wrist";
+        const isLowerArm = key === "lower_arm";
         const currentCurlMultiplier = isWrist ? 1 : CURL_MULTIPLIER;
+        const isTracking = rotation.x !== 0 || rotation.y !== 0 || rotation.z !== 0;
 
-        // 2. Apply multipliers to base euler
         tempEuler.set(
           swizzled.x * multX,
           swizzled.y * multY * currentCurlMultiplier,
           swizzled.z * multZ
         );
+        if (isTracking) {
+          if (isLowerArm) {
+            // Math.PI / 2 itu 90 derajat. 
+            // Kalo pas lu save dia malah muter ke arah sebaliknya (malah makin miring), 
+            // lu tinggal ganti tandanya jadi minus: -Math.PI / 2
+            tempEuler.set(
+              tempEuler.x,
+              tempEuler.y,
+              tempEuler.z+ -(Math.PI / 2)
+            );
+          }
 
-        // 3. Apply custom wrist offset for bind pose calibration
-        if (isWrist) {
-          const xOffset = 0; 
-          const yOffset = 0; 
-          const zOffset = 0; 
+          if (isWrist) {
+            // --- FOKUS BENERIN OFFSET PERGELANGAN DI SINI ---
+            const xOffset = 0; 
+            // Mainkan yOffset ini (misal -0.5, -0.8, atau 0.5) sampai pergelangan 3D lu sejajar lurus
+            const yOffset = -0.5; 
+            const zOffset = 0; 
 
-          tempEuler.set(
-            tempEuler.x + xOffset,
-            tempEuler.y + yOffset,
-            tempEuler.z + zOffset
-          );
+            tempEuler.set(
+              tempEuler.x + xOffset,
+              tempEuler.y + yOffset,
+              tempEuler.z + zOffset
+            );
+          }
         }
 
-        // 4. Slerp to target rotation
         tempQuaternion.setFromEuler(tempEuler);
         targetQuaternion.copy(initial).multiply(tempQuaternion);
         bone.quaternion.slerp(targetQuaternion, DAMPING_FACTOR);
         bone.updateMatrixWorld(true);
       }
     }
+    // GUA HAPUS BLOK FAKE IK (lowerArmBone) DI SINI. Udah murni ditangani loop di atas.
 
     // --- Precision Pinch Logic ---
     const thumbBone = boneMap.thumb_dip;
@@ -208,7 +242,7 @@ export function Model(props) {
 
       const now = state.clock.getElapsedTime();
       if (now - lastLogTimeRef.current > 1.0) {
-        console.log(`[Debug Pinch] Fingertips Distance: ${pinchDistance.toFixed(2)} | To Target: ${targetDistance.toFixed(2)}`);
+        // console.log(`[Debug Pinch] Fingertips Distance: ${pinchDistance.toFixed(2)} | To Target: ${targetDistance.toFixed(2)}`);
         lastLogTimeRef.current = now;
       }
 

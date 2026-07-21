@@ -14,7 +14,7 @@ export function VisensaCanvas() {
         {/* First-person camera: positioned above and behind the patient's shoulder */}
         <PerspectiveCamera
           makeDefault
-          position={[0, 8, 22]} 
+          position={[0, 8, 35]} 
           fov={50}
         />
 
@@ -37,7 +37,7 @@ export function VisensaCanvas() {
           */}
           <group
             // POSITION: Anchor the shoulder/elbow at the bottom edge of the screen
-            position={[0, -2, 2]} 
+            position={[0, -8, 2]} 
             // ROTATION: Orient the forearm to point straight forward (away from the camera, into the Z-axis)
             // [x, y, z] index mapping:
             //   rotation[0] = X axis -> controls "Tilt Up/Down" (Pitch)
@@ -55,7 +55,7 @@ export function VisensaCanvas() {
             Positioned at Y=-16 to sit just below the horizontally laid arm.
           */}
           <ContactShadows
-            position={[0, -16, 0]}
+            position={[0, -20, 0]}
             opacity={0.35}
             scale={60}
             blur={2.0}
