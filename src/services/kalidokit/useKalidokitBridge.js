@@ -5,6 +5,7 @@ import * as Kalidokit from "kalidokit";
 
 // Object statis buat reset — dibuat sekali di luar, tidak di-recreate tiap frame
 const RESET_POSE = Object.freeze({
+  upper_arm:  { x: 0, y: 0, z: 0 },
   lower_arm:  { x: 0, y: 0, z: 0 },
   wrist:      { x: 0, y: 0, z: 0 },
   thumb_mcp:  { x: 0, y: 0, z: 0 }, thumb_pip:  { x: 0, y: 0, z: 0 }, thumb_dip:  { x: 0, y: 0, z: 0 },
@@ -58,18 +59,8 @@ export function useKalidokitBridge() {
 
         // ── 1. Solve Rotasi Jari & Pergelangan ─────────────────────────
         if (handLandmarks) {
-          // ── FIX #1: Mirror x sebelum dikirim ke Kalidokit ─────────────
-          // Video ditampilkan dengan scaleX(-1) (CSS flip), tapi landmark
-          // MediaPipe masih dalam koordinat raw (tidak ter-flip).
-          // Tanpa ini, Kalidokit solve di ruang koordinat yang salah
-          // → jari di model 3D bergerak ke arah yang berlawanan.
-          const mirroredLandmarks = handLandmarks.map((lm) => ({
-            x: 1 - lm.x, // Mirror sumbu X
-            y: lm.y,
-            z: lm.z,
-          }));
-
-          handSolved = Kalidokit.Hand.solve(mirroredLandmarks, "Right");
+          // Tangan kanan: pakai landmark asli tanpa mirror
+          handSolved = Kalidokit.Hand.solve(handLandmarks, "Right");
         }
 
         // ── 2. Solve Rotasi Bahu & Siku ────────────────────────────────
@@ -81,14 +72,54 @@ export function useKalidokitBridge() {
           );
         }
 
-        // ── FIX #2: posePrefix "Left" → "Right" ────────────────────────
+        // Data tangan kanan langsung cocok untuk J_Bip_R_* tanpa inversi
         const handPrefix = "Right";
-        const posePrefix = "Right";
 
-        // ── 3. Jahit hasil dua AI jadi satu pose object ────────────────
+        // Hitung rotasi upper arm & lower arm dari world landmark kanan
+        // Indeks MediaPipe: 12=right shoulder, 14=right elbow, 16=right wrist
+        let upperArmRot = ZERO;
+        let lowerArmRot = ZERO;
+
+        if (poseWorldLandmarks) {
+          const shoulder = poseWorldLandmarks[12];
+          const elbow    = poseWorldLandmarks[14];
+          const wrist    = poseWorldLandmarks[16];
+
+          if (shoulder && elbow && wrist) {
+            // Vektor arah lengan atas (shoulder → elbow)
+            const ux = elbow.x - shoulder.x;
+            const uy = elbow.y - shoulder.y;
+            const uz = elbow.z - shoulder.z;
+
+            // rotX = elevasi (naik/turun): atan2 dari komponen Y vs XZ
+            const uxzLen = Math.sqrt(ux * ux + uz * uz);
+            const elevAngle = Math.atan2(-uy, uxzLen); // negatif karena Y ke bawah
+
+            // rotZ = swing depan/belakang: 0 saat T-pose, positif saat maju
+            // atan2(-uz, ux): T-pose → atan2(0, positive) = 0 ✅
+            //                  maju → atan2(positive, ~0) = positive ✅ (uz < 0 saat maju)
+            const abdAngle = Math.atan2(-uz, ux);
+
+            upperArmRot = { x: elevAngle, y: 0, z: abdAngle };
+
+            // Lengan bawah: sudut siku dari vektor (elbow→wrist) relatif (shoulder→elbow)
+            const lx = wrist.x - elbow.x;
+            const ly = wrist.y - elbow.y;
+            const lz = wrist.z - elbow.z;
+            const len = Math.sqrt(lx*lx + ly*ly + lz*lz);
+            if (len > 0.001) {
+              const elbowAngle = Math.atan2(
+                Math.sqrt(ly*ly + lz*lz),
+                lx
+              );
+              lowerArmRot = { x: elbowAngle * 0.8, y: 0, z: 0 };
+            }
+          }
+        }
+
         const pose = {
-          // Lengan bawah dari Pose — null-safe dengan ZERO fallback
-          lower_arm: poseSolved?.[`${posePrefix}LowerArm`] ?? ZERO,
+          upper_arm: upperArmRot,
+          lower_arm: lowerArmRot,
 
           // Pergelangan & jari dari Hand — jika tangan hilang tapi pose ada,
           // jari di-reset ke netral (tidak membeku)

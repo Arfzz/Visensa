@@ -1,16 +1,16 @@
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Environment, ContactShadows, PerspectiveCamera } from "@react-three/drei";
 import { Suspense, useState } from "react";
-import { Model } from "../models/Visensa3d";
+import { Model } from "../models/Robotic_prosthetic_arm";
 import { HologramTarget } from "./HologramTarget";
 
 export function VisensaCanvas() {
   // Live Tuner State
-  const [posX, setPosX] = useState(0);
-  const [posY, setPosY] = useState(-16);
-  const [posZ, setPosZ] = useState(30);
-  const [modelScale, setModelScale] = useState(12);
-  const [rotY, setRotY] = useState(90); // Slider rotasi dalam derajat (0-360)
+  const [posX, setPosX] = useState(12);
+  const [posY, setPosY] = useState(-22);
+  const [posZ, setPosZ] = useState(-15);
+  const [modelScale, setModelScale] = useState(1.5);
+  const [rotY, setRotY] = useState(-35); // Slider rotasi dalam derajat (0-360)
 
   return (
     <div style={{ width: "100%", height: "100%", position: "absolute", top: 0, left: 0 }}>
@@ -30,23 +30,23 @@ export function VisensaCanvas() {
         fontFamily: "monospace"
       }}>
         <div>
-          <label>X: {posX}</label><br/>
+          <label>X: {posX}</label><br />
           <input type="range" min="-50" max="50" value={posX} onChange={(e) => setPosX(Number(e.target.value))} />
         </div>
         <div>
-          <label>Y: {posY}</label><br/>
+          <label>Y: {posY}</label><br />
           <input type="range" min="-50" max="50" value={posY} onChange={(e) => setPosY(Number(e.target.value))} />
         </div>
         <div>
-          <label>Z: {posZ}</label><br/>
+          <label>Z: {posZ}</label><br />
           <input type="range" min="-50" max="50" value={posZ} onChange={(e) => setPosZ(Number(e.target.value))} />
         </div>
         <div>
-          <label>Rot (Derajat): {rotY}</label><br/>
+          <label>Rot (Derajat): {rotY}</label><br />
           <input type="range" min="-180" max="180" value={rotY} onChange={(e) => setRotY(Number(e.target.value))} />
         </div>
         <div>
-          <label>Scale: {modelScale}</label><br/>
+          <label>Scale: {modelScale}</label><br />
           <input type="range" min="1" max="30" value={modelScale} onChange={(e) => setModelScale(Number(e.target.value))} />
         </div>
       </div>
@@ -86,7 +86,7 @@ export function VisensaCanvas() {
           minDistance={10}
           maxDistance={40}
           maxPolarAngle={Math.PI / 2}
-          target={[0, -5, -10]} 
+          target={[0, -5, -10]}
         />
       </Canvas>
     </div>

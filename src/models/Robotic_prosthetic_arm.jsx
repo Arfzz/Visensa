@@ -38,7 +38,7 @@ const CURL_MULTIPLIER = 2.0;
 // ═══════════════════════════════════════════════════════════════════
 const WRIST_OFFSET = {
   x: 0,
-  y: -0.8, // Coba sesuaikan ini (misal: 0, -0.8, Math.PI/2, -Math.PI/2)
+  y: 0, // Zero-out: offset sebelumnya (-0.8) menyebabkan wrist melintir konstan
   z: 0
 };
 
@@ -172,14 +172,21 @@ export function Model(props) {
     }
 
     const inversionMap = {
-      lower_arm: { x: -1, y: 1, z: 1 },
-      thumb: { x: 1, y: -1, z: 1 },
-      index: { x: 1, y: 1, z: -1 },
-      middle: { x: 1, y: 1, z: -1 },
-      ring: { x: 1, y: 1, z: -1 },
-      pinky: { x: 1, y: 1, z: -1 },
-
-      wrist: { x: 1, y: 1, z: -1 },  // Sama dengan jari — mirror fix sudah handle handedness
+      lower_arm:  { x: -1, y: 1,  z: 1  },
+      wrist:      { x: 1,  y: 1,  z: -1 },
+      // MCP (pangkal jari): inversion berbeda dari PIP/DIP
+      // curl direction dibalik karena orientasi bone beda
+      index_mcp:  { x: 1,  y: -1, z: 1  },
+      middle_mcp: { x: 1,  y: -1, z: 1  },
+      ring_mcp:   { x: 1,  y: -1, z: 1  },
+      pinky_mcp:  { x: 1,  y: -1, z: 1  },
+      thumb_mcp:  { x: 1,  y: -1, z: 1  },
+      // PIP / DIP: tetap sama seperti sebelumnya
+      thumb:  { x: 1, y: -1, z: 1  },
+      index:  { x: 1, y: 1,  z: -1 },
+      middle: { x: 1, y: 1,  z: -1 },
+      ring:   { x: 1, y: 1,  z: -1 },
+      pinky:  { x: 1, y: 1,  z: -1 },
       default: { x: 1, y: 1, z: 1 }
     };
 
@@ -207,8 +214,18 @@ export function Model(props) {
           swizzled.y = 0; // lock lateral yaw — normal untuk setup first-person
         }
 
+        const isMCP = key.endsWith('_mcp');
         const fingerName = key.split('_')[0];
-        const { x: multX, y: multY, z: multZ } = inversionMap[fingerName] || inversionMap.default;
+        // Cek full key dulu (untuk MCP overrides), lalu fallback ke fingerName
+        const { x: multX, y: multY, z: multZ } = 
+          inversionMap[key] ?? inversionMap[fingerName] ?? inversionMap.default;
+
+        // MCP: suppress spread (X & Z) agar hanya curl yang aktif
+        // Spread/abduction dari Kalidokit sering menyebabkan joint terlihat ngaco
+        if (isMCP && key !== 'thumb_mcp') {
+          swizzled.x = 0;
+          swizzled.z = 0;
+        }
 
         const currentCurlMultiplier = isWrist ? 1 : CURL_MULTIPLIER;
         const isTracking = rotation.x !== 0 || rotation.y !== 0 || rotation.z !== 0;

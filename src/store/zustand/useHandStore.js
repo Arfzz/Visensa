@@ -7,6 +7,7 @@ import { create } from "zustand";
 export const useHandStore = create((set) => ({
   // Holds translation/rotation vectors for 15 key bones
   handPose: {
+    upper_arm: { x: 0, y: 0, z: 0 },
     lower_arm: { x: 0, y: 0, z: 0 },
     wrist: { x: 0, y: 0, z: 0 },
     thumb_mcp: { x: 0, y: 0, z: 0 },
