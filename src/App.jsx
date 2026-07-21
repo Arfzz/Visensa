@@ -51,8 +51,8 @@ const LandingPage = () => {
 
 function App() {
   // Aktifkan hook animasi bawaan jika ada
-  // useLenis();
-  // useScrollReveal();
+  useLenis();
+  useScrollReveal();
 
   return (
     <Router>
