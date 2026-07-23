@@ -3,17 +3,21 @@ import { OrbitControls, Environment, ContactShadows, PerspectiveCamera } from "@
 import { Suspense, useState } from "react";
 import { Model } from "../models/Robotic_prosthetic_arm";
 import { HologramTarget } from "./HologramTarget";
+import DebugArmPanel from "./DebugArmPanel";
+import DebugJointsPanel from "./DebugJointsPanel";
 
 export function VisensaCanvas() {
   // Live Tuner State
-  const [posX, setPosX] = useState(12);
+  const [posX, setPosX] = useState(0);
   const [posY, setPosY] = useState(-22);
-  const [posZ, setPosZ] = useState(-15);
+  const [posZ, setPosZ] = useState(-30);
   const [modelScale, setModelScale] = useState(1.5);
-  const [rotY, setRotY] = useState(-35); // Slider rotasi dalam derajat (0-360)
+  const [rotY, setRotY] = useState(0); // Slider rotasi dalam derajat (0-360)
 
   return (
     <div style={{ width: "100%", height: "100%", position: "absolute", top: 0, left: 0 }}>
+      <DebugArmPanel/>
+      <DebugJointsPanel/>
       {/* Live Tuner UI */}
       <div style={{
         position: "absolute",
@@ -49,6 +53,7 @@ export function VisensaCanvas() {
           <label>Scale: {modelScale}</label><br />
           <input type="range" min="1" max="30" value={modelScale} onChange={(e) => setModelScale(Number(e.target.value))} />
         </div>
+        
       </div>
 
       <Canvas

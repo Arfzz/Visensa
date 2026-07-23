@@ -58,9 +58,12 @@ export function useKalidokitBridge() {
         let poseSolved = null;
 
         // ── 1. Solve Rotasi Jari & Pergelangan ─────────────────────────
-        if (handLandmarks) {
+if (handLandmarks && handLandmarks.length > 0) {
+          // Cek apakah ini array 2D (array of hands), kalo iya kita ambil tangan pertama [0]
+          const singleHand = Array.isArray(handLandmarks[0]) ? handLandmarks[0] : handLandmarks;
+          
           // Tangan kanan: pakai landmark asli tanpa mirror
-          handSolved = Kalidokit.Hand.solve(handLandmarks, "Right");
+          handSolved = Kalidokit.Hand.solve(singleHand, "Right");
         }
 
         // ── 2. Solve Rotasi Bahu & Siku ────────────────────────────────
