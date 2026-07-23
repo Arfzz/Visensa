@@ -20,9 +20,10 @@ const BONE_KEYS = Object.keys(boneMap);
 const CURL_MULTIPLIER = 2.0;
 
 const DAMPING = {
-  lower_arm: 0.22,
-  wrist: 0.18,
-  default: 0.15,
+  upper_arm: 0.08,
+  lower_arm: 0.1,
+  wrist: 0.15,
+  default: 0.2,
 };
 
 const axisMapping = {
@@ -46,7 +47,7 @@ export function Model(props) {
   const { scene } = useGLTF("/models/robotic_prosthetic_arm.glb");
   const clone = React.useMemo(() => SkeletonUtils.clone(scene), [scene]);
   const { nodes, materials } = useGraph(clone);
-  const lastLogTimeRef = React.useRef(0)
+  const lastLogTimeRef = React.useRef(0);
 
   useEffect(() => {
     clone.traverse((child) => {
@@ -59,6 +60,17 @@ export function Model(props) {
       }
     });
   }, [clone]);
+
+  useEffect(() => {
+    const handler = (e) => {
+      const key = e.key.toLowerCase();
+      if (key === 'l' || key === 'o') {
+        window.__captureLog = true;
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, []);
 
   useEffect(() => {
     if (nodes) {
@@ -83,26 +95,10 @@ export function Model(props) {
   useFrame(() => {
     const pose = useHandStore.getState().handPose;
     if (!pose) return;
-    console.log(pose)
 
-    // if (Date.now() - lastLogTimeRef.current > 500) {
-    //   if (pose.wrist) {
-    //     console.log(`
-    //       =============
-    //       X (Pitch): ${pose.wrist.y.toFixed(3)}
-
-    //     `);
-    //   }
-    //   lastLogTimeRef.current = Date.now();
-    // }
-
-    // ════════ INI OBATNYA BIAR LOWER ARM GA KE-SKIP ════════
-    // Kita pancing sistemnya. Kalau tangan (wrist) kedetect, 
-    // kita bikin data palsu buat lower_arm biar lolos pengecekan.
     if (pose.wrist && !pose.lower_arm) {
       pose.lower_arm = { x: 0, y: 0, z: 0 };
     }
-    
 
     const inversionMap = {
       lower_arm:  { x: 1, y: -1, z: -1 }, 
@@ -112,7 +108,7 @@ export function Model(props) {
       ring_mcp:   { x: 1, y: -1, z: 1 },
       pinky_mcp:  { x: 1, y: -1, z: 1 },
       thumb_mcp:  { x: 1, y: -1, z: 1 },
-      thumb:      { x: 1, y: -1, z: 1 },
+      thumb:      { x: 1, y: 1, z: 1 },
       index:      { x: 1, y: 1, z: -1 },
       middle:     { x: 1, y: 1, z: -1 },
       ring:       { x: 1, y: 1, z: -1 },
@@ -130,22 +126,19 @@ export function Model(props) {
         const isWrist = key === "wrist";
         const isLowerArm = key === "lower_arm";
         
-        // isTracking sekarang liatnya ke pergerakan wrist, biar lengan bawah ikutan gerak
         const isTracking = pose.wrist && (pose.wrist.x !== 0 || pose.wrist.y !== 0 || pose.wrist.z !== 0);
 
         const mapper = axisMapping[key] || axisMapping.default;
         const swizzled = mapper(rotation);
 
-        // ════════════ 1. LOGIKA LENGAN BAWAH (LOWER ARM) ════════════
+        // --- LOWER ARM KINEMATICS ---
         if (isLowerArm) {
           if (pose.wrist) {
-
-            swizzled.y = -((pose.wrist.y * 1.05) + (Math.PI/2.5));
+            swizzled.y = -((pose.wrist.y * 1.05) + (Math.PI / 2.5));
           } else {
             swizzled.y = 0;
           }
 
-          // 👉 PERBAIKAN PENARIKAN DATA DI SINI
           const visionState = useVisionStore.getState();
           const poseLandmarks = visionState.poseLandmarks; 
           
@@ -154,59 +147,76 @@ export function Model(props) {
             const wristDot = poseLandmarks[16]; 
 
             const deltaX = wristDot.x - elbowDot.x;
-            let bendMultiplier = 5; 
-            const baseOffset = Math.PI / 2;  
-            
-            // Kita cek apakah telapak tangan lagi ngadep atas. 
-            // Lu butuh nentuin "BATAS_NILAI" ini dengan cara console.log(pose.wrist.y).
-            // Misal: pas telapak ke bawah dia di angka -1.2, tapi pas telapak ke atas dia di angka 0.5.
-            // Lu ambil nilai tengahnya sebagai batas (misal -0.2).
-            if (pose.wrist && pose.wrist.y < 0) { 
-               // Kalo telapak ngadep atas, kita flip arah sikunya!
-              const bendMultiplier = 1.0; 
-            } else {
-              const bendMultiplier = -1.0;
-            }
+            const k = 3;
+            const bendMultiplier = pose.wrist ? -Math.tanh(k * pose.wrist.y) : -1;
 
             swizzled.z = (deltaX * bendMultiplier);
           } else {
             swizzled.z = 0; 
           }
           swizzled.x = 0; 
+
+          // --- DIAGNOSTIC LOG SEMENTARA (SNAPSHOT ON-DEMAND 'L' / 'O') ---
+          if (window.__captureLog) {
+            if (poseLandmarks && poseLandmarks[14] && poseLandmarks[16]) {
+              const elbowDot = poseLandmarks[14]; 
+              const wristDot = poseLandmarks[16]; 
+              const deltaX = wristDot.x - elbowDot.x;
+              const k = 3;
+              const bendMultiplier = pose.wrist ? -Math.tanh(k * pose.wrist.y) : -1;
+              console.log('%c[SNAPSHOT]', 'color: lime; font-weight: bold', {
+                deltaX: deltaX.toFixed(4),
+                poseWristY: pose.wrist ? pose.wrist.y.toFixed(4) : null,
+                bendMultiplier: bendMultiplier.toFixed(4),
+                swizzledZ: swizzled.z.toFixed(4),
+              });
+            } else {
+              console.log('%c[SNAPSHOT WARNING]', 'color: yellow; font-weight: bold', {
+                hasPoseLandmarks: !!poseLandmarks,
+                hasElbow14: !!(poseLandmarks && poseLandmarks[14]),
+                hasWrist16: !!(poseLandmarks && poseLandmarks[16]),
+                poseWristY: pose.wrist ? pose.wrist.y.toFixed(4) : null,
+              });
+            }
+            window.__captureLog = false;
+          }
+          // --- END DIAGNOSTIC LOG ---
         }
 
-        // ════════════ 2. LOGIKA PERGELANGAN TANGAN (WRIST) ════════════
-        // 👉 BALIKIN LOGIKA INI BIAR BISA NAIK TURUN
+        // --- WRIST KINEMATICS (HAND LANDMARKS PIPE 0 & 9 + READY POSE CLAMP) ---
         if (isWrist) {
-          if (pose.wrist) {
-            // swizzled.x = rotation.x;  
-            // swizzled.y = -rotation.y; 
-            // swizzled.x = 0; 
-            swizzled.x = (Math.PI/6) - pose.wrist.y;  
-            swizzled.y = 0; 
-            swizzled.z = 0; 
+          const visionState = useVisionStore.getState();
+          const handLandmarks = visionState.handLandmarks;
+
+          if (handLandmarks && handLandmarks.length > 0) {
+            const singleHand = Array.isArray(handLandmarks[0]) ? handLandmarks[0] : handLandmarks;
+            const wristDot = singleHand[0]; // Base of palm / wrist
+            const palmDot = singleHand[9];  // Middle MCP (pangkal jari tengah)
+
+            if (wristDot && palmDot) {
+              const deltaY = wristDot.y - palmDot.y;
+              const deltaZ = palmDot.z - wristDot.z;
+
+              const wristPitch = Math.atan2(deltaY, Math.sqrt(deltaZ * deltaZ + 0.001));
+
+              // Hard anatomical limit: min -30 deg (-PI/6), max +60 deg (+PI/3)
+              // Mencegah rotasi berlebihan menyentuh mesh lengan
+              swizzled.x = THREE.MathUtils.clamp(wristPitch * 1.2, -Math.PI / 6, Math.PI / 3);
+              swizzled.y = 0;
+              swizzled.z = 0;
+            }
+          } else if (pose.wrist) {
+            swizzled.x = THREE.MathUtils.clamp(pose.wrist.x, -Math.PI / 6, Math.PI / 3);
+            swizzled.y = 0;
+            swizzled.z = 0;
           } else {
             swizzled.x = 0;
             swizzled.y = 0;
             swizzled.z = 0;
           }
-
-          
         }
-        // if (isWrist) {
-        //   const debugWrist = window.debugWrist || { x: 0, y: 0, z: 0 };
-        //   swizzled.x = debugWrist.x;
-        //   swizzled.y = debugWrist.y;
-        //   swizzled.z = debugWrist.z;
-        // }
 
-        // if (isLowerArm) {
-        //   const debugWrist = window.debugLowerArm || { x: 0, y: 0, z: 0 };
-        //   swizzled.x = debugLowerArm.x;
-        //   swizzled.y = debugLowerArm.y;
-        //   swizzled.z = debugLowerArm.z;
-        // }
-        // ════════════ 3. LOGIKA JARI ════════════
+        // --- FINGER KINEMATICS ---
         const isMCP = key.endsWith('_mcp');
         const fingerName = key.split('_')[0];
         const { x: multX, y: multY, z: multZ } = inversionMap[key] ?? inversionMap[fingerName] ?? inversionMap.default;
@@ -224,31 +234,21 @@ export function Model(props) {
           swizzled.z * multZ
         );
 
-        // ════════════ 4. KALIBRASI WRIST ════════════
-        // if (isTracking && isWrist) {
-        //   const realX = tempEuler.x;
-        //   const realY = tempEuler.y;
-        //   const realZ = tempEuler.z;
-
-        //   tempEuler.set(
-        //     realX + (Math.PI / 12), 
-        //     realY + (Math.PI / 4), 
-        //     realZ - (Math.PI / 2),
-        //   );
-        // }
-
-        // ════════════ 5. APPLY KE MODEL ════════════
         tempQuaternion.setFromEuler(tempEuler);
-        
         targetQuaternion.copy(initial).multiply(tempQuaternion);
 
-        const damping = DAMPING[key] || DAMPING.default;
+        // --- DOUBLE COVER SHORT-PATH GUARD ---
+        if (bone.quaternion.dot(targetQuaternion) < 0) {
+          targetQuaternion.negate();
+        }
+
+        const damping = DAMPING[key] ?? DAMPING.default;
         bone.quaternion.slerp(targetQuaternion, damping);
         bone.updateMatrixWorld(true);
       }
     }
 
-    // --- PINCH DETECTION BIARIN AJA ---
+    // --- PINCH DETECTION ---
     const thumbBone = boneMap.thumb_dip;
     const indexBone = boneMap.index_dip;
 

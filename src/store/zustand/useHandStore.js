@@ -4,28 +4,19 @@ import { create } from "zustand";
  * High-performance state store for tracking real-time 60fps hand tracking data.
  * Employs Zustand's non-reactive/transient updates to prevent component re-render loops.
  */
+export const RESET_POSE = Object.freeze({
+  upper_arm:  { x: Math.PI / 2, y: 0, z: 0 },
+  lower_arm:  { x: 0, y: 0, z: 0 },
+  wrist:      { x: Math.PI / 3, y: 0, z: 0 },
+  thumb_mcp:  { x: 0, y: 0, z: 0 }, thumb_pip:  { x: 0, y: 0, z: 0 }, thumb_dip:  { x: 0, y: 0, z: 0 },
+  index_mcp:  { x: 0, y: 0, z: 0 }, index_pip:  { x: 0, y: 0, z: 0 }, index_dip:  { x: 0, y: 0, z: 0 },
+  middle_mcp: { x: 0, y: 0, z: 0 }, middle_pip: { x: 0, y: 0, z: 0 }, middle_dip: { x: 0, y: 0, z: 0 },
+  ring_mcp:   { x: 0, y: 0, z: 0 }, ring_pip:   { x: 0, y: 0, z: 0 }, ring_dip:   { x: 0, y: 0, z: 0 },
+  pinky_mcp:  { x: 0, y: 0, z: 0 }, pinky_pip:  { x: 0, y: 0, z: 0 }, pinky_dip:  { x: 0, y: 0, z: 0 },
+});
+
 export const useHandStore = create((set) => ({
-  // Holds translation/rotation vectors for 15 key bones
-  handPose: {
-    upper_arm: { x: 0, y: 0, z: 0 },
-    lower_arm: { x: 0, y: 0, z: 0 },
-    wrist: { x: 0, y: 0, z: 0 },
-    thumb_mcp: { x: 0, y: 0, z: 0 },
-    thumb_pip: { x: 0, y: 0, z: 0 },
-    thumb_dip: { x: 0, y: 0, z: 0 },
-    index_mcp: { x: 0, y: 0, z: 0 },
-    index_pip: { x: 0, y: 0, z: 0 },
-    index_dip: { x: 0, y: 0, z: 0 },
-    middle_mcp: { x: 0, y: 0, z: 0 },
-    middle_pip: { x: 0, y: 0, z: 0 },
-    middle_dip: { x: 0, y: 0, z: 0 },
-    ring_mcp: { x: 0, y: 0, z: 0 },
-    ring_pip: { x: 0, y: 0, z: 0 },
-    ring_dip: { x: 0, y: 0, z: 0 },
-    pinky_mcp: { x: 0, y: 0, z: 0 },
-    pinky_pip: { x: 0, y: 0, z: 0 },
-    pinky_dip: { x: 0, y: 0, z: 0 },
-  },
+  handPose: RESET_POSE,
 
   // Set whole handpose payload
   setHandPose: (pose) => set({ handPose: pose }),

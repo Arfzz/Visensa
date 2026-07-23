@@ -20,7 +20,6 @@ export default function App() {
   return (
     <div className="w-screen h-screen relative overflow-hidden">
       <VisensaCanvas />
-      <MockTester />
 
       {/* Modern overlay container for real-time webcam tracking and calibration HUD */}
       <div style={{
