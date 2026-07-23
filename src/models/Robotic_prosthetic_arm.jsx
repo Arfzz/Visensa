@@ -48,6 +48,7 @@ export function Model(props) {
   const clone = React.useMemo(() => SkeletonUtils.clone(scene), [scene]);
   const { nodes, materials } = useGraph(clone);
   const lastLogTimeRef = React.useRef(0);
+  const lowerArmBaselineXRef = React.useRef(null);
 
   useEffect(() => {
     clone.traverse((child) => {
@@ -140,44 +141,45 @@ export function Model(props) {
           }
 
           const visionState = useVisionStore.getState();
-          const poseLandmarks = visionState.poseLandmarks; 
-          
-          if (poseLandmarks && poseLandmarks[14] && poseLandmarks[16]) {
-            const elbowDot = poseLandmarks[14]; 
-            const wristDot = poseLandmarks[16]; 
+          const handLandmarks = visionState.handLandmarks;
+          const poseLandmarks = visionState.poseLandmarks;
+          const isCalibrated = visionState.isCalibrated;
 
-            const deltaX = wristDot.x - elbowDot.x;
-            const k = 3;
-            const bendMultiplier = pose.wrist ? -Math.tanh(k * pose.wrist.y) : -1;
-
-            swizzled.z = (deltaX * bendMultiplier);
-          } else {
-            swizzled.z = 0; 
+          let wristDotX = null;
+          if (poseLandmarks && poseLandmarks[16]) {
+            wristDotX = poseLandmarks[16].x;
+          } else if (handLandmarks && handLandmarks.length > 0) {
+            const singleHand = Array.isArray(handLandmarks[0]) ? handLandmarks[0] : handLandmarks;
+            if (singleHand[0]) wristDotX = singleHand[0].x;
           }
-          swizzled.x = 0; 
+
+          let deviationRaw = 0;
+          if (wristDotX !== null) {
+            if (isCalibrated) {
+              if (lowerArmBaselineXRef.current === null) {
+                lowerArmBaselineXRef.current = wristDotX;
+              }
+              deviationRaw = wristDotX - lowerArmBaselineXRef.current;
+              const SENSITIVITY =  3.5;
+              swizzled.z = deviationRaw * SENSITIVITY;
+            } else {
+              lowerArmBaselineXRef.current = null;
+              swizzled.z = 0;
+            }
+          } else {
+            lowerArmBaselineXRef.current = null;
+            swizzled.z = 0;
+          }
+          swizzled.x = 0;
 
           // --- DIAGNOSTIC LOG SEMENTARA (SNAPSHOT ON-DEMAND 'L' / 'O') ---
           if (window.__captureLog) {
-            if (poseLandmarks && poseLandmarks[14] && poseLandmarks[16]) {
-              const elbowDot = poseLandmarks[14]; 
-              const wristDot = poseLandmarks[16]; 
-              const deltaX = wristDot.x - elbowDot.x;
-              const k = 3;
-              const bendMultiplier = pose.wrist ? -Math.tanh(k * pose.wrist.y) : -1;
-              console.log('%c[SNAPSHOT]', 'color: lime; font-weight: bold', {
-                deltaX: deltaX.toFixed(4),
-                poseWristY: pose.wrist ? pose.wrist.y.toFixed(4) : null,
-                bendMultiplier: bendMultiplier.toFixed(4),
-                swizzledZ: swizzled.z.toFixed(4),
-              });
-            } else {
-              console.log('%c[SNAPSHOT WARNING]', 'color: yellow; font-weight: bold', {
-                hasPoseLandmarks: !!poseLandmarks,
-                hasElbow14: !!(poseLandmarks && poseLandmarks[14]),
-                hasWrist16: !!(poseLandmarks && poseLandmarks[16]),
-                poseWristY: pose.wrist ? pose.wrist.y.toFixed(4) : null,
-              });
-            }
+            console.log('%c[SNAPSHOT]', 'color: lime; font-weight: bold', {
+              wristDotX: wristDotX !== null ? wristDotX.toFixed(4) : null,
+              baselineX: lowerArmBaselineXRef.current !== null ? lowerArmBaselineXRef.current.toFixed(4) : null,
+              deviationRaw: deviationRaw.toFixed(4),
+              swizzledZ: swizzled.z.toFixed(4),
+            });
             window.__captureLog = false;
           }
           // --- END DIAGNOSTIC LOG ---
@@ -228,10 +230,13 @@ export function Model(props) {
 
         const currentCurlMultiplier = isWrist ? 1 : CURL_MULTIPLIER;
 
+        const eulerOrder = isLowerArm ? 'ZYX' : 'XYZ';
+
         tempEuler.set(
           swizzled.x * multX,
           swizzled.y * multY * currentCurlMultiplier,
-          swizzled.z * multZ
+          swizzled.z * multZ,
+          eulerOrder
         );
 
         tempQuaternion.setFromEuler(tempEuler);
