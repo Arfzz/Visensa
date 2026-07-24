@@ -1,5 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { VisensaCanvas } from "../../components/VisensaCanvas";
+import VisionTracker from "../../components/VisionTracker";
+import { useKalidokitBridge } from "../../services/kalidokit/useKalidokitBridge";
 
 // Data Exercises dengan tambahan instruksi detail dan repetisi
 const exercises = [
@@ -69,6 +72,7 @@ const exercises = [
 ];
 
 const Camera = () => {
+  useKalidokitBridge();
   const navigate = useNavigate();
 
   // States Utama
@@ -153,7 +157,7 @@ const Camera = () => {
         fontFamily: "Space Grotesk, sans-serif",
       }}
     >
-      {/* ELEMEN VIDEO KAMERA */}
+      {/* ELEMEN VIDEO KAMERA (original) */}
       <video
         ref={videoRef}
         autoPlay
@@ -171,6 +175,18 @@ const Camera = () => {
         }}
       />
 
+      {/* 3D TRACKING SCENE — overlay transparan di atas video */}
+      <div style={{ position: "absolute", inset: 0, zIndex: 1, pointerEvents: "none" }}>
+        <VisensaCanvas />
+      </div>
+
+      {/* VisionTracker — tersembunyi, jalan saat izin kamera sudah diberikan */}
+      {cameraStatus === "granted" && (
+        <div style={{ position: "absolute", width: 0, height: 0, overflow: "hidden", opacity: 0 }}>
+          <VisionTracker showCanvas={false} />
+        </div>
+      )}
+
       {/* GLOW & BLUR OVERLAYS */}
       <div
         style={{
@@ -179,7 +195,7 @@ const Camera = () => {
           height: "100%",
           background:
             "radial-gradient(ellipse 50.00% 60.00% at 30.00% 50.00%, rgba(59, 184, 176, 0.05) 0%, rgba(0, 0, 0, 0) 55%), radial-gradient(ellipse 50.00% 60.00% at 70.00% 50.00%, rgba(59, 184, 176, 0.04) 0%, rgba(0, 0, 0, 0) 55%)",
-          zIndex: 1,
+          zIndex: 2,
           pointerEvents: "none",
         }}
       />
@@ -190,7 +206,7 @@ const Camera = () => {
           height: "100%",
           background:
             "radial-gradient(ellipse 55.00% 65.00% at 50.00% 50.00%, rgba(0, 0, 0, 0) 25%, rgba(12, 17, 25, 0.55) 80%, rgba(12, 17, 25, 0.88) 100%)",
-          zIndex: 1,
+          zIndex: 2,
           pointerEvents: "none",
         }}
       />
@@ -435,14 +451,14 @@ const Camera = () => {
           position: "absolute",
           bottom: 0,
           width: "100%",
-          height: "338px",
+          height: "180px",
           background:
-            "linear-gradient(0deg, #0C1119 0%, rgba(12, 17, 25, 0.92) 55%, rgba(0, 0, 0, 0) 100%)",
+            "linear-gradient(0deg, rgba(12, 17, 25, 0.85) 0%, rgba(12, 17, 25, 0.45) 60%, rgba(0, 0, 0, 0) 100%)",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "flex-end",
-          paddingBottom: "34.96px",
+          paddingBottom: "25px",
           zIndex: 10,
         }}
       >

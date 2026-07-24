@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
+import TextType from '../reactbits/TextType'
 import './Preloader.css'
 
 const words = [
@@ -14,28 +15,44 @@ const words = [
 ]
 
 const colors = [
-  '#ffffff',   // white       — Halo
-  '#CDDC28',   // lime        — Hello
-  '#0d1a14',   // forest dark — Bonjour
-  '#fff5c0',   // warm cream  — Ciao
-  '#b2f5ea',   // mint        — 안녕하세요
-  '#ffd166',   // amber       — 你好
-  '#f4a261',   // peach       — こんにちは
-  '#a8dadc',   // sky blue    — Привет
+  '#FFFFFF', // White
+  '#FFD166', // Bright Yellow
+  '#111111', // Almost Black
+  '#FF6B6B', // Coral Red
+  '#003F5C', // Deep Navy
+  '#CDDC28', // Lime
+  '#FFA600', // Orange
+  '#a8dadc', // White for the last one
 ]
 
 export default function Preloader() {
-  const [index, setIndex]       = useState(0)
-  const [visible, setVisible]   = useState(true)
-  const overlayRef              = useRef(null)
-  const wordRef                 = useRef(null)
+  const [index, setIndex] = useState(0)
+  const [visible, setVisible] = useState(true)
+  const [showVisensa, setShowVisensa] = useState(false)
+  const overlayRef = useRef(null)
+  const wordRef = useRef(null)
 
   // ── cycle words ────────────────────────────────────────────────────
   useEffect(() => {
+    if (!visible) return
+
     if (index === words.length - 1) {
-      // Hold the last word briefly, then trigger exit
-      const t = setTimeout(() => exitPreloader(), 500)
-      return () => clearTimeout(t)
+      // Waktu untuk kata terakhir ("Привет")
+      const t1 = setTimeout(() => {
+        // Hilangkan kata terakhir
+        gsap.to(wordRef.current, {
+          y: -60,
+          opacity: 0,
+          duration: 0.2,
+          ease: 'power2.in',
+          onComplete: () => {
+            // Tampilkan tulisan Visensa
+            setShowVisensa(true)
+          }
+        })
+      }, 500)
+
+      return () => clearTimeout(t1)
     }
 
     const interval = setInterval(() => {
@@ -57,7 +74,7 @@ export default function Preloader() {
     }, 300)
 
     return () => clearInterval(interval)
-  }, [index])
+  }, [index, visible])
 
   // ── lock scroll while visible ──────────────────────────────────────
   useEffect(() => {
@@ -80,19 +97,44 @@ export default function Preloader() {
     })
   }
 
+  // Effect to handle exit when Visensa TextType finishes typing
+  // We will trigger this using a timeout after showVisensa becomes true
+  useEffect(() => {
+    if (showVisensa) {
+      // Asumsikan TextType butuh sekitar 1-1.5 detik untuk ngetik "Visensa"
+      const t = setTimeout(() => {
+        exitPreloader()
+      }, 1500) // Waktu tunggu TextType selesai + delay sebentar sebelum naik
+      return () => clearTimeout(t)
+    }
+  }, [showVisensa])
+
   if (!visible) return null
 
   return (
     <div className="preloader" ref={overlayRef}>
       <div className="preloader__clip">
-        <p
-          ref={wordRef}
-          className="preloader__word"
-          style={{ color: colors[index] }}
-        >
-          {words[index]}
-          <span className="preloader__dot">.</span>
-        </p>
+        {!showVisensa ? (
+          <p
+            ref={wordRef}
+            className="preloader__word"
+            style={{ color: colors[index] }}
+          >
+            {words[index]}
+            <span className="preloader__dot">.</span>
+          </p>
+        ) : (
+          <div style={{ color: "#FFFFFF", fontSize: "clamp(3rem, 10vw, 7rem)", fontWeight: 700, fontFamily: "'Space Grotesk', sans-serif" }}>
+            <TextType
+              text="Visensa."
+              typingSpeed={100}
+              showCursor={true}
+              cursorCharacter="|"
+              cursorBlinkDuration={0.5}
+              loop={false}
+            />
+          </div>
+        )}
       </div>
 
       {/* subtle animated progress bar at bottom */}
@@ -100,7 +142,7 @@ export default function Preloader() {
         <div
           className="preloader__bar-fill"
           style={{
-            width: `${((index + 1) / words.length) * 100}%`,
+            width: showVisensa ? '100%' : `${((index + 1) / words.length) * 100}%`,
           }}
         />
       </div>

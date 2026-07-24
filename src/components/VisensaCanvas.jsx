@@ -18,7 +18,8 @@ export function VisensaCanvas() {
     <div style={{ width: "100%", height: "100%", position: "absolute", top: 0, left: 0 }}>
       {/* <DebugArmPanel/> */}
       {/* <DebugJointsPanel/> */}
-      {/* Live Tuner UI */}
+      {/* Live Tuner UI (Disembunyikan di Production) */}
+      {false && (
       <div style={{
         position: "absolute",
         bottom: "24px",
@@ -55,13 +56,14 @@ export function VisensaCanvas() {
         </div>
         
       </div>
+      )}
 
       <Canvas
         shadows={false}
         style={{ width: "100%", height: "100%" }}
       >
         <PerspectiveCamera makeDefault position={[0, 8, 35]} fov={50} />
-        <color attach="background" args={["#f8f9fa"]} />
+        {/* Background transparan: tidak ada tag <color attach="background" /> */}
         <ambientLight intensity={0.4} />
         <directionalLight position={[10, 15, 10]} intensity={1.0} />
         <Environment preset="city" />
