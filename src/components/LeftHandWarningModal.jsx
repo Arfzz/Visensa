@@ -18,11 +18,9 @@ export function LeftHandWarningModal() {
         maxWidth: "460px",
         padding: "16px 20px",
         borderRadius: "16px",
-        background: "rgba(220, 38, 38, 0.35)",
-        backdropFilter: "blur(14px)",
-        WebkitBackdropFilter: "blur(14px)",
+        background: "rgba(220, 38, 38, 0.9)",
         border: "1px solid rgba(248, 113, 113, 0.5)",
-        boxShadow: "0 10px 30px 0 rgba(220, 38, 38, 0.3)",
+        boxShadow: "0 10px 20px 0 rgba(220, 38, 38, 0.4)",
         display: "flex",
         alignItems: "center",
         gap: "14px",
@@ -79,7 +77,8 @@ export function LeftHandWarningModal() {
             lineHeight: "1.4",
           }}
         >
-          Sistem menggunakan model Lengan Kanan. Harap gunakan Tangan Kanan untuk mengontrol.
+          Sistem menggunakan model Lengan Kanan. Harap gunakan Tangan Kanan
+          untuk mengontrol.
         </p>
       </div>
     </div>
