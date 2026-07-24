@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { VisensaCanvas } from "../../components/VisensaCanvas";
 import VisionTracker from "../../components/VisionTracker";
 import { useKalidokitBridge } from "../../services/kalidokit/useKalidokitBridge";
+import LeftHandWarningModal from "../../components/LeftHandWarningModal";
 
 // Data Exercises dengan tambahan instruksi detail dan repetisi
 const exercises = [
@@ -176,13 +177,29 @@ const Camera = () => {
       />
 
       {/* 3D TRACKING SCENE — overlay transparan di atas video */}
-      <div style={{ position: "absolute", inset: 0, zIndex: 1, pointerEvents: "none" }}>
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          zIndex: 1,
+          pointerEvents: "none",
+        }}
+      >
         <VisensaCanvas />
+        <LeftHandWarningModal />
       </div>
 
       {/* VisionTracker — tersembunyi, jalan saat izin kamera sudah diberikan */}
       {cameraStatus === "granted" && (
-        <div style={{ position: "absolute", width: 0, height: 0, overflow: "hidden", opacity: 0 }}>
+        <div
+          style={{
+            position: "absolute",
+            width: 0,
+            height: 0,
+            overflow: "hidden",
+            opacity: 0,
+          }}
+        >
           <VisionTracker showCanvas={false} />
         </div>
       )}

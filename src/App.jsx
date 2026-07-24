@@ -29,6 +29,7 @@ import heroImg from './assets/hero.png';
 import { useVisionStore } from './store/zustand/VisionStore';
 import VisionTracker from './components/VisionTracker';
 import { useKalidokitBridge } from './services/kalidokit/useKalidokitBridge';
+import LeftHandWarningModal from './components/LeftHandWarningModal';
 
 import Login from "./pages/login/Login";
 import Register from "./pages/register/Register";
@@ -71,6 +72,7 @@ const Tracking3DView = () => {
   return (
     <div className="w-screen h-screen relative overflow-hidden">
       <VisensaCanvas />
+      <LeftHandWarningModal />
 
       {/* Modern overlay container for real-time webcam tracking and calibration HUD */}
       <div style={{

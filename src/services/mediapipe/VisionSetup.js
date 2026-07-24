@@ -14,7 +14,7 @@ export const setupMediaPipe = async () => {
       delegate: "GPU"
     },
     runningMode: "VIDEO",
-    numHands: 1,
+    numHands: 2,
     minHandDetectionConfidence: 0.65,
     minHandPresenceConfidence: 0.65
   });

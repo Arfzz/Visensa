@@ -9,12 +9,14 @@ export const useVisionStore = create((set) => ({
   poseWorldLandmarks: null,
   handedness: 'Left',    // Sisi tangan (Left/Right)
   calibrationWarning: false,
+  isLeftHandWarning: false,
     
   setPoseLandmarks: (landmarks, worldLandmarks) => set({ 
     poseLandmarks: landmarks, 
     poseWorldLandmarks: worldLandmarks 
   }),
   setCalibrationWarning: (status) => set({ calibrationWarning: status }),
+  setIsLeftHandWarning: (status) => set({ isLeftHandWarning: status }),
   setModelReady: (status) => set({ isModelReady: status }),
   setCalibrationProgress: (progress) => set({ calibrationProgress: progress }),
   setCalibrated: (status) => set({ isCalibrated: status }),
