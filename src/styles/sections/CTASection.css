@@ -1,0 +1,122 @@
+.cta {
+  padding: 160px 0;
+  background: #E8F4F2;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.cta__inner {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.cta__mono-label {
+  color: #9aafac;
+  margin-bottom: 4px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-size: 11px;
+}
+
+.cta__heading {
+  font-size: clamp(44px, 6.5vw, 80px);
+  font-weight: 700;
+  letter-spacing: -3px;
+  line-height: 1.05;
+  color: #1a2e22;
+  max-width: 900px;
+  margin: 0;
+}
+
+.cta__heading-accent {
+  color: #20D3B0;
+  display: block;
+}
+
+.cta__sub {
+  font-size: 17px;
+  color: #7a9490;
+  max-width: 520px;
+  line-height: 1.6;
+  margin-top: 4px;
+}
+
+.cta__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 40px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #ffffff;
+  background: #2aada0;
+  border-radius: 100px;
+  text-decoration: none;
+  margin-top: 20px;
+  transition: all var(--transition-normal);
+  box-shadow: 0 8px 28px rgba(32, 211, 176, 0.25);
+  font-family: var(--font-sans);
+}
+
+.cta__btn:hover {
+  background: #239e93;
+  transform: translateY(-3px);
+  box-shadow: 0 14px 40px rgba(32, 211, 176, 0.35);
+}
+
+.cta__btn svg {
+  transition: transform var(--transition-normal);
+}
+
+.cta__btn:hover svg {
+  transform: translateX(4px);
+}
+
+.cta__clinician {
+  font-size: 14px;
+  color: #8aada8;
+  margin-top: 20px;
+}
+
+.cta__clinician a {
+  color: #4a7a74;
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: rgba(74, 122, 116, 0.5);
+  transition: all var(--transition-fast);
+}
+
+.cta__clinician a:hover {
+  color: #1a2e22;
+  text-decoration-color: #1a2e22;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 768px) {
+  .cta {
+    padding: 100px 0;
+  }
+
+  .cta__heading {
+    font-size: clamp(36px, 8vw, 52px);
+    letter-spacing: -2px;
+  }
+
+  .cta__inner {
+    gap: 16px;
+  }
+
+  .cta__btn {
+    padding: 18px 32px;
+    width: 100%;
+    max-width: 360px;
+    justify-content: center;
+  }
+}
