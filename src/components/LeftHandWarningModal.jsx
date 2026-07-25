@@ -10,7 +10,7 @@ export function LeftHandWarningModal() {
     <div
       style={{
         position: "absolute",
-        top: "24px",
+        top: "169px",
         left: "50%",
         transform: "translateX(-50%)",
         zIndex: 50,

@@ -21,7 +21,7 @@ const Register = () => {
         padding: 0,
       }}
     >
-      {/* SISI KIRI: Dark Branding Panel (TETAP DIAM) */}
+      {/* SISI KIRI: Dark Branding Panel */}
       <div
         style={{
           width: "40%",
@@ -79,64 +79,64 @@ const Register = () => {
         style={{
           flex: 1,
           height: "100vh", 
-          overflowY: "scroll", // <--- UBAH "auto" JADI "scroll" DI SINI
+          overflowY: "auto", 
           display: "flex",
           flexDirection: "column", 
           alignItems: "center", 
-          justifyContent: "flex-start", 
-          paddingTop: "120px", 
-          paddingBottom: "120px", 
+          justifyContent: "center",
+          paddingTop: "12px",
+          paddingBottom: "12px",
           boxSizing: "border-box",
         }}
       >
         <div
           style={{
             width: "100%",
-            maxWidth: "480px", // Lebar maksimal form dikunci di sini
+            maxWidth: "380px",
             display: "flex",
             flexDirection: "column",
-            padding: "0 27px",
+            padding: "0 16px",
           }}
         >
           {/* Back to Home Link */}
-          <div onClick={() => navigate('/')} style={{ color: "#7AAAB4", fontSize: "14.86px", fontFamily: "Space Mono, monospace", fontWeight: "400", lineHeight: "22.29px", cursor: "pointer", marginBottom: "45.72px" }}>
+          <div onClick={() => navigate('/')} style={{ color: "#7AAAB4", fontSize: "12px", fontFamily: "Space Mono, monospace", fontWeight: "400", cursor: "pointer", marginBottom: "16px" }}>
             ← Back to home
           </div>
 
-          {/* Toggle Tab (Sign In / Create Account) */}
-          <div style={{ height: "54.86px", padding: "4.57px", background: "#C4E8EC", borderRadius: "18.29px", display: "flex", boxSizing: "border-box", marginBottom: "36.58px", flexShrink: 0 }}>
+          {/* Toggle Tab */}
+          <div style={{ height: "40px", padding: "4px", background: "#C4E8EC", borderRadius: "12px", display: "flex", boxSizing: "border-box", marginBottom: "20px", flexShrink: 0 }}>
             <div onClick={() => navigate('/login')} style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center", cursor: "pointer" }}>
-              <div style={{ color: "#7AAAB4", fontSize: "16px", fontFamily: "Space Grotesk, sans-serif", fontWeight: "600", lineHeight: "22.86px" }}>Sign in</div>
+              <div style={{ color: "#7AAAB4", fontSize: "13px", fontFamily: "Space Grotesk, sans-serif", fontWeight: "600" }}>Sign in</div>
             </div>
-            <div style={{ flex: 1, background: "white", boxShadow: "0px 1.14px 4.57px rgba(28, 24, 22, 0.08)", borderRadius: "16px", display: "flex", justifyContent: "center", alignItems: "center", cursor: "default" }}>
-              <div style={{ color: "#18687E", fontSize: "16px", fontFamily: "Space Grotesk, sans-serif", fontWeight: "600", lineHeight: "22.86px" }}>Create account</div>
+            <div style={{ flex: 1, background: "white", boxShadow: "0px 1px 4px rgba(28, 24, 22, 0.08)", borderRadius: "10px", display: "flex", justifyContent: "center", alignItems: "center", cursor: "default" }}>
+              <div style={{ color: "#18687E", fontSize: "13px", fontFamily: "Space Grotesk, sans-serif", fontWeight: "600" }}>Create account</div>
             </div>
           </div>
 
           {/* Form Header */}
-          <div style={{ marginBottom: "36.58px", flexShrink: 0 }}>
-            <div style={{ color: "#1C1816", fontSize: "32px", fontFamily: "Space Grotesk, sans-serif", fontWeight: "800", lineHeight: "48.01px" }}>Create your account</div>
-            <div style={{ color: "#7AAAB4", fontSize: "17.15px", fontFamily: "Space Grotesk, sans-serif", fontWeight: "400", lineHeight: "25.72px", marginTop: "6.86px" }}>Start your therapy programme for free.</div>
+          <div style={{ marginBottom: "20px", flexShrink: 0 }}>
+            <div style={{ color: "#1C1816", fontSize: "22px", fontFamily: "Space Grotesk, sans-serif", fontWeight: "800" }}>Create your account</div>
+            <div style={{ color: "#7AAAB4", fontSize: "13px", fontFamily: "Space Grotesk, sans-serif", fontWeight: "400", marginTop: "4px" }}>Start your therapy programme for free.</div>
           </div>
 
           {/* Input Fields Container */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "22.86px", marginBottom: "24px", flexShrink: 0 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginBottom: "20px", flexShrink: 0 }}>
             <div style={{ display: "flex", flexDirection: "column" }}>
-              <div style={{ color: "#7AAAB4", fontSize: "13.72px", fontFamily: "Space Mono, monospace", fontWeight: "400", letterSpacing: "1.10px", marginBottom: "8px" }}>FULL NAME</div>
-              <input type="text" placeholder="Your name" style={{ width: "100%", height: "55.44px", padding: "0 18.29px", background: "#F0FAFB", border: "1.14px solid #C4E8EC", borderRadius: "13.72px", color: "#1C1816", fontSize: "17.15px", fontFamily: "Space Grotesk, sans-serif", outline: "none", boxSizing: "border-box" }} />
+              <div style={{ color: "#7AAAB4", fontSize: "11px", fontFamily: "Space Mono, monospace", fontWeight: "400", letterSpacing: "1px", marginBottom: "4px" }}>FULL NAME</div>
+              <input type="text" placeholder="Your name" style={{ width: "100%", height: "40px", padding: "0 14px", background: "#F0FAFB", border: "1px solid #C4E8EC", borderRadius: "8px", color: "#1C1816", fontSize: "13px", fontFamily: "Space Grotesk, sans-serif", outline: "none", boxSizing: "border-box" }} />
             </div>
 
             <div style={{ display: "flex", flexDirection: "column" }}>
-              <div style={{ color: "#7AAAB4", fontSize: "13.72px", fontFamily: "Space Mono, monospace", fontWeight: "400", letterSpacing: "1.10px", marginBottom: "8px" }}>EMAIL ADDRESS</div>
-              <input type="email" placeholder="your@email.com" style={{ width: "100%", height: "55.44px", padding: "0 18.29px", background: "#F0FAFB", border: "1.14px solid #C4E8EC", borderRadius: "13.72px", color: "#1C1816", fontSize: "17.15px", fontFamily: "Space Grotesk, sans-serif", outline: "none", boxSizing: "border-box" }} />
+              <div style={{ color: "#7AAAB4", fontSize: "11px", fontFamily: "Space Mono, monospace", fontWeight: "400", letterSpacing: "1px", marginBottom: "4px" }}>EMAIL ADDRESS</div>
+              <input type="email" placeholder="your@email.com" style={{ width: "100%", height: "40px", padding: "0 14px", background: "#F0FAFB", border: "1px solid #C4E8EC", borderRadius: "8px", color: "#1C1816", fontSize: "13px", fontFamily: "Space Grotesk, sans-serif", outline: "none", boxSizing: "border-box" }} />
             </div>
 
             <div style={{ display: "flex", flexDirection: "column" }}>
-              <div style={{ color: "#7AAAB4", fontSize: "13.72px", fontFamily: "Space Mono, monospace", fontWeight: "400", letterSpacing: "1.10px", marginBottom: "8px" }}>PASSWORD</div>
+              <div style={{ color: "#7AAAB4", fontSize: "11px", fontFamily: "Space Mono, monospace", fontWeight: "400", letterSpacing: "1px", marginBottom: "4px" }}>PASSWORD</div>
               <div style={{ position: "relative", width: "100%" }}>
-                <input type={showPassword ? "text" : "password"} placeholder="Min. 8 characters" style={{ width: "100%", height: "55.44px", paddingLeft: "18.29px", paddingRight: "50.29px", background: "#F0FAFB", border: "1.14px solid #C4E8EC", borderRadius: "13.72px", color: "#1C1816", fontSize: "17.15px", fontFamily: "Space Grotesk, sans-serif", outline: "none", boxSizing: "border-box" }} />
-                <div onClick={() => setShowPassword(!showPassword)} style={{ position: "absolute", right: "18.29px", top: "18.57px", cursor: "pointer", display: "flex", alignItems: "center" }}>
-                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={showPassword ? "#0099A6" : "#7AAAB4"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <input type={showPassword ? "text" : "password"} placeholder="Min. 8 characters" style={{ width: "100%", height: "40px", paddingLeft: "14px", paddingRight: "40px", background: "#F0FAFB", border: "1px solid #C4E8EC", borderRadius: "8px", color: "#1C1816", fontSize: "13px", fontFamily: "Space Grotesk, sans-serif", outline: "none", boxSizing: "border-box" }} />
+                <div onClick={() => setShowPassword(!showPassword)} style={{ position: "absolute", right: "14px", top: "11px", cursor: "pointer", display: "flex", alignItems: "center" }}>
+                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={showPassword ? "#0099A6" : "#7AAAB4"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                     <circle cx="12" cy="12" r="3"></circle>
                   </svg>
@@ -145,8 +145,8 @@ const Register = () => {
             </div>
 
             <div style={{ display: "flex", flexDirection: "column" }}>
-              <div style={{ color: "#7AAAB4", fontSize: "13.72px", fontFamily: "Space Mono, monospace", fontWeight: "400", letterSpacing: "1.10px", marginBottom: "8px" }}>YOUR CONDITION</div>
-              <select style={{ width: "100%", height: "55.44px", padding: "0 18.29px", background: "#F0FAFB", border: "1.14px solid #C4E8EC", borderRadius: "13.72px", color: "#7AAAB4", fontSize: "17.15px", fontFamily: "Space Grotesk, sans-serif", outline: "none", boxSizing: "border-box", appearance: "none", WebkitAppearance: "none", MozAppearance: "none" }}>
+              <div style={{ color: "#7AAAB4", fontSize: "11px", fontFamily: "Space Mono, monospace", fontWeight: "400", letterSpacing: "1px", marginBottom: "4px" }}>YOUR CONDITION</div>
+              <select style={{ width: "100%", height: "40px", padding: "0 14px", background: "#F0FAFB", border: "1px solid #C4E8EC", borderRadius: "8px", color: "#7AAAB4", fontSize: "13px", fontFamily: "Space Grotesk, sans-serif", outline: "none", boxSizing: "border-box", appearance: "none", WebkitAppearance: "none", MozAppearance: "none" }}>
                 <option value="">Select your condition</option>
                 <option value="stroke">Stroke Recovery</option>
                 <option value="phantom">Phantom Limb Pain</option>
@@ -155,22 +155,25 @@ const Register = () => {
           </div>
 
           {/* Checklist Benefits section */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "36.58px", flexShrink: 0 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "4px", marginBottom: "20px", flexShrink: 0 }}>
             {["Free first session — no credit card", "Your data stays on your device", "Track your progress over time"].map((benefit, idx) => (
-              <div key={idx} style={{ display: "flex", alignItems: "center", gap: "8px", color: "#7AAAB4", fontSize: "14.86px", fontFamily: "Space Grotesk, sans-serif" }}><span style={{ color: "#3BB8B0" }}>✓</span> {benefit}</div>
+              <div key={idx} style={{ display: "flex", alignItems: "center", gap: "8px", color: "#7AAAB4", fontSize: "12px", fontFamily: "Space Grotesk, sans-serif" }}><span style={{ color: "#3BB8B0" }}>✓</span> {benefit}</div>
             ))}
           </div>
 
           {/* Action Button & Bottom Link */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "27.43px", flexShrink: 0 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "12px", flexShrink: 0 }}>
             <button 
-              onClick={() => navigate('/intro')} // <--- TAMBAHKAN BARIS INI JADINYA BEGINI
-              style={{ width: "100%", height: "57.72px", background: "#0099A6", border: "none", borderRadius: "38px", boxShadow: "0px 4.57px 18.28px rgba(200, 112, 74, 0.28)", display: "flex", justifyContent: "center", alignItems: "center", gap: "9.14px", cursor: "pointer" }}
+              onClick={() => navigate('/intro')}
+              style={{ width: "100%", height: "42px", background: "#0099A6", border: "none", borderRadius: "21px", boxShadow: "0px 4px 12px rgba(200, 112, 74, 0.2)", display: "flex", justifyContent: "center", alignItems: "center", gap: "8px", cursor: "pointer" }}
             >
-              <span style={{ color: "white", fontSize: "17.15px", fontFamily: "Space Grotesk, sans-serif", fontWeight: "600", lineHeight: "25.72px" }}>Create account</span>
+              <span style={{ color: "white", fontSize: "14px", fontFamily: "Space Grotesk, sans-serif", fontWeight: "600" }}>Create account</span>
             </button>
-            <div style={{ textAlign: "center", color: "#7AAAB4", fontSize: "13px", fontFamily: "Space Grotesk, sans-serif", lineHeight: "18px", maxWidth: "400px", margin: "0 auto" }}>
+            <div style={{ textAlign: "center", color: "#7AAAB4", fontSize: "11px", fontFamily: "Space Grotesk, sans-serif", lineHeight: "14px", maxWidth: "350px", margin: "0 auto" }}>
               By creating an account you agree to our <span style={{ textDecoration: "underline", cursor: "pointer" }}>Terms of Service</span> and <span style={{ textDecoration: "underline", cursor: "pointer" }}>Privacy Policy</span>.
+            </div>
+            <div style={{ textAlign: "center", color: "#7AAAB4", fontSize: "11px", fontFamily: "Space Grotesk, sans-serif", lineHeight: "14px", maxWidth: "350px", margin: "0 auto" }}>
+              Already have an account? <span style={{ color: "#0099A6", fontSize:"14px" ,fontWeight: "bold", cursor: "pointer" }} onClick={()=>navigate('/login')}>Sign In</span>
             </div>
           </div>
         </div>

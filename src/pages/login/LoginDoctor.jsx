@@ -20,209 +20,99 @@ const LoginDoctor = () => {
         padding: 0,
       }}
     >
-      {/* SISI KIRI */}
-      <div
-        style={{
-          width: "40%",
-          minWidth: "480px",
-          height: "100vh",
-          background: "#0C1119",
-          position: "relative",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "space-between",
-          padding: "54.86px",
-          boxSizing: "border-box",
-        }}
-      >
-        <div
-          style={{
-            width: "100%",
-            height: "100%",
-            left: 0,
-            top: 0,
-            position: "absolute",
-            background:
-              "radial-gradient(ellipse 98.99% 98.99% at 70.00% 30.00%, rgba(59, 184, 176, 0.07) 0%, rgba(0, 0, 0, 0) 55%), radial-gradient(ellipse 113.14% 113.14% at 20.00% 80.00%, rgba(200, 112, 74, 0.08) 0%, rgba(0, 0, 0, 0) 50%)",
-            pointerEvents: "none",
-          }}
-        />
-        <div
-          style={{
-            position: "relative",
-            display: "flex",
-            alignItems: "center",
-            gap: "11.43px",
-            zIndex: 2,
-          }}
-        >
-          <img
-            src={visensaLogo}
-            alt="Visensa Logo"
-            style={{ height: "27px", width: "auto" }}
-          />
-          <div
-            style={{
-              color: "white",
-              fontSize: "22.86px",
-              fontFamily: "Space Grotesk, sans-serif",
-              fontWeight: "800",
-            }}
-          >
-            VISENSA
-          </div>
-        </div>
-        <div
-          style={{
-            position: "relative",
-            zIndex: 2,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            textAlign: "center",
-            margin: "auto 0",
-          }}
-        >
-          <div
-            style={{
-              width: "240px",
-              height: "140px",
-              position: "relative",
-              marginBottom: "45.72px",
-            }}
-          >
-            <img
-              src={avatarHands}
-              alt="Left Hand"
+      {/* SISI KIRI: Dark Branding Panel (TETAP DIAM & TIDAK DIUBAH) */}
+            <div
               style={{
-                width: "110px",
-                height: "auto",
-                position: "absolute",
-                left: "15px",
-                top: "5px",
-                transform: "rotate(-6deg)",
-                opacity: 0.85,
+                width: "40%",
+                minWidth: "480px",
+                height: "100vh",
+                background: "#0C1119",
+                position: "relative",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+                padding: "54.86px",
+                boxSizing: "border-box",
+                overflow: "hidden",
               }}
-            />
-            <img
-              src={avatarHands}
-              alt="Right Hand"
-              style={{
-                width: "110px",
-                height: "auto",
-                position: "absolute",
-                right: "15px",
-                top: "5px",
-                transform: "scaleX(-1) rotate(-6deg)",
-                filter:
-                  "invert(52%) sepia(87%) saturate(1832%) hue-rotate(141deg) brightness(95%) contrast(101%)",
-                opacity: 0.85,
-              }}
-            />
-          </div>
-          <div
-            style={{
-              color: "#F2EDE8",
-              fontSize: "32px",
-              fontFamily: "Space Grotesk, sans-serif",
-              fontWeight: "700",
-              marginBottom: "18px",
-            }}
-          >
-            Empower recovery,
-            <br />
-            monitor remotely.
-          </div>
-          <div
-            style={{
-              color: "#445570",
-              fontSize: "17.15px",
-              fontFamily: "Space Grotesk, sans-serif",
-              maxWidth: "340px",
-              lineHeight: "1.6",
-            }}
-          >
-            Seamlessly track your patients' mirror therapy progress, review
-            compliance, and adjust protocols from your clinical dashboard.
-          </div>
-        </div>
-        <div
-          style={{
-            position: "relative",
-            display: "flex",
-            justifyContent: "space-between",
-            zIndex: 2,
-          }}
-        >
-          {[
-            { v: "94%", l: "Patient compliance" },
-            { v: "42%", l: "Avg. pain reduction" },
-            { v: "50+", l: "Clinics worldwide" },
-          ].map((stat, i) => (
-            <div key={i} style={{ textAlign: "center" }}>
+            >
               <div
                 style={{
-                  color: "#0099A6",
-                  fontSize: "25px",
-                  fontFamily: "Space Mono",
-                  fontWeight: "700",
+                  width: "100%",
+                  height: "100%",
+                  left: 0,
+                  top: 0,
+                  position: "absolute",
+                  background:
+                    "radial-gradient(ellipse 98.99% 98.99% at 70.00% 30.00%, rgba(59, 184, 176, 0.07) 0%, rgba(0, 0, 0, 0) 55%), radial-gradient(ellipse 113.14% 113.14% at 20.00% 80.00%, rgba(200, 112, 74, 0.08) 0%, rgba(0, 0, 0, 0) 50%)",
+                  pointerEvents: "none",
                 }}
-              >
-                {stat.v}
+              />
+      
+              {/* LOGO */}
+              <div style={{ position: "relative", display: "flex", alignItems: "center", gap: "11.43px", zIndex: 2 }}>
+                <img src={visensaLogo} alt="Visensa Logo" style={{ height: "27px", width: "auto" }} />
+                <div style={{ color: "white", fontSize: "22.86px", fontFamily: "Space Grotesk, sans-serif", fontWeight: "800", lineHeight: "27.43px", letterSpacing: "0.5px" }}>VISENSA</div>
               </div>
-              <div
-                style={{
-                  color: "#445570",
-                  fontSize: "12.5px",
-                  fontFamily: "Space Grotesk",
-                  marginTop: "4px",
-                }}
-              >
-                {stat.l}
+      
+              {/* ILUSTRASI & TEKS UTAMA */}
+              <div style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", zIndex: 2, margin: "auto 0" }}>
+                <div style={{ width: "240px", height: "140px", position: "relative", marginBottom: "45.72px" }}>
+                  <img src={avatarHands} alt="Left Hand" style={{ width: "110px", height: "auto", position: "absolute", left: "15px", top: "5px", transform: "rotate(-6deg)", opacity: 0.85 }} />
+                  <img src={avatarHands} alt="Right Hand" style={{ width: "110px", height: "auto", position: "absolute", right: "15px", top: "5px", transform: "scaleX(-1) rotate(-6deg)", filter: "invert(52%) sepia(87%) saturate(1832%) hue-rotate(141deg) brightness(95%) contrast(101%)", opacity: 0.85 }} />
+                </div>
+                <div style={{ color: "#F2EDE8", fontSize: "32px", fontFamily: "Space Grotesk, sans-serif", fontWeight: "700", lineHeight: "38.41px", marginBottom: "18.29px" }}>Your recovery,<br />on your schedule.</div>
+                <div style={{ maxWidth: "320.04px", color: "#445570", fontSize: "17.15px", fontFamily: "Space Grotesk, sans-serif", fontWeight: "400", lineHeight: "28.29px" }}>Guided mirror therapy sessions from your browser. No hardware, no appointment, no waiting room.</div>
+              </div>
+      
+              {/* STATISTIK DATA */}
+              <div style={{ position: "relative", display: "flex", justifyContent: "space-between", width: "100%", zIndex: 2 }}>
+                <div style={{ textAlign: "center" }}><div style={{ color: "#0099A6", fontSize: "25.15px", fontFamily: "Space Mono, monospace", fontWeight: "700", lineHeight: "25.15px" }}>94%</div><div style={{ color: "#445570", fontSize: "12.57px", fontFamily: "Space Grotesk, sans-serif", fontWeight: "400", marginTop: "4.57px" }}>Completion rate</div></div>
+                <div style={{ textAlign: "center" }}><div style={{ color: "#0099A6", fontSize: "25.15px", fontFamily: "Space Mono, monospace", fontWeight: "700", lineHeight: "25.15px" }}>42%</div><div style={{ color: "#445570", fontSize: "12.57px", fontFamily: "Space Grotesk, sans-serif", fontWeight: "400", marginTop: "4.57px" }}>Pain reduction</div></div>
+                <div style={{ textAlign: "center" }}><div style={{ color: "#0099A6", fontSize: "25.15px", fontFamily: "Space Mono, monospace", fontWeight: "700", lineHeight: "25.15px" }}>200+</div><div style={{ color: "#445570", fontSize: "12.57px", fontFamily: "Space Grotesk, sans-serif", fontWeight: "400", marginTop: "4.57px" }}>Studies backing</div></div>
               </div>
             </div>
-          ))}
-        </div>
-      </div>
 
-      {/* SISI KANAN */}
+      {/* SISI KANAN: Form Login Doctor */}
       <div
         style={{
           flex: 1,
           height: "100vh",
-          overflowY: "scroll",
+          overflowY: "auto",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          paddingTop: "120px",
-          paddingBottom: "120px",
+          justifyContent: "center",
+          paddingTop: "40px",
+          paddingBottom: "40px",
           boxSizing: "border-box",
         }}
       >
-        <div style={{ width: "100%", maxWidth: "480px", padding: "0 27px" }}>
+        <div style={{ width: "100%", maxWidth: "440px", padding: "0 20px" }}>
+          {/* Back to Home Link */}
           <div
             onClick={() => navigate("/")}
             style={{
               color: "#7AAAB4",
-              fontSize: "14.86px",
+              fontSize: "13px",
               fontFamily: "Space Mono",
               cursor: "pointer",
-              marginBottom: "45px",
+              marginBottom: "24px",
             }}
           >
             ← Back to home
           </div>
 
-          {/* TOGGLE: Diatur width 50:50 fix */}
+          {/* TOGGLE TAB */}
           <div
             style={{
-              height: "54.86px",
-              padding: "4.57px",
+              height: "46px",
+              padding: "4px",
               background: "#C4E8EC",
-              borderRadius: "18.29px",
+              borderRadius: "14px",
               display: "flex",
               boxSizing: "border-box",
-              marginBottom: "36px",
+              marginBottom: "24px",
               flexShrink: 0,
             }}
           >
@@ -231,8 +121,8 @@ const LoginDoctor = () => {
                 flex: "1 1 0",
                 width: "50%",
                 background: "white",
-                boxShadow: "0px 1.14px 4.57px rgba(28, 24, 22, 0.08)",
-                borderRadius: "16px",
+                boxShadow: "0px 1px 4px rgba(28, 24, 22, 0.08)",
+                borderRadius: "12px",
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
@@ -242,7 +132,7 @@ const LoginDoctor = () => {
               <div
                 style={{
                   color: "#18687E",
-                  fontSize: "16px",
+                  fontSize: "14px",
                   fontFamily: "Space Grotesk, sans-serif",
                   fontWeight: "600",
                 }}
@@ -264,7 +154,7 @@ const LoginDoctor = () => {
               <div
                 style={{
                   color: "#7AAAB4",
-                  fontSize: "16px",
+                  fontSize: "14px",
                   fontFamily: "Space Grotesk, sans-serif",
                   fontWeight: "600",
                 }}
@@ -274,11 +164,12 @@ const LoginDoctor = () => {
             </div>
           </div>
 
-          <div style={{ marginBottom: "36px" }}>
+          {/* Form Header */}
+          <div style={{ marginBottom: "24px" }}>
             <div
               style={{
                 color: "#1C1816",
-                fontSize: "32px",
+                fontSize: "26px",
                 fontFamily: "Space Grotesk",
                 fontWeight: "800",
               }}
@@ -288,31 +179,33 @@ const LoginDoctor = () => {
             <div
               style={{
                 color: "#7AAAB4",
-                fontSize: "17.15px",
+                fontSize: "14px",
                 fontFamily: "Space Grotesk",
-                marginTop: "6px",
+                marginTop: "4px",
               }}
             >
               Access your patient monitoring portal.
             </div>
           </div>
 
+          {/* Input Fields Container */}
           <div
             style={{
               display: "flex",
               flexDirection: "column",
-              gap: "22px",
-              marginBottom: "36px",
+              gap: "16px",
+              marginBottom: "24px",
             }}
           >
+            {/* Input Email / Clinic ID */}
             <div>
               <div
                 style={{
                   color: "#7AAAB4",
-                  fontSize: "13.7px",
+                  fontSize: "12px",
                   fontFamily: "Space Mono",
-                  letterSpacing: "1.1px",
-                  marginBottom: "8px",
+                  letterSpacing: "1px",
+                  marginBottom: "6px",
                 }}
               >
                 EMAIL ADDRESS / CLINIC ID
@@ -322,26 +215,29 @@ const LoginDoctor = () => {
                 placeholder="dr.smith@clinic.com"
                 style={{
                   width: "100%",
-                  height: "55px",
-                  padding: "0 18px",
+                  height: "46px",
+                  padding: "0 16px",
                   background: "#F0FAFB",
-                  border: "1.14px solid #C4E8EC",
-                  borderRadius: "13.7px",
-                  fontSize: "17px",
+                  border: "1px solid #C4E8EC",
+                  borderRadius: "10px",
+                  fontSize: "14px",
                   boxSizing: "border-box",
                   outline: "none",
                   fontFamily: "Space Grotesk",
+                  color: "#1C1816",
                 }}
               />
             </div>
+
+            {/* Input Password */}
             <div>
               <div
                 style={{
                   color: "#7AAAB4",
-                  fontSize: "13.7px",
+                  fontSize: "12px",
                   fontFamily: "Space Mono",
-                  letterSpacing: "1.1px",
-                  marginBottom: "8px",
+                  letterSpacing: "1px",
+                  marginBottom: "6px",
                 }}
               >
                 PASSWORD
@@ -352,24 +248,25 @@ const LoginDoctor = () => {
                   placeholder="••••••••"
                   style={{
                     width: "100%",
-                    height: "55px",
-                    padding: "0 18px",
-                    paddingRight: "50px",
+                    height: "46px",
+                    padding: "0 16px",
+                    paddingRight: "46px",
                     background: "#F0FAFB",
-                    border: "1.14px solid #C4E8EC",
-                    borderRadius: "13.7px",
-                    fontSize: "17px",
+                    border: "1px solid #C4E8EC",
+                    borderRadius: "10px",
+                    fontSize: "14px",
                     boxSizing: "border-box",
                     outline: "none",
                     fontFamily: "Space Grotesk",
+                    color: "#1C1816",
                   }}
                 />
                 <div
                   onClick={() => setShowPassword(!showPassword)}
                   style={{
                     position: "absolute",
-                    right: "18px",
-                    top: "18px",
+                    right: "16px",
+                    top: "14px",
                     cursor: "pointer",
                     display: "flex",
                     alignItems: "center",
@@ -391,11 +288,13 @@ const LoginDoctor = () => {
                 </div>
               </div>
             </div>
+
+            {/* Forgot Password */}
             <div style={{ display: "flex", justifyContent: "flex-end" }}>
               <div
                 style={{
                   color: "#0099A6",
-                  fontSize: "13.7px",
+                  fontSize: "12px",
                   fontFamily: "Space Mono",
                   cursor: "pointer",
                 }}
@@ -405,16 +304,18 @@ const LoginDoctor = () => {
             </div>
           </div>
 
+          {/* Submit Button */}
           <button
             onClick={() => navigate("/admin-dashboard")}
             style={{
               width: "100%",
-              height: "57px",
+              height: "48px",
               background: "#0099A6",
               border: "none",
-              borderRadius: "38px",
+              borderRadius: "24px",
+              boxShadow: "0px 4px 12px rgba(200, 112, 74, 0.2)",
               color: "white",
-              fontSize: "17px",
+              fontSize: "15px",
               fontFamily: "Space Grotesk",
               fontWeight: "600",
               cursor: "pointer",

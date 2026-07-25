@@ -6,7 +6,6 @@ const SessionIntro = () => {
   const videoRef = useRef(null);
 
   // Live camera preview — hanya untuk cek posisi & pencahayaan
-  // TIDAK ada MediaPipe atau Kalidokit di halaman ini
   useEffect(() => {
     let stream = null;
     const startPreview = async () => {
@@ -27,7 +26,6 @@ const SessionIntro = () => {
     };
   }, []);
 
-  // Data untuk list exercise agar tidak perlu nulis HTML berulang-ulang
   const exercises = [
     { id: 1, name: "Open & close — gentle", time: "60s" },
     { id: 2, name: "Finger spread", time: "45s" },
@@ -52,7 +50,7 @@ const SessionIntro = () => {
         padding: 0,
       }}
     >
-      {/* SISI KIRI: Visualisasi (Camera Placeholder) */}
+      {/* SISI KIRI: Visualisasi (Camera Placeholder)  */}
       <div
         style={{
           flex: 1,
@@ -64,7 +62,7 @@ const SessionIntro = () => {
           position: "relative",
         }}
       >
-        <div style={{ textAlign: "center", color: "#7AAAB4", fontSize: "15px", fontFamily: "Space Mono", textTransform: "uppercase", letterSpacing: "2.28px", marginBottom: "24px" }}>
+        <div style={{ textAlign: "center", color: "#7AAAB4", fontSize: "14px", fontFamily: "Space Mono", textTransform: "uppercase", letterSpacing: "2px", marginBottom: "20px" }}>
           Your session visualization
         </div>
 
@@ -73,7 +71,7 @@ const SessionIntro = () => {
           style={{
             width: "100%",
             maxWidth: "730px",
-            height: "580px",
+            height: "560px",
             background: "#0C1119",
             borderRadius: "21px",
             border: "1.5px rgba(196, 232, 236, 0.5) solid",
@@ -84,7 +82,6 @@ const SessionIntro = () => {
             paddingBottom: "24px",
           }}
         >
-          {/* Video feed */}
           <video
             ref={videoRef}
             autoPlay
@@ -100,7 +97,6 @@ const SessionIntro = () => {
               borderRadius: "21px",
             }}
           />
-          {/* Overlay label */}
           <div style={{
             position: "absolute",
             top: "16px",
@@ -118,135 +114,133 @@ const SessionIntro = () => {
             <div style={{ width: "7px", height: "7px", background: "#3ED8C8", borderRadius: "50%" }} />
             <span style={{ color: "#3ED8C8", fontSize: "11px", fontFamily: "Space Mono", letterSpacing: "1.5px", textTransform: "uppercase" }}>Camera Preview</span>
           </div>
-          {/* Card Preview Exercise 1 yang menumpuk di bawah kotak kamera */}
           <div
             style={{
               width: "90%",
               backgroundColor: "white",
-              padding: "18px 24px",
+              padding: "16px 20px",
               boxShadow: "0px 3px 18px rgba(28, 24, 22, 0.06)",
-              borderRadius: "24px",
+              borderRadius: "20px",
               border: "1.5px solid #C4E8EC",
               display: "flex",
               flexDirection: "column",
-              gap: "6px",
+              gap: "4px",
               position: "absolute",
-              bottom: "-40px", // Membuat efek overlap keluar dari kotak kamera
+              bottom: "-30px",
               zIndex: 10,
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-              <div style={{ width: "9px", height: "9px", background: "#0099A6", borderRadius: "50%" }} />
-              <div style={{ color: "#0099A6", fontSize: "15px", fontFamily: "Space Mono", textTransform: "uppercase", letterSpacing: "2px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <div style={{ width: "8px", height: "8px", background: "#0099A6", borderRadius: "50%" }} />
+              <div style={{ color: "#0099A6", fontSize: "14px", fontFamily: "Space Mono", textTransform: "uppercase", letterSpacing: "1.5px" }}>
                 Preview — Exercise 1
               </div>
             </div>
-            <div style={{ color: "#3A6870", fontSize: "21px", fontFamily: "Space Grotesk", fontWeight: "400" }}>
+            <div style={{ color: "#3A6870", fontSize: "19px", fontFamily: "Space Grotesk", fontWeight: "400" }}>
               Gentle open-and-close — following the mirrored movement
             </div>
           </div>
         </div>
 
-        <div style={{ marginTop: "70px", textAlign: "center", color: "#7AAAB4", fontSize: "18px", fontFamily: "Space Grotesk", maxWidth: "600px" }}>
+        <div style={{ marginTop: "60px", textAlign: "center", color: "#7AAAB4", fontSize: "16px", fontFamily: "Space Grotesk", maxWidth: "550px" }}>
           This is what you'll see during therapy. The mirrored hand guides each exercise.
         </div>
       </div>
 
-      {/* SISI KANAN: Panel Detail Sesi */}
+      {/* SISI KANAN: Panel Detail Sesi (VERSI ULTRA COMPACT) */}
       <div
         style={{
-          width: "425px",
+          width: "380px", 
           height: "100vh",
           backgroundColor: "white",
           borderLeft: "1px solid #C4E8EC",
-          overflowY: "scroll", // Mengizinkan scroll jika layar kecil
-          padding: "35px",
+          overflowY: "auto",
+          padding: "16px 20px", // Padding atas-bawah sangat minim
           display: "flex",
           flexDirection: "column",
           boxSizing: "border-box",
         }}
       >
-        <div style={{ padding: "35px", display: "flex", flexDirection: "column" }}>
+        <div style={{ display: "flex", flexDirection: "column", flex: 1, justifyContent: "space-between" }}>
+          
           {/* Header Sesi */}
-          <div style={{ color: "#3ED8C8", fontSize: "11px", fontFamily: "Space Mono", textTransform: "uppercase", letterSpacing: "1.6px" }}>
-            Today's session
-          </div>
-          <div style={{ color: "#0C2830", fontSize: "26px", fontFamily: "Space Grotesk", fontWeight: "700", marginTop: "12px" }}>
-            You're ready to begin
-          </div>
-          <div style={{ color: "#3A6870", fontSize: "15px", fontFamily: "Space Grotesk", marginTop: "4px" }}>
-            Mirror therapy · Hand movement rehabilitation
-          </div>
-
-          {/* Grid Statistik Sesi (Menggantikan posisi Absolute dari Figma agar lebih rapi) */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginTop: "35px" }}>
-            {/* Card 1: Exercises */}
-            <div style={{ background: "rgba(0, 153, 166, 0.08)", padding: "16px", borderRadius: "16px", border: "1px solid rgba(0, 153, 166, 0.20)" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "#7AAAB4", fontSize: "11px", fontFamily: "Space Mono", textTransform: "uppercase" }}>
-                <span style={{ fontSize: "14px" }}>▤</span> Exercises
-              </div>
-              <div style={{ color: "#0C2830", fontSize: "18px", fontFamily: "Space Grotesk", fontWeight: "600", marginTop: "8px" }}>8</div>
+          <div>
+            <div style={{ color: "#3ED8C8", fontSize: "10px", fontFamily: "Space Mono", textTransform: "uppercase", letterSpacing: "1.5px" }}>
+              Today's session
             </div>
-            {/* Card 2: Duration */}
-            <div style={{ background: "rgba(0, 153, 166, 0.08)", padding: "16px", borderRadius: "16px", border: "1px solid rgba(0, 153, 166, 0.20)" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "#7AAAB4", fontSize: "11px", fontFamily: "Space Mono", textTransform: "uppercase" }}>
-                <span style={{ fontSize: "14px" }}>⏱</span> Duration
-              </div>
-              <div style={{ color: "#0C2830", fontSize: "18px", fontFamily: "Space Grotesk", fontWeight: "600", marginTop: "8px" }}>~12 min</div>
+            <div style={{ color: "#0C2830", fontSize: "20px", fontFamily: "Space Grotesk", fontWeight: "700", marginTop: "4px" }}>
+              You're ready to begin
             </div>
-            {/* Card 3: Difficulty */}
-            <div style={{ background: "rgba(0, 153, 166, 0.08)", padding: "16px", borderRadius: "16px", border: "1px solid rgba(0, 153, 166, 0.20)" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "#7AAAB4", fontSize: "11px", fontFamily: "Space Mono", textTransform: "uppercase" }}>
-                <span style={{ fontSize: "14px" }}>📈</span> Difficulty
-              </div>
-              <div style={{ color: "#0C2830", fontSize: "18px", fontFamily: "Space Grotesk", fontWeight: "600", marginTop: "8px" }}>Starting</div>
-            </div>
-            {/* Card 4: Focus */}
-            <div style={{ background: "rgba(0, 153, 166, 0.08)", padding: "16px", borderRadius: "16px", border: "1px solid rgba(0, 153, 166, 0.20)" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "#7AAAB4", fontSize: "11px", fontFamily: "Space Mono", textTransform: "uppercase" }}>
-                <span style={{ fontSize: "14px" }}>🎯</span> Focus
-              </div>
-              <div style={{ color: "#0C2830", fontSize: "18px", fontFamily: "Space Grotesk", fontWeight: "600", marginTop: "8px" }}>Grip & flex</div>
+            <div style={{ color: "#3A6870", fontSize: "12px", fontFamily: "Space Grotesk", marginTop: "2px" }}>
+              Mirror therapy · Hand movement rehabilitation
             </div>
           </div>
 
-          {/* List Exercise (Dibuat otomatis menggunakan map) */}
-          <div style={{ marginTop: "35px" }}>
-            <div style={{ color: "#7AAAB4", fontSize: "11px", fontFamily: "Space Mono", textTransform: "uppercase", letterSpacing: "1.6px", marginBottom: "16px" }}>
+          {/* Grid Statistik Sesi */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginTop: "14px" }}>
+            <div style={{ background: "rgba(0, 153, 166, 0.08)", padding: "10px", borderRadius: "10px", border: "1px solid rgba(0, 153, 166, 0.20)" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "4px", color: "#7AAAB4", fontSize: "9px", fontFamily: "Space Mono", textTransform: "uppercase" }}>
+                <span style={{ fontSize: "11px" }}>▤</span> Exercises
+              </div>
+              <div style={{ color: "#0C2830", fontSize: "15px", fontFamily: "Space Grotesk", fontWeight: "600", marginTop: "2px" }}>8</div>
+            </div>
+            <div style={{ background: "rgba(0, 153, 166, 0.08)", padding: "10px", borderRadius: "10px", border: "1px solid rgba(0, 153, 166, 0.20)" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "4px", color: "#7AAAB4", fontSize: "9px", fontFamily: "Space Mono", textTransform: "uppercase" }}>
+                <span style={{ fontSize: "11px" }}>⏱</span> Duration
+              </div>
+              <div style={{ color: "#0C2830", fontSize: "15px", fontFamily: "Space Grotesk", fontWeight: "600", marginTop: "2px" }}>~12 min</div>
+            </div>
+            <div style={{ background: "rgba(0, 153, 166, 0.08)", padding: "10px", borderRadius: "10px", border: "1px solid rgba(0, 153, 166, 0.20)" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "4px", color: "#7AAAB4", fontSize: "9px", fontFamily: "Space Mono", textTransform: "uppercase" }}>
+                <span style={{ fontSize: "11px" }}>📈</span> Difficulty
+              </div>
+              <div style={{ color: "#0C2830", fontSize: "15px", fontFamily: "Space Grotesk", fontWeight: "600", marginTop: "2px" }}>Starting</div>
+            </div>
+            <div style={{ background: "rgba(0, 153, 166, 0.08)", padding: "10px", borderRadius: "10px", border: "1px solid rgba(0, 153, 166, 0.20)" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "4px", color: "#7AAAB4", fontSize: "9px", fontFamily: "Space Mono", textTransform: "uppercase" }}>
+                <span style={{ fontSize: "11px" }}>🎯</span> Focus
+              </div>
+              <div style={{ color: "#0C2830", fontSize: "15px", fontFamily: "Space Grotesk", fontWeight: "600", marginTop: "2px" }}>Grip & flex</div>
+            </div>
+          </div>
+
+          {/* List Exercise */}
+          <div style={{ marginTop: "14px" }}>
+            <div style={{ color: "#7AAAB4", fontSize: "10px", fontFamily: "Space Mono", textTransform: "uppercase", letterSpacing: "1.5px", marginBottom: "6px" }}>
               Session exercises
             </div>
             <div style={{ display: "flex", flexDirection: "column" }}>
               {exercises.map((item) => (
-                <div key={item.id} style={{ display: "flex", alignItems: "center", padding: "12px 0", borderBottom: "1px solid #C4E8EC" }}>
-                  <div style={{ color: "#7AAAB4", fontSize: "11px", fontFamily: "Space Mono", width: "24px" }}>{item.id}.</div>
-                  <div style={{ color: "#3A6870", fontSize: "15px", fontFamily: "Space Grotesk", flex: 1 }}>{item.name}</div>
-                  <div style={{ color: "#7AAAB4", fontSize: "13px", fontFamily: "Space Mono" }}>{item.time}</div>
+                <div key={item.id} style={{ display: "flex", alignItems: "center", padding: "5px 0", borderBottom: "1px solid #C4E8EC" }}>
+                  <div style={{ color: "#7AAAB4", fontSize: "11px", fontFamily: "Space Mono", width: "20px" }}>{item.id}.</div>
+                  <div style={{ color: "#3A6870", fontSize: "13px", fontFamily: "Space Grotesk", flex: 1 }}>{item.name}</div>
+                  <div style={{ color: "#7AAAB4", fontSize: "11px", fontFamily: "Space Mono" }}>{item.time}</div>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Info Box */}
-          <div style={{ background: "rgba(62, 216, 200, 0.08)", padding: "16px", borderRadius: "16px", border: "1px solid rgba(62, 216, 200, 0.20)", marginTop: "35px", display: "flex", gap: "12px" }}>
-            <div style={{ color: "#3ED8C8", marginTop: "2px" }}>ⓘ</div>
-            <div style={{ color: "#3A6870", fontSize: "13px", fontFamily: "Space Grotesk", lineHeight: "1.6" }}>
-              You can pause at any moment. Your progress is always saved. If a movement causes discomfort, simply stop and rest.
+          {/* Info Box (Padding dan margin ditekan) */}
+          <div style={{ background: "rgba(62, 216, 200, 0.08)", padding: "10px", borderRadius: "10px", border: "1px solid rgba(62, 216, 200, 0.20)", marginTop: "14px", display: "flex", gap: "8px", alignItems: "flex-start" }}>
+            <div style={{ color: "#3ED8C8", marginTop: "1px", fontSize: "13px" }}>ⓘ</div>
+            <div style={{ color: "#3A6870", fontSize: "11px", fontFamily: "Space Grotesk", lineHeight: "1.4" }}>
+              You can pause at any moment. Your progress is saved. Stop if you feel discomfort.
             </div>
           </div>
 
-          {/* Action Buttons */}
-          <div style={{ marginTop: "35px", display: "flex", flexDirection: "column", gap: "16px", paddingBottom: "40px" }}>
+          {/* Action Buttons (Padding Y ditekan jadi 12px) */}
+          <div style={{ marginTop: "14px", display: "flex", flexDirection: "column", gap: "10px" }}>
             <button
-              onClick={() => navigate('/camera')} // Nanti arahkan ke halaman kamera
+              onClick={() => navigate('/camera')}
               style={{
                 width: "100%",
-                padding: "16px",
+                padding: "12px",
                 background: "linear-gradient(135deg, #0099A6 0%, #007580 100%)",
                 boxShadow: "0px 4px 18px rgba(0, 153, 166, 0.30)",
-                borderRadius: "16px",
+                borderRadius: "12px",
                 border: "none",
                 color: "white",
-                fontSize: "16px",
+                fontSize: "14px",
                 fontFamily: "Space Grotesk",
                 fontWeight: "600",
                 cursor: "pointer",
@@ -259,11 +253,12 @@ const SessionIntro = () => {
               Begin Session <span>→</span>
             </button>
 
-            <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "8px", cursor: "pointer" }}>
-              <span style={{ color: "#7AAAB4" }}>⚙</span>
-              <span style={{ color: "#7AAAB4", fontSize: "15px", fontFamily: "Space Grotesk", fontWeight: "500" }}>Adjust session settings</span>
+            <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "6px", cursor: "pointer" }}>
+              <span style={{ color: "#7AAAB4", fontSize: "12px" }}>⚙</span>
+              <span style={{ color: "#7AAAB4", fontSize: "12px", fontFamily: "Space Grotesk", fontWeight: "500" }}>Adjust session settings</span>
             </div>
           </div>
+
         </div>
       </div>
     </div>
