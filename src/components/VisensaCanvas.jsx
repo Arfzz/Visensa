@@ -12,6 +12,7 @@ import { Model } from "../models/Robotic_prosthetic_arm";
 import { HologramTarget } from "./HologramTarget";
 import DebugArmPanel from "./DebugArmPanel";
 import DebugJointsPanel from "./DebugJointsPanel";
+import DebugExerciseUI from "./DebugExerciseUI";
 
 export function VisensaCanvas() {
   // Live Tuner State
@@ -31,6 +32,7 @@ export function VisensaCanvas() {
         left: 0,
       }}
     >
+      {/* <DebugExerciseUI /> */}
       {/* <DebugArmPanel/> */}
       {/* <DebugJointsPanel/> */}
       {/* Live Tuner UI (Disembunyikan di Production) */}
@@ -124,8 +126,6 @@ export function VisensaCanvas() {
           >
             <Model />
           </group>
-
-          <HologramTarget />
 
           <ContactShadows
             position={[0, -20, 0]}
