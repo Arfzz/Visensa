@@ -40,7 +40,7 @@ export function ExerciseHUD() {
     return () => clearInterval(timer);
   }, [isCalibrated, isTimerRunning, isCompleted, tickTimer]);
 
-  // --- AUTO-NEXT & SESSION TERMINATION LOGIC ---
+  // --- AUTO-NEXT & ROUTING SESSION COMPLETE LOGIC ---
   useEffect(() => {
     if (!isCompleted) return;
 
@@ -49,7 +49,7 @@ export function ExerciseHUD() {
       endSession();
       const redirectTimer = setTimeout(() => {
         navigate("/session-complete");
-      }, 3000);
+      }, 2500);
       return () => clearTimeout(redirectTimer);
     }
 
@@ -73,78 +73,78 @@ export function ExerciseHUD() {
   const getInstructionText = () => {
     if (isCompleted) {
       return activeExerciseId >= EXERCISES_LIST.length
-        ? "Seluruh Sesi Selesai! Mengarahkan ke Rangkuman Sesi..."
-        : "Latihan Selesai! Membuka latihan berikutnya...";
+        ? "Session Complete! Redirecting to session summary..."
+        : "Exercise Completed! Loading next exercise...";
     }
 
     if (activeExerciseId === 8) {
       switch (phase) {
         case "WAITING_REST":
-          return "Tahan tangan dalam posisi rileks";
+          return "Keep your hand in a relaxed position";
         case "HOLDING_REST":
-          return "Tahan posisi rileks... (5 detik)";
+          return "Hold relaxed position... (10 seconds)";
         case "COMPLETED":
-          return "Seluruh Sesi Latihan Selesai!";
+          return "Session Complete!";
         default:
-          return "Tahan tangan dalam posisi rileks";
+          return "Keep your hand in a relaxed position";
       }
     }
 
     if (activeExerciseId === 7) {
       return phase === "WAITING_LIFT"
-        ? "Kepalkan tangan, lalu angkat hanya jari telunjuk"
-        : "Turunkan kembali jari telunjuk";
+        ? "Make a fist, then lift only your index finger"
+        : "Lower your index finger back to a fist";
     }
 
     if (activeExerciseId === 6) {
       switch (phase) {
         case "WAITING_OPEN":
-          return "Buka tangan lebar dan tahan posisi";
+          return "Open your hand wide and hold position";
         case "HOLDING":
-          return "Tahan... (3 detik)";
+          return "Hold open position... (3 seconds)";
         case "WAITING_RELAX":
-          return "Rilekskan tangan sebentar";
+          return "Relax your hand briefly";
         default:
-          return "Buka tangan lebar dan tahan posisi";
+          return "Open your hand wide and hold position";
       }
     }
 
     if (activeExerciseId === 5) {
       switch (phase) {
         case "WAITING_INDEX_TAP":
-          return "Ketuk dengan Jari Telunjuk";
+          return "Tap with your Index finger";
         case "WAITING_MIDDLE_TAP":
-          return "Ketuk dengan Jari Tengah";
+          return "Tap with your Middle finger";
         case "WAITING_RING_TAP":
-          return "Ketuk dengan Jari Manis";
+          return "Tap with your Ring finger";
         case "WAITING_PINKY_TAP":
-          return "Ketuk dengan Jari Kelingking";
+          return "Tap with your Pinky finger";
         default:
-          return "Ketuk jari secara berurutan";
+          return "Tap fingers sequentially";
       }
     }
 
     if (activeExerciseId === 4) {
       return phase === "WAITING_LEFT"
-        ? "Lambaikan pergelangan tangan ke kiri"
-        : "Lambaikan pergelangan tangan ke kanan";
+        ? "Wave or tilt your wrist to the left"
+        : "Wave or tilt your wrist to the right";
     }
 
     if (activeExerciseId === 3) {
       return phase === "WAITING_PINCH"
-        ? "Jepit ujung ibu jari dan telunjuk (seperti memegang koin)"
-        : "Buka kembali ujung jari telunjuk dan ibu jari";
+        ? "Pinch thumb and index tips together (like holding a coin)"
+        : "Release index finger and thumb back outward";
     }
 
     if (activeExerciseId === 2) {
       return phase === "WAITING_UP"
-        ? "Tekuk pergelangan tangan ke atas (posisi STOP)"
-        : "Tekuk pergelangan tangan ke bawah";
+        ? "Bend wrist upward (Stop gesture)"
+        : "Flex wrist downward";
     }
 
     return phase === "WAITING_OPEN"
-      ? "Buka tangan lebar"
-      : "Kepalkan dengan lembut";
+      ? "Open your hand wide"
+      : "Form a gentle fist";
   };
 
   const instructionText = getInstructionText();

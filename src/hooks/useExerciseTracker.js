@@ -44,10 +44,10 @@ const HOLD_DURATION_MS = 3000;
 const EX7_EXTENDED_THRESHOLD = 1.60;
 const EX7_CURLED_THRESHOLD = 1.25;
 
-// Exercise 8: Resting Pose Stability (Neutral natural hand curve ratio & 5s hold duration)
+// Exercise 8: Resting Pose Stability (Neutral natural hand curve ratio & 10s hold timer)
 const EX8_REST_MIN_RATIO = 1.25;
 const EX8_REST_MAX_RATIO = 1.60;
-const REST_DURATION_MS = 5000;
+const REST_DURATION_MS = 10000;
 
 export function useExerciseTracker() {
   // --- STATE SELECTORS ---
@@ -58,6 +58,7 @@ export function useExerciseTracker() {
   const phase = useExerciseStore((state) => state.phase);
 
   const addRep = useExerciseStore((state) => state.addRep);
+  const completeExercise = useExerciseStore((state) => state.completeExercise);
   const setPhase = useExerciseStore((state) => state.setPhase);
 
   const lastRepTimeRef = useRef(0);
@@ -360,7 +361,7 @@ export function useExerciseTracker() {
         break;
       }
 
-      // --- EXERCISE 8: RESTING POSE STABILITY (5s TIMER) ---
+      // --- EXERCISE 8: RESTING POSE STABILITY (PURE 10s HOLD TIMER) ---
       case 8: {
         let totalTipDistance = 0;
         const tips = [INDEX_TIP, MIDDLE_TIP, RING_TIP, PINKY_TIP];
@@ -380,28 +381,29 @@ export function useExerciseTracker() {
           return;
         }
 
+        // WAITING_REST: Start 10s hold timer when hand enters neutral posture
         if (phase === "WAITING_REST" && isRestingNeutral) {
           restStartTimeRef.current = Date.now();
           setPhase("HOLDING_REST");
           return;
         }
 
+        // HOLDING_REST: Monitor continuous 10-second hold
         if (phase === "HOLDING_REST") {
+          // If user leaves neutral zone, reset timestamp cleanly
           if (!isRestingNeutral) {
             restStartTimeRef.current = null;
             setPhase("WAITING_REST");
             return;
           }
 
+          // Complete session when 10,000ms is reached
           if (
             restStartTimeRef.current &&
-            now - restStartTimeRef.current >= REST_DURATION_MS &&
-            now - lastRepTimeRef.current > REPEAT_COOLDOWN_MS
+            now - restStartTimeRef.current >= REST_DURATION_MS
           ) {
-            lastRepTimeRef.current = now;
             restStartTimeRef.current = null;
-            addRep();
-            setPhase("COMPLETED");
+            completeExercise();
             return;
           }
         }
@@ -417,6 +419,7 @@ export function useExerciseTracker() {
     isCompleted,
     phase,
     addRep,
+    completeExercise,
     setPhase,
   ]);
 }

@@ -45,7 +45,7 @@ const dateTabs = ["Latest", "8 Jul", "7 Jul", "5 Jul", "3 Jul", "2 Jul"];
 const exercisesData = [
   { name: "Open & close — gentle", reps: "10 reps", percent: 92, status: "Excellent", color: "#4BA882", bg: "rgba(75, 168, 130, 0.09)", stroke: "#4BA882", statusBg: "rgba(75, 168, 130, 0.10)" },
   { name: "Wrist flexion/extension", reps: "11 reps", percent: 89, status: "Excellent", color: "#4BA882", bg: "rgba(75, 168, 130, 0.09)", stroke: "#4BA882", statusBg: "rgba(75, 168, 130, 0.10)" },
-  { name: "Pinch grip — koin", reps: "12 reps", percent: 75, status: "Good", color: "#3ED8C8", bg: "rgba(62, 216, 200, 0.09)", stroke: "#3ED8C8", statusBg: "rgba(62, 216, 200, 0.10)" },
+  { name: "Pinch grip — coin", reps: "12 reps", percent: 75, status: "Good", color: "#3ED8C8", bg: "rgba(62, 216, 200, 0.09)", stroke: "#3ED8C8", statusBg: "rgba(62, 216, 200, 0.10)" },
   { name: "Wrist deviation — floating", reps: "13 reps", percent: 71, status: "Good", color: "#3ED8C8", bg: "rgba(62, 216, 200, 0.09)", stroke: "#3ED8C8", statusBg: "rgba(62, 216, 200, 0.10)" },
   { name: "Finger tap sequence", reps: "10 reps", percent: 88, status: "Excellent", color: "#4BA882", bg: "rgba(75, 168, 130, 0.09)", stroke: "#4BA882", statusBg: "rgba(75, 168, 130, 0.10)" },
   { name: "Static open hold", reps: "11 reps", percent: 78, status: "Good", color: "#3ED8C8", bg: "rgba(62, 216, 200, 0.09)", stroke: "#3ED8C8", statusBg: "rgba(62, 216, 200, 0.10)" },

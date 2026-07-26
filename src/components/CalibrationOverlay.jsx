@@ -167,7 +167,7 @@ export function CalibrationOverlay() {
                   fontFamily: "var(--font-sans)",
                 }}
               >
-                Kalibrasi Selesai!
+                Calibration Complete!
               </h3>
               <p
                 style={{
@@ -177,7 +177,7 @@ export function CalibrationOverlay() {
                   fontFamily: "var(--font-sans)",
                 }}
               >
-                Menyiapkan tampilan interaktif...
+                Initializing 3D mirror workspace...
               </p>
             </div>
           ) : calibrationWarning ? (
@@ -195,7 +195,7 @@ export function CalibrationOverlay() {
                   fontFamily: "var(--font-sans)",
                 }}
               >
-                Jaga posisi tangan tetap terlihat di tengah layar
+                Keep hand centered in camera view
               </h3>
               <p
                 style={{
@@ -205,7 +205,7 @@ export function CalibrationOverlay() {
                   fontFamily: "var(--font-sans)",
                 }}
               >
-                Pastikan seluruh telapak dan jari tangan berada di area pandang kamera.
+                Ensure all fingers and palm are clearly visible within the frame.
               </p>
             </div>
           ) : (
@@ -219,7 +219,7 @@ export function CalibrationOverlay() {
                   fontFamily: "var(--font-sans)",
                 }}
               >
-                Kalibrasi Tangan
+                Hand Sensor Calibration
               </h3>
               <p
                 style={{
@@ -230,7 +230,7 @@ export function CalibrationOverlay() {
                   lineHeight: "1.5",
                 }}
               >
-                Arahkan telapak tangan ke kamera untuk memulai pemindaian awal.
+                Position your palm facing the camera to begin initial scanning.
               </p>
             </div>
           )}

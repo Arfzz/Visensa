@@ -25,7 +25,7 @@ const exercises = [
   },
   {
     id: 3,
-    title: "Pinch grip — koin",
+    title: "Pinch grip — coin",
     duration: 60,
     reps: 12,
     instruction:
