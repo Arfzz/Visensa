@@ -9,10 +9,8 @@ import { Suspense, useState } from "react";
 import * as THREE from "three";
 import { Timer } from "three";
 import { Model } from "../models/Robotic_prosthetic_arm";
-import { HologramTarget } from "./HologramTarget";
-import DebugArmPanel from "./DebugArmPanel";
-import DebugJointsPanel from "./DebugJointsPanel";
-import DebugExerciseUI from "./DebugExerciseUI";
+import CalibrationOverlay from "./CalibrationOverlay";
+import ExerciseHUD from "./ExerciseHUD";
 
 export function VisensaCanvas() {
   // Live Tuner State
@@ -20,7 +18,7 @@ export function VisensaCanvas() {
   const [posY, setPosY] = useState(-22);
   const [posZ, setPosZ] = useState(-30);
   const [modelScale, setModelScale] = useState(1.5);
-  const [rotY, setRotY] = useState(0); // Slider rotasi dalam derajat (0-360)
+  const [rotY, setRotY] = useState(0);
 
   return (
     <div
@@ -32,10 +30,9 @@ export function VisensaCanvas() {
         left: 0,
       }}
     >
-      {/* <DebugExerciseUI /> */}
-      {/* <DebugArmPanel/> */}
-      {/* <DebugJointsPanel/> */}
-      {/* Live Tuner UI (Disembunyikan di Production) */}
+      <CalibrationOverlay />
+      <ExerciseHUD />
+
       {false && (
         <div
           style={{
