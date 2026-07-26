@@ -229,7 +229,7 @@ const Camera = () => {
       />
 
       {/* Teks Center "MIRROR PLANE" */}
-      <div
+      {/* <div
         style={{
           position: "absolute",
           bottom: "32%",
@@ -244,7 +244,7 @@ const Camera = () => {
         }}
       >
         MIRROR PLANE
-      </div>
+      </div> */}
 
       {/* HEADER BARS */}
       <div
