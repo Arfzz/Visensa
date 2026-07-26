@@ -4,6 +4,7 @@ import { VisensaCanvas } from "../../components/VisensaCanvas";
 import VisionTracker from "../../components/VisionTracker";
 import { useKalidokitBridge } from "../../services/kalidokit/useKalidokitBridge";
 import LeftHandWarningModal from "../../components/LeftHandWarningModal";
+import { useExerciseStore } from "../../store/zustand/useExerciseStore";
 
 // Data Exercises dengan tambahan instruksi detail dan repetisi
 const exercises = [
@@ -16,27 +17,27 @@ const exercises = [
   },
   {
     id: 2,
-    title: "Finger spread",
-    duration: 45,
+    title: "Wrist flexion/extension",
+    duration: 60,
     reps: 10,
     instruction:
-      "Spread your fingers as wide as comfortably possible, then bring them together",
+      "Bend your wrist upward like a stop gesture, then flex it downward",
   },
   {
     id: 3,
-    title: "Thumb opposition",
+    title: "Pinch grip — koin",
     duration: 60,
     reps: 12,
     instruction:
-      "Touch the tip of your thumb to the tip of each finger one by one",
+      "Pinch the tip of your thumb and index finger together like holding a coin, then release",
   },
   {
     id: 4,
-    title: "Wrist rotation — slow",
-    duration: 90,
+    title: "Wrist deviation — floating",
+    duration: 60,
     reps: 15,
     instruction:
-      "Slowly rotate your wrist in a gentle, controlled circular motion",
+      "Wave or tilt your wrist horizontally to the left and right without rotating arm",
   },
   {
     id: 5,
@@ -48,27 +49,27 @@ const exercises = [
   },
   {
     id: 6,
-    title: "Grip & release",
+    title: "Static open hold",
     duration: 60,
     reps: 10,
     instruction:
-      "Form a gentle fist, hold for a moment, and slowly release your grip",
+      "Hold your palm open and still in a neutral relaxed position",
   },
   {
     id: 7,
-    title: "Wrist flexion/extension",
-    duration: 90,
+    title: "Single finger lift",
+    duration: 60,
     reps: 15,
     instruction:
-      "Gently bend your wrist forward and backward as far as comfortable",
+      "Gently lift individual fingers one by one while keeping palm flat",
   },
   {
     id: 8,
-    title: "Full hand movement",
+    title: "Resting pose stability",
     duration: 60,
     reps: 10,
     instruction:
-      "Combine opening, closing, and wrist movements in a smooth flow",
+      "Maintain a stable resting position with minimal muscle strain",
   },
 ];
 
@@ -76,9 +77,13 @@ const Camera = () => {
   useKalidokitBridge();
   const navigate = useNavigate();
 
+  // Zustand Store Synchronization
+  const activeExerciseId = useExerciseStore((state) => state.activeExerciseId);
+  const setActiveExerciseId = useExerciseStore((state) => state.setActiveExerciseId);
+  const currentStep = Math.max(0, activeExerciseId - 1);
+
   // States Utama
   const [cameraStatus, setCameraStatus] = useState("requesting");
-  const [currentStep, setCurrentStep] = useState(0);
   const [timeLeft, setTimeLeft] = useState(exercises[0].duration);
 
   // State untuk Modals (Pause & Exit)
@@ -96,7 +101,7 @@ const Camera = () => {
       setTimeLeft((prevTime) => {
         if (prevTime <= 1) {
           if (currentStep < exercises.length - 1) {
-            setCurrentStep((prevStep) => prevStep + 1);
+            setActiveExerciseId(currentStep + 2);
             return exercises[currentStep + 1].duration;
           }
           return 0;
@@ -106,7 +111,7 @@ const Camera = () => {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [cameraStatus, isPaused, isExiting, currentStep]);
+  }, [cameraStatus, isPaused, isExiting, currentStep, setActiveExerciseId]);
 
   // Logika Izin Kamera
   const handleRequestPermission = async () => {
@@ -228,24 +233,6 @@ const Camera = () => {
         }}
       />
 
-      {/* Teks Center "MIRROR PLANE" */}
-      {/* <div
-        style={{
-          position: "absolute",
-          bottom: "32%",
-          left: "50%",
-          transform: "translateX(-50%)",
-          textAlign: "center",
-          color: "#00FFEF",
-          fontSize: "18.73px",
-          fontFamily: "Space Mono",
-          letterSpacing: "2px",
-          zIndex: 5,
-        }}
-      >
-        MIRROR PLANE
-      </div> */}
-
       {/* HEADER BARS */}
       <div
         style={{
@@ -322,82 +309,6 @@ const Camera = () => {
             >
               ✕
             </span>
-          </div>
-        </div>
-
-        {/* Tengah (Badge Tracking & Timer) */}
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: "12px",
-            marginTop: "10px",
-          }}
-        >
-          <div
-            style={{
-              padding: "6.24px 14.98px",
-              background: "rgba(75, 168, 130, 0.12)",
-              borderRadius: "20px",
-              outline: "1.25px rgba(75, 168, 130, 0.25) solid",
-              outlineOffset: "-1.25px",
-              display: "flex",
-              alignItems: "center",
-              gap: "7.49px",
-            }}
-          >
-            <div
-              style={{
-                width: "7.49px",
-                height: "7.49px",
-                background: "#4BA882",
-                borderRadius: "50%",
-              }}
-            />
-            <div
-              style={{
-                color: "#4BA882",
-                fontSize: "12.49px",
-                fontFamily: "Space Mono",
-                fontWeight: "700",
-                letterSpacing: "0.75px",
-              }}
-            >
-              TRACKING ACTIVE
-            </div>
-          </div>
-          <div
-            style={{
-              padding: "5.95px 19.83px",
-              background: "rgba(255, 255, 255, 0.07)",
-              borderRadius: "20px",
-              outline: "1.98px rgba(255, 255, 255, 0.12) solid",
-              outlineOffset: "-1.98px",
-              display: "flex",
-              alignItems: "center",
-              gap: "9.92px",
-            }}
-          >
-            <div
-              style={{
-                width: "9.92px",
-                height: "9.92px",
-                background: "#0099A6",
-                borderRadius: "50%",
-              }}
-            />
-            <div
-              style={{
-                color: "#F2EDE8",
-                fontSize: "21.82px",
-                fontFamily: "Space Mono",
-                fontWeight: "700",
-              }}
-            >
-              {Math.floor(timeLeft / 60)}:
-              {String(timeLeft % 60).padStart(2, "0")}
-            </div>
           </div>
         </div>
 
@@ -608,7 +519,7 @@ const Camera = () => {
                 <div
                   key={item.id}
                   onClick={() => {
-                    setCurrentStep(index);
+                    setActiveExerciseId(item.id);
                     setTimeLeft(exercises[index].duration);
                   }}
                   style={{

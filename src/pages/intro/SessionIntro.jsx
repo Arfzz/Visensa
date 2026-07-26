@@ -28,13 +28,13 @@ const SessionIntro = () => {
 
   const exercises = [
     { id: 1, name: "Open & close — gentle", time: "60s" },
-    { id: 2, name: "Finger spread", time: "45s" },
-    { id: 3, name: "Thumb opposition", time: "60s" },
-    { id: 4, name: "Wrist rotation — slow", time: "90s" },
+    { id: 2, name: "Wrist flexion/extension", time: "45s" },
+    { id: 3, name: "Pinch grip — koin", time: "60s" },
+    { id: 4, name: "Wrist deviation — floating", time: "60s" },
     { id: 5, name: "Finger tap sequence", time: "60s" },
-    { id: 6, name: "Grip & release", time: "60s" },
-    { id: 7, name: "Wrist flexion/extension", time: "90s" },
-    { id: 8, name: "Full hand movement", time: "60s" },
+    { id: 6, name: "Static open hold", time: "60s" },
+    { id: 7, name: "Single finger lift", time: "60s" },
+    { id: 8, name: "Resting pose stability", time: "60s" },
   ];
 
   return (
