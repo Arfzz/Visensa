@@ -3,12 +3,12 @@ import { create } from "zustand";
 export const EXERCISES_LIST = [
   { id: 1, title: "Open & close — gentle", targetReps: 5 },
   { id: 2, title: "Wrist flexion/extension", targetReps: 5 },
-  { id: 3, title: "Pinch grip — koin", targetReps: 5 },
+  { id: 3, title: "Pinch grip — coin", targetReps: 5 },
   { id: 4, title: "Wrist deviation — floating", targetReps: 5 },
   { id: 5, title: "Finger tap sequence", targetReps: 5 },
   { id: 6, title: "Static open hold", targetReps: 5 },
   { id: 7, title: "Single finger lift", targetReps: 5 },
-  { id: 8, title: "Resting pose stability", targetReps: 5 },
+  { id: 8, title: "Resting pose stability", targetReps: 1 },
 ];
 
 export const useExerciseStore = create((set, get) => ({
@@ -34,6 +34,15 @@ export const useExerciseStore = create((set, get) => ({
       repCount: nextCount,
       isCompleted: completed,
       isTimerRunning: !completed,
+    });
+  },
+
+  completeExercise: () => {
+    set({
+      repCount: get().targetReps,
+      isCompleted: true,
+      isTimerRunning: false,
+      phase: "COMPLETED",
     });
   },
 
