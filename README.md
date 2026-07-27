@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="src/assets/visensa-logo.png" width="80" alt="Visensa Logo" />
+  <img src="public/logo.png" width="80" alt="Visensa Logo" />
 </p>
 
 <h1 align="center">VISENSA</h1>
@@ -105,6 +105,24 @@ npm run dev
 
 The app will be available at `http://localhost:5173`.
 
+---
+
+## 🔑 Demo Access
+
+For demonstration purposes, the authentication flow is currently mocked.
+
+> **No username or password is required.**
+>
+> Simply click the **Login** button on either the Patient or Doctor login page to access the application.
+
+**Available Demo Flows**
+- 👤 **Patient** → Click **Login** on `/login`
+- 👨‍⚕️ **Doctor** → Click **Login** on `/login-doctor`
+
+Authentication and backend integration will be connected to the Express.js API in future development.
+
+---
+
 ### Available Scripts
 
 | Command | Description |
@@ -166,14 +184,6 @@ The `vercel.json` configuration handles SPA routing rewrites to prevent 404 erro
 
 ---
 
-## 🤝 Contributing
-
-1. Fork the repository.
-2. Create a feature branch: `git checkout -b feature/amazing-feature`
-3. Commit your changes: `git commit -m "feat: add amazing feature"`
-4. Push to the branch: `git push origin feature/amazing-feature`
-5. Open a Pull Request to the `develop` branch.
-
 ### Branch Strategy
 - **`main`** — Production-ready code (auto-deployed to Vercel).
 - **`develop`** — Active development branch. All PRs target this branch first.
@@ -194,9 +204,17 @@ We sincerely thank the original creator for making this asset available.
 
 ---
 
-## 📜 License
+## 📜 Code Ownership
 
-This project is developed as part of an academic research initiative.
+This project was independently developed by Team tahu cabe garam for the Software Development Competition.
+
+All source code in this repository is the original work of the team unless otherwise stated. Third-party libraries, frameworks, and assets are used under their respective licenses and are acknowledged in the Acknowledgements section.
+
+This repository is provided solely for competition evaluation and academic purposes.
 
 ---
+
+<p align="center">
+  <strong>Made with 💜 by Team tahu cabe garam © 2026</strong>
+</p>
 
