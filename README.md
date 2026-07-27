@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="public/favicon.svg" width="80" alt="Visensa Logo" />
+  <img src="src/assets/visensa-logo.png" width="80" alt="Visensa Logo" />
 </p>
 
-<h1 align="center">Visensa</h1>
+<h1 align="center">VISENSA</h1>
 
 <p align="center">
   <strong>Vision-Based Digital Neurorehabilitation Platform for Interactive Mirror Therapy</strong>
@@ -20,10 +20,10 @@
 
 ## 📖 Overview
 
-**Visensa** is a web-based digital neurorehabilitation platform that adapts the principles of Mirror Box Therapy into an interactive three-dimensional (3D) environment. Designed as an assistive rehabilitation tool, Visensa aims to help reduce Phantom Limb Pain (PLP) in post-amputation patients while supporting motor recovery for stroke patients with hemiparesis. B leveraging markerless AI hand tracking (MediaPipe), real-time 3D visualization, and a robotic prosthetic arm model, Visensa enables users to perform interactive mirror therapy directly through a web browser without requiring additional hardware beyond a standard webcam.
+**VISENSA** is a web-based digital neurorehabilitation platform that adapts the principles of Mirror Box Therapy into an interactive three-dimensional (3D) environment. Designed as an assistive rehabilitation tool, Visensa aims to help reduce Phantom Limb Pain (PLP) in post-amputation patients while supporting motor recovery for stroke patients with hemiparesis. By leveraging markerless AI hand tracking (MediaPipe), real-time 3D visualization, and a robotic prosthetic arm model, Visensa enables users to perform interactive mirror therapy directly through a web browser without requiring additional hardware beyond a standard webcam.
 
 ### Key Highlights
-- 🤖 **AI Hand Tracking** — MediaPipe detects 21 hand landmarks at 60 FPS directly in the browser.
+- 🤖 **AI Hand Tracking** — MediaPipe detects 21 hand landmarks at 30 FPS directly in the browser.
 - 🦾 **3D Prosthetic Arm** — Real-time mirroring of hand movements onto a rigged 3D robotic arm model using React Three Fiber.
 - 🧠 **Kinematics Engine** — Kalidokit translates 2D/3D landmark coordinates into accurate bone rotations (Euler/Quaternion).
 - 🎨 **Premium UI/UX** — Glassmorphism design, GSAP scroll animations, Lenis smooth scrolling, and Space Grotesk typography.
@@ -138,7 +138,7 @@ The core of Visensa is the real-time synchronization between the physical webcam
 1. **VisionTracker** captures webcam frames and processes them through MediaPipe.
 2. Extracted hand landmarks are stored in **Zustand** (`VisionStore`).
 3. **Kalidokit** reads the store and computes inverse kinematics (bone rotations).
-4. **VisensaCanvas** applies rotations to the 3D prosthetic arm model at 60 FPS.
+4. **VisensaCanvas** applies rotations to the 3D prosthetic arm model at 30 FPS.
 
 ---
 
