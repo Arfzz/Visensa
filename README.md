@@ -5,7 +5,7 @@
 <h1 align="center">Visensa</h1>
 
 <p align="center">
-  <strong>AI-Powered Hand Rehabilitation Platform with Real-Time 3D Visualization</strong>
+  <strong>Vision-Based Digital Neurorehabilitation Platform for Interactive Mirror Therapy</strong>
 </p>
 
 <p align="center">
@@ -20,7 +20,7 @@
 
 ## 📖 Overview
 
-**Visensa** is a web-based digital neurorehabilitation platform that adapts the principles of Mirror Box Therapy into an interactive three-dimensional (3D) environment. Designed as an assistive rehabilitation tool, Visensa aims to help reduce Phantom Limb Pain (PLP) in post-amputation patients while supporting motor recovery for stroke patients with hemiparesis. By leveraging Artificial Intelligence, real-time hand tracking, and 3D visualization of a robotic prosthetic arm, the platform delivers an accessible rehabilitation experience that can be performed both in clinical settings and independently at home—directly through a web browser without requiring dedicated hardware or software installation.
+**Visensa** is a web-based digital neurorehabilitation platform that adapts the principles of Mirror Box Therapy into an interactive three-dimensional (3D) environment. Designed as an assistive rehabilitation tool, Visensa aims to help reduce Phantom Limb Pain (PLP) in post-amputation patients while supporting motor recovery for stroke patients with hemiparesis. B leveraging markerless AI hand tracking (MediaPipe), real-time 3D visualization, and a robotic prosthetic arm model, Visensa enables users to perform interactive mirror therapy directly through a web browser without requiring additional hardware beyond a standard webcam.
 
 ### Key Highlights
 - 🤖 **AI Hand Tracking** — MediaPipe detects 21 hand landmarks at 60 FPS directly in the browser.
