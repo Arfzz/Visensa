@@ -20,7 +20,7 @@
 
 ## 📖 Overview
 
-**Visensa** (*Visualizing Your Recovery*) is a web-based rehabilitation platform that leverages Artificial Intelligence to track hand movements in real-time via webcam and visualize them on a 3D robotic prosthetic arm model. The platform aims to make physiotherapy interactive, accessible, and data-driven — all within a browser, with zero software installation required.
+**Visensa** is a web-based digital neurorehabilitation platform that adapts the principles of Mirror Box Therapy into an interactive three-dimensional (3D) environment. Designed as an assistive rehabilitation tool, Visensa aims to help reduce Phantom Limb Pain (PLP) in post-amputation patients while supporting motor recovery for stroke patients with hemiparesis. By leveraging Artificial Intelligence, real-time hand tracking, and 3D visualization of a robotic prosthetic arm, the platform delivers an accessible rehabilitation experience that can be performed both in clinical settings and independently at home—directly through a web browser without requiring dedicated hardware or software installation.
 
 ### Key Highlights
 - 🤖 **AI Hand Tracking** — MediaPipe detects 21 hand landmarks at 60 FPS directly in the browser.
@@ -42,7 +42,7 @@
 | **State** | Zustand | Lightweight global state for tracking data |
 | **Animation** | GSAP + Lenis | Scroll-triggered animations & smooth scrolling |
 | **Routing** | React Router DOM v7 | Client-side page navigation |
-| **Backend** | Firebase | Authentication & data persistence |
+| **Backend** | Express | REST API, authentication, and database communication |
 | **Deployment** | Vercel | Automated CI/CD from GitHub |
 
 ---
@@ -154,7 +154,6 @@ The core of Visensa is the real-time synchronization between the physical webcam
 | `/intro` | Pre-session camera preview & exercise selection |
 | `/camera` | Active rehabilitation session with 3D tracking |
 | `/session-complete` | Post-session results summary |
-| `/tracking-3d` | Standalone 3D tracking playground |
 | `/admin-dashboard` | Doctor analytics dashboard |
 
 ---
@@ -178,6 +177,20 @@ The `vercel.json` configuration handles SPA routing rewrites to prevent 404 erro
 ### Branch Strategy
 - **`main`** — Production-ready code (auto-deployed to Vercel).
 - **`develop`** — Active development branch. All PRs target this branch first.
+
+---
+
+## 🙏 Acknowledgements
+
+This project uses the following third-party assets:
+
+### 3D Model
+- **Robotic Prosthetic Arm**
+- Source: https://sketchfab.com/3d-models/robotic-prosthetic-arm-43b482c8526f45709b56434924dc4d3c
+- Platform: Sketchfab
+- License: *(sesuaikan dengan lisensi yang tertera di halaman Sketchfab, misalnya CC BY 4.0)*
+
+We sincerely thank the original creator for making this asset available.
 
 ---
 
