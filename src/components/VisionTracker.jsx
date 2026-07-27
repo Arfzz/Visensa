@@ -100,8 +100,12 @@ export default function VisionTracker({ showCanvas = true }) {
           visionState.setLandmarks(handResults.landmarks[0]);
           
           if (handResults.handedness && handResults.handedness[0] && handResults.handedness[0][0]) {
-            const side = handResults.handedness[0][0].categoryName || handResults.handedness[0][0].label;
+            const side = handResults.handedness[0][0].categoryName || handResults.handedness[0][0].displayName || handResults.handedness[0][0].label;
             visionState.setHandedness(side);
+            const isLeft = side === "Left";
+            if (visionState.isLeftHandWarning !== isLeft) {
+              visionState.setIsLeftHandWarning(isLeft);
+            }
           }
 
           if (showCanvas && ctx && canvas) {
@@ -124,6 +128,9 @@ export default function VisionTracker({ showCanvas = true }) {
             }
           }
         } else {
+          if (visionState.isLeftHandWarning) {
+            visionState.setIsLeftHandWarning(false);
+          }
           if (!visionState.isCalibrated) {
             if (frameCount > 0 && !visionState.calibrationWarning) {
               visionState.setCalibrationWarning(true);

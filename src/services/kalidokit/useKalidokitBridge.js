@@ -28,7 +28,6 @@ export function useKalidokitBridge() {
       const { handLandmarks, poseLandmarks, poseWorldLandmarks } = state;
 
       // ── FIX #3: Guard yang benar ────────────────────────────────────
-      // Jika benar-benar tidak ada data sama sekali → reset model & stop
       if (!handLandmarks && (!poseLandmarks || !poseWorldLandmarks)) {
         jointFilters.upper_arm.reset();
         jointFilters.lower_arm.reset();
@@ -96,6 +95,7 @@ export function useKalidokitBridge() {
         const rawWrist = handSolved?.[`${handPrefix}Wrist`] ?? ZERO;
 
         const pose = {
+          handedness: state.handedness || "Right",
           upper_arm: jointFilters.upper_arm.filter(upperArmRot, timestamp),
           lower_arm: jointFilters.lower_arm.filter(lowerArmRot, timestamp),
           wrist:     jointFilters.wrist.filter(rawWrist, timestamp),
@@ -119,8 +119,8 @@ export function useKalidokitBridge() {
 
         useHandStore.getState().setHandPose(pose);
 
-        // Throttled debug log (1x/detik)
-        if (now - lastLogTime > 1000) {
+        // Throttled debug log (Opsional: aktifkan jika window.__debugBridge = true)
+        if (window.__debugBridge && now - lastLogTime > 1000) {
           console.log("[Bridge] handSolved keys:", handSolved ? Object.keys(handSolved) : "null");
           console.log("[Bridge] handSolved sample (wrist):", handSolved?.RightWrist, "| index_mcp:", handSolved?.RightIndexProximal);
           console.log("[Bridge] pose sent to store:", {
@@ -142,3 +142,5 @@ export function useKalidokitBridge() {
     return unsubscribe;
   }, []);
 }
+
+export default useKalidokitBridge;

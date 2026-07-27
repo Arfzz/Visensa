@@ -1,5 +1,5 @@
 /* ============================================================
-   FOOTER
+   FOOTER - VISENSA CLINICAL & REHABILITATION STYLING
    ============================================================ */
 .footer {
   background: #151E2C;
@@ -10,65 +10,88 @@
 /* Top section */
 .footer__top {
   display: grid;
-  grid-template-columns: 3.5fr 1.5fr 1.5fr 3.5fr;
-  gap: 40px;
-  padding-top: 100px;
-  padding-bottom: 80px;
+  grid-template-columns: 3fr 1.8fr 2fr 3.2fr;
+  gap: 36px;
+  padding-top: 80px;
+  padding-bottom: 60px;
 }
 
-/* Brand */
+/* Brand Column */
 .footer__brand {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  padding-right: 40px;
+  gap: 16px;
+}
+
+.footer__logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .footer__logo h2 {
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 700;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.04em;
   color: #ffffff;
   margin: 0;
 }
 
 .footer__brand-desc {
-  font-size: 15px;
-  line-height: 1.7;
-  color: #D1D5DB;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #94A3B8;
   margin: 0;
 }
 
-/* Nav Columns */
-.footer__navs {
-  display: contents; 
+.footer__tech-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
 }
 
+.footer__tech-pill {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #CBD5E1;
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+
+/* Column Headings & Links */
 .footer__col {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 18px;
 }
 
 .footer__col-heading {
-  font-size: 18px;
+  font-size: 15px;
   font-weight: 600;
   color: #ffffff;
   margin: 0;
+  letter-spacing: 0.02em;
 }
 
 .footer__links {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
+.footer__links--compact {
+  gap: 10px;
+}
+
 .footer__link {
-  font-size: 15px;
-  color: #D1D5DB;
+  font-size: 14px;
+  color: #94A3B8;
   text-decoration: none;
   transition: color var(--transition-fast);
 }
@@ -77,162 +100,132 @@
   color: #4BA882;
 }
 
-/* Newsletter */
-.footer__newsletter {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  padding-left: 20px;
-}
-
-.footer__newsletter-heading {
-  font-size: 26px;
-  font-weight: 700;
-  color: #ffffff;
-  margin: 0;
-  letter-spacing: -0.5px;
-}
-
-.footer__newsletter-desc {
-  font-size: 15px;
-  color: #D1D5DB;
-  line-height: 1.6;
-  margin: 0;
-}
-
-.footer__newsletter-form {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  margin-top: 8px;
-}
-
-.footer__newsletter-input {
-  width: 100%;
-  padding: 16px 24px;
-  background: #F8FAFC;
-  border: 2px solid transparent;
-  border-radius: 100px;
-  color: #1a2e22;
-  font-size: 15px;
-  font-family: var(--font-sans);
-  outline: none;
-  transition: all var(--transition-fast);
-}
-
-.footer__newsletter-input::placeholder {
-  color: #94A3B8;
+.footer__link--accent {
+  color: #3ED8C8;
   font-weight: 500;
 }
 
-.footer__newsletter-input:focus {
-  border-color: #4BA882;
-  background: #ffffff;
-  box-shadow: 0 0 0 4px rgba(75, 168, 130, 0.15);
+/* Clinical & Medical Disclaimer Card */
+.footer__disclaimer-box {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(75, 168, 130, 0.25);
+  border-radius: 14px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.footer__newsletter-btn {
+.footer__disclaimer-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.footer__disclaimer-text {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #94A3B8;
+  margin: 0;
+}
+
+.footer__action-row {
+  margin-top: 4px;
+}
+
+.footer__cta-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 14px 36px;
-  background: #3BB8B0;
+  padding: 10px 18px;
+  background: #4BA882;
   color: #ffffff;
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 600;
-  border-radius: 100px;
-  cursor: pointer;
-  border: none;
+  text-decoration: none;
+  border-radius: 8px;
   transition: all var(--transition-fast);
-  width: fit-content;
 }
 
-.footer__newsletter-btn:hover {
-  background: #2aada0;
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(59, 184, 176, 0.3);
+.footer__cta-btn:hover {
+  background: #3eb487;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(75, 168, 130, 0.3);
 }
 
 /* Bottom Bar */
 .footer__bottom {
-  padding: 32px 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 24px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .footer__bottom-inner {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 24px;
+  gap: 20px;
 }
 
 .footer__copyright {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   font-size: 12px;
-  color: #94A3B8;
+  color: #64748B;
   font-family: var(--font-mono);
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
-.footer__copyright span {
+.footer__status-badge {
   display: flex;
   align-items: center;
-}
-
-.footer__socials {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-}
-
-.footer__social-icon {
+  gap: 8px;
+  font-size: 12px;
+  font-family: var(--font-mono);
   color: #94A3B8;
-  text-decoration: none;
-  transition: all var(--transition-fast);
-  display: flex;
-  align-items: center;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 6px 14px;
+  border-radius: 100px;
 }
 
-.footer__social-icon:hover {
-  color: #ffffff;
-  transform: translateY(-2px);
+.footer__status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #4BA882;
+  box-shadow: 0 0 8px #4BA882;
 }
 
 /* ============================================================
    RESPONSIVE
    ============================================================ */
-@media (max-width: 1200px) {
+@media (max-width: 1100px) {
   .footer__top {
     grid-template-columns: 1fr 1fr;
-    gap: 60px;
-  }
-  
-  .footer__brand {
-    padding-right: 0;
-  }
-  
-  .footer__newsletter {
-    padding-left: 0;
+    gap: 40px;
   }
 }
 
 @media (max-width: 768px) {
   .footer__top {
     grid-template-columns: 1fr;
-    gap: 48px;
+    gap: 32px;
+    padding-top: 60px;
+    padding-bottom: 40px;
   }
-  
+
   .footer__bottom-inner {
     flex-direction: column;
-    gap: 24px;
+    gap: 16px;
     text-align: center;
   }
-  
+
   .footer__copyright {
     flex-direction: column;
-    gap: 16px;
+    gap: 8px;
   }
 }
