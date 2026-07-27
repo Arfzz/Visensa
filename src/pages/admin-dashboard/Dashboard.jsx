@@ -50,7 +50,7 @@ const exercisesData = [
   { name: "Finger tap sequence", reps: "10 reps", percent: 88, status: "Excellent", color: "#4BA882", bg: "rgba(75, 168, 130, 0.09)", stroke: "#4BA882", statusBg: "rgba(75, 168, 130, 0.10)" },
   { name: "Static open hold", reps: "11 reps", percent: 78, status: "Good", color: "#3ED8C8", bg: "rgba(62, 216, 200, 0.09)", stroke: "#3ED8C8", statusBg: "rgba(62, 216, 200, 0.10)" },
   { name: "Single finger lift", reps: "12 reps", percent: 84, status: "Good", color: "#3ED8C8", bg: "rgba(62, 216, 200, 0.09)", stroke: "#3ED8C8", statusBg: "rgba(62, 216, 200, 0.10)" },
-  { name: "Resting pose stability", reps: "13 reps", percent: 91, status: "Excellent", color: "#4BA882", bg: "rgba(75, 168, 130, 0.09)", stroke: "#4BA882", statusBg: "rgba(75, 168, 130, 0.10)" },
+  { name: "Fist hold", reps: "13 reps", percent: 91, status: "Excellent", color: "#4BA882", bg: "rgba(75, 168, 130, 0.09)", stroke: "#4BA882", statusBg: "rgba(75, 168, 130, 0.10)" },
 ];
 
 const notificationsData = [

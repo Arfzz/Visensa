@@ -32,7 +32,7 @@ const CURL_MULTIPLIER = 2.0;
 const DAMPING = {
   upper_arm: 3.0,
   lower_arm: 3.0,
-  wrist: 7.0,
+  wrist: 6.0,
   default: 8.0,
 };
 
