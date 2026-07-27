@@ -44,9 +44,8 @@ const HOLD_DURATION_MS = 3000;
 const EX7_EXTENDED_THRESHOLD = 1.60;
 const EX7_CURLED_THRESHOLD = 1.25;
 
-// Exercise 8: Resting Pose Stability (Neutral natural hand curve ratio & 10s hold timer)
-const EX8_REST_MIN_RATIO = 1.25;
-const EX8_REST_MAX_RATIO = 1.60;
+// Exercise 8: Fist Hold (Isometric flexor contraction 10s hold timer)
+const EX8_FIST_THRESHOLD = 1.25;
 const REST_DURATION_MS = 10000;
 
 export function useExerciseTracker() {
@@ -60,6 +59,7 @@ export function useExerciseTracker() {
   const addRep = useExerciseStore((state) => state.addRep);
   const completeExercise = useExerciseStore((state) => state.completeExercise);
   const setPhase = useExerciseStore((state) => state.setPhase);
+  const setHoldTimeRemaining = useExerciseStore((state) => state.setHoldTimeRemaining);
 
   const lastRepTimeRef = useRef(0);
   const holdStartTimeRef = useRef(null);
@@ -361,7 +361,7 @@ export function useExerciseTracker() {
         break;
       }
 
-      // --- EXERCISE 8: RESTING POSE STABILITY (PURE 10s HOLD TIMER) ---
+      // --- EXERCISE 8: FIST HOLD (ISOMETRIC FLEXOR 10s HOLD TIMER) ---
       case 8: {
         let totalTipDistance = 0;
         const tips = [INDEX_TIP, MIDDLE_TIP, RING_TIP, PINKY_TIP];
@@ -371,40 +371,42 @@ export function useExerciseTracker() {
         }
 
         const avgTipDistance = totalTipDistance / tips.length;
-        const averageRatio = avgTipDistance / palmLength;
-        const isRestingNeutral =
-          averageRatio >= EX8_REST_MIN_RATIO && averageRatio <= EX8_REST_MAX_RATIO;
+        const averageTipRatio = avgTipDistance / palmLength;
+        const isFistClosed = averageTipRatio < EX8_FIST_THRESHOLD;
 
-        if (phase !== "WAITING_REST" && phase !== "HOLDING_REST" && phase !== "COMPLETED") {
+        if (phase !== "WAITING_FIST" && phase !== "HOLDING_FIST" && phase !== "COMPLETED") {
           restStartTimeRef.current = null;
-          setPhase("WAITING_REST");
+          setHoldTimeRemaining(10);
+          setPhase("WAITING_FIST");
           return;
         }
 
-        // WAITING_REST: Start 10s hold timer when hand enters neutral posture
-        if (phase === "WAITING_REST" && isRestingNeutral) {
+        if (phase === "WAITING_FIST" && isFistClosed) {
           restStartTimeRef.current = Date.now();
-          setPhase("HOLDING_REST");
+          setHoldTimeRemaining(10);
+          setPhase("HOLDING_FIST");
           return;
         }
 
-        // HOLDING_REST: Monitor continuous 10-second hold
-        if (phase === "HOLDING_REST") {
-          // If user leaves neutral zone, reset timestamp cleanly
-          if (!isRestingNeutral) {
+        if (phase === "HOLDING_FIST") {
+          if (!isFistClosed) {
             restStartTimeRef.current = null;
-            setPhase("WAITING_REST");
+            setHoldTimeRemaining(10);
+            setPhase("WAITING_FIST");
             return;
           }
 
-          // Complete session when 10,000ms is reached
-          if (
-            restStartTimeRef.current &&
-            now - restStartTimeRef.current >= REST_DURATION_MS
-          ) {
-            restStartTimeRef.current = null;
-            completeExercise();
-            return;
+          if (restStartTimeRef.current) {
+            const elapsed = Date.now() - restStartTimeRef.current;
+            const remaining = Math.max(0, 10 - Math.floor(elapsed / 1000));
+            setHoldTimeRemaining(remaining);
+
+            if (elapsed >= REST_DURATION_MS) {
+              restStartTimeRef.current = null;
+              setHoldTimeRemaining(0);
+              completeExercise();
+              return;
+            }
           }
         }
         break;
@@ -421,6 +423,7 @@ export function useExerciseTracker() {
     addRep,
     completeExercise,
     setPhase,
+    setHoldTimeRemaining,
   ]);
 }
 

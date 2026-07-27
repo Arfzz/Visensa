@@ -11,7 +11,7 @@ const EXERCISE_MODULES = [
   { name: "Finger tap sequence", id: "ex-5" },
   { name: "Static open hold", id: "ex-6" },
   { name: "Single finger lift", id: "ex-7" },
-  { name: "Resting pose stability", id: "ex-8" },
+  { name: "Fist hold", id: "ex-8" },
 ];
 
 const PLATFORM_NAV = [
