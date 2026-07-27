@@ -12,7 +12,7 @@ export const EXERCISES_LIST = [
 ];
 
 export const useExerciseStore = create((set, get) => ({
-  activeExerciseId: 8, 
+  activeExerciseId: 1, 
   repCount: 0,
   targetReps: 5,
   phase: "WAITING_OPEN",
