@@ -20,6 +20,7 @@ export function ExerciseHUD() {
   const isCompleted = useExerciseStore((state) => state.isCompleted);
   const elapsedTime = useExerciseStore((state) => state.elapsedTime);
   const isTimerRunning = useExerciseStore((state) => state.isTimerRunning);
+  const holdTimeRemaining = useExerciseStore((state) => state.holdTimeRemaining);
 
   const tickTimer = useExerciseStore((state) => state.tickTimer);
   const nextExercise = useExerciseStore((state) => state.nextExercise);
@@ -78,16 +79,10 @@ export function ExerciseHUD() {
     }
 
     if (activeExerciseId === 8) {
-      switch (phase) {
-        case "WAITING_REST":
-          return "Keep your hand in a relaxed position";
-        case "HOLDING_REST":
-          return "Hold relaxed position... (10 seconds)";
-        case "COMPLETED":
-          return "Session Complete!";
-        default:
-          return "Keep your hand in a relaxed position";
+      if (phase === "COMPLETED") {
+        return "Session Complete! Redirecting to session summary...";
       }
+      return "Make a tight fist and hold it for 10 seconds";
     }
 
     if (activeExerciseId === 7) {
@@ -148,7 +143,10 @@ export function ExerciseHUD() {
   };
 
   const instructionText = getInstructionText();
-  const progressPercent = Math.min((repCount / targetReps) * 100, 100);
+  const progressPercent =
+    activeExerciseId === 8
+      ? Math.min(((10 - holdTimeRemaining) / 10) * 100, 100)
+      : Math.min((repCount / targetReps) * 100, 100);
 
   return (
     <div
@@ -210,7 +208,7 @@ export function ExerciseHUD() {
           </h4>
         </div>
 
-        {/* Right Flex Group: Stopwatch Pill & Reps Counter */}
+        {/* Right Flex Group: Stopwatch Pill & Reps/Countdown Counter */}
         <div style={{ display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }}>
           {/* Stopwatch Elapsed Time Pill */}
           <div
@@ -249,40 +247,66 @@ export function ExerciseHUD() {
             </span>
           </div>
 
-          {/* Rep Counter Badge */}
-          <div
-            style={{
-              backgroundColor: isCompleted ? "var(--color-primary-light)" : "var(--color-bg)",
-              border: `1px solid ${isCompleted ? "var(--color-primary)" : "var(--color-border)"}`,
-              borderRadius: "10px",
-              padding: "6px 12px",
-              display: "flex",
-              alignItems: "center",
-              gap: "4px",
-              transition: "all 0.3s ease",
-            }}
-          >
-            <span
+          {/* Conditional Counter Badge: Countdown for Exercise 8, Rep Counter for 1-7 */}
+          {activeExerciseId === 8 ? (
+            <div
               style={{
-                fontSize: "16px",
-                fontWeight: "700",
-                fontFamily: "var(--font-sans)",
-                color: "var(--color-primary)",
+                backgroundColor: isCompleted ? "var(--color-primary-light)" : "var(--color-bg)",
+                border: `1px solid ${isCompleted ? "var(--color-primary)" : "var(--color-border)"}`,
+                borderRadius: "10px",
+                padding: "6px 12px",
+                display: "flex",
+                alignItems: "center",
+                gap: "4px",
+                transition: "all 0.3s ease",
               }}
             >
-              {repCount}
-            </span>
-            <span
+              <span
+                style={{
+                  fontSize: "14px",
+                  fontWeight: "700",
+                  fontFamily: "var(--font-mono)",
+                  color: "var(--color-primary)",
+                }}
+              >
+                ⏱ {holdTimeRemaining}s
+              </span>
+            </div>
+          ) : (
+            <div
               style={{
-                fontSize: "13px",
-                fontWeight: "500",
-                fontFamily: "var(--font-sans)",
-                color: "var(--color-text-muted)",
+                backgroundColor: isCompleted ? "var(--color-primary-light)" : "var(--color-bg)",
+                border: `1px solid ${isCompleted ? "var(--color-primary)" : "var(--color-border)"}`,
+                borderRadius: "10px",
+                padding: "6px 12px",
+                display: "flex",
+                alignItems: "center",
+                gap: "4px",
+                transition: "all 0.3s ease",
               }}
             >
-              / {targetReps}
-            </span>
-          </div>
+              <span
+                style={{
+                  fontSize: "16px",
+                  fontWeight: "700",
+                  fontFamily: "var(--font-sans)",
+                  color: "var(--color-primary)",
+                }}
+              >
+                {repCount}
+              </span>
+              <span
+                style={{
+                  fontSize: "13px",
+                  fontWeight: "500",
+                  fontFamily: "var(--font-sans)",
+                  color: "var(--color-text-muted)",
+                }}
+              >
+                / {targetReps}
+              </span>
+            </div>
+          )}
         </div>
       </div>
 

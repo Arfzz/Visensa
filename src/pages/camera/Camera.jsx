@@ -65,11 +65,11 @@ const exercises = [
   },
   {
     id: 8,
-    title: "Resting pose stability",
+    title: "Fist hold",
     duration: 60,
     reps: 10,
     instruction:
-      "Maintain a stable resting position with minimal muscle strain",
+      "Make a tight fist and hold it for 10 seconds",
   },
 ];
 

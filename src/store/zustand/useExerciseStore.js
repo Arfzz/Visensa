@@ -8,11 +8,11 @@ export const EXERCISES_LIST = [
   { id: 5, title: "Finger tap sequence", targetReps: 5 },
   { id: 6, title: "Static open hold", targetReps: 5 },
   { id: 7, title: "Single finger lift", targetReps: 5 },
-  { id: 8, title: "Resting pose stability", targetReps: 1 },
+  { id: 8, title: "Fist hold", targetReps: 1 },
 ];
 
 export const useExerciseStore = create((set, get) => ({
-  activeExerciseId: 1,
+  activeExerciseId: 1, 
   repCount: 0,
   targetReps: 5,
   phase: "WAITING_OPEN",
@@ -23,8 +23,10 @@ export const useExerciseStore = create((set, get) => ({
   avgDistance: 0,
   thresholdOpen: 0.35,
   thresholdClose: 0.22,
+  holdTimeRemaining: 10,
 
   // --- ACTIONS ---
+  setHoldTimeRemaining: (time) => set({ holdTimeRemaining: time }),
   addRep: () => {
     const nextCount = get().repCount + 1;
     const target = get().targetReps;
@@ -77,6 +79,7 @@ export const useExerciseStore = create((set, get) => ({
       isCompleted: false,
       elapsedTime: 0,
       isTimerRunning: true,
+      holdTimeRemaining: 10,
     });
   },
 
@@ -91,6 +94,7 @@ export const useExerciseStore = create((set, get) => ({
       isSessionFinished: false,
       elapsedTime: 0,
       isTimerRunning: true,
+      holdTimeRemaining: 10,
     });
   },
 
@@ -110,5 +114,6 @@ export const useExerciseStore = create((set, get) => ({
       elapsedTime: 0,
       isTimerRunning: true,
       avgDistance: 0,
+      holdTimeRemaining: 10,
     }),
 }));
