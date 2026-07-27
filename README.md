@@ -1,11 +1,11 @@
 <p align="center">
-  <img src="public/favicon.svg" width="80" alt="Visensa Logo" />
+  <img src="src/assets/visensa-logo.png" width="80" alt="Visensa Logo" />
 </p>
 
-<h1 align="center">Visensa</h1>
+<h1 align="center">VISENSA</h1>
 
 <p align="center">
-  <strong>AI-Powered Hand Rehabilitation Platform with Real-Time 3D Visualization</strong>
+  <strong>Vision-Based Digital Neurorehabilitation Platform for Interactive Mirror Therapy</strong>
 </p>
 
 <p align="center">
@@ -20,10 +20,10 @@
 
 ## 📖 Overview
 
-**Visensa** (*Visualizing Your Recovery*) is a web-based rehabilitation platform that leverages Artificial Intelligence to track hand movements in real-time via webcam and visualize them on a 3D robotic prosthetic arm model. The platform aims to make physiotherapy interactive, accessible, and data-driven — all within a browser, with zero software installation required.
+**VISENSA** is a web-based digital neurorehabilitation platform that adapts the principles of Mirror Box Therapy into an interactive three-dimensional (3D) environment. Designed as an assistive rehabilitation tool, Visensa aims to help reduce Phantom Limb Pain (PLP) in post-amputation patients while supporting motor recovery for stroke patients with hemiparesis. By leveraging markerless AI hand tracking (MediaPipe), real-time 3D visualization, and a robotic prosthetic arm model, Visensa enables users to perform interactive mirror therapy directly through a web browser without requiring additional hardware beyond a standard webcam.
 
 ### Key Highlights
-- 🤖 **AI Hand Tracking** — MediaPipe detects 21 hand landmarks at 60 FPS directly in the browser.
+- 🤖 **AI Hand Tracking** — MediaPipe detects 21 hand landmarks at 30 FPS directly in the browser.
 - 🦾 **3D Prosthetic Arm** — Real-time mirroring of hand movements onto a rigged 3D robotic arm model using React Three Fiber.
 - 🧠 **Kinematics Engine** — Kalidokit translates 2D/3D landmark coordinates into accurate bone rotations (Euler/Quaternion).
 - 🎨 **Premium UI/UX** — Glassmorphism design, GSAP scroll animations, Lenis smooth scrolling, and Space Grotesk typography.
@@ -42,7 +42,7 @@
 | **State** | Zustand | Lightweight global state for tracking data |
 | **Animation** | GSAP + Lenis | Scroll-triggered animations & smooth scrolling |
 | **Routing** | React Router DOM v7 | Client-side page navigation |
-| **Backend** | Firebase | Authentication & data persistence |
+| **Backend** | Express | REST API, authentication, and database communication |
 | **Deployment** | Vercel | Automated CI/CD from GitHub |
 
 ---
@@ -138,7 +138,7 @@ The core of Visensa is the real-time synchronization between the physical webcam
 1. **VisionTracker** captures webcam frames and processes them through MediaPipe.
 2. Extracted hand landmarks are stored in **Zustand** (`VisionStore`).
 3. **Kalidokit** reads the store and computes inverse kinematics (bone rotations).
-4. **VisensaCanvas** applies rotations to the 3D prosthetic arm model at 60 FPS.
+4. **VisensaCanvas** applies rotations to the 3D prosthetic arm model at 30 FPS.
 
 ---
 
@@ -154,7 +154,6 @@ The core of Visensa is the real-time synchronization between the physical webcam
 | `/intro` | Pre-session camera preview & exercise selection |
 | `/camera` | Active rehabilitation session with 3D tracking |
 | `/session-complete` | Post-session results summary |
-| `/tracking-3d` | Standalone 3D tracking playground |
 | `/admin-dashboard` | Doctor analytics dashboard |
 
 ---
@@ -181,12 +180,23 @@ The `vercel.json` configuration handles SPA routing rewrites to prevent 404 erro
 
 ---
 
+## 🙏 Acknowledgements
+
+This project uses the following third-party assets:
+
+### 3D Model
+- **Robotic Prosthetic Arm**
+- Source: https://sketchfab.com/3d-models/robotic-prosthetic-arm-43b482c8526f45709b56434924dc4d3c
+- Platform: Sketchfab
+- License: CC Attribution (CC BY 4.0)
+
+We sincerely thank the original creator for making this asset available.
+
+---
+
 ## 📜 License
 
 This project is developed as part of an academic research initiative.
 
 ---
 
-<p align="center">
-  <strong>Visensa</strong> — <em>Visualizing Your Recovery</em>
-</p>
