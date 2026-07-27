@@ -188,7 +188,7 @@ This project uses the following third-party assets:
 - **Robotic Prosthetic Arm**
 - Source: https://sketchfab.com/3d-models/robotic-prosthetic-arm-43b482c8526f45709b56434924dc4d3c
 - Platform: Sketchfab
-- License: *(sesuaikan dengan lisensi yang tertera di halaman Sketchfab, misalnya CC BY 4.0)*
+- License: CC Attribution (CC BY 4.0)
 
 We sincerely thank the original creator for making this asset available.
 
@@ -200,6 +200,3 @@ This project is developed as part of an academic research initiative.
 
 ---
 
-<p align="center">
-  <strong>Visensa</strong> — <em>Visualizing Your Recovery</em>
-</p>
