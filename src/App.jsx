@@ -40,6 +40,7 @@ import SessionComplete from "./pages/session-complete/SessionComplete";
 import LoginDoctor from './pages/login/LoginDoctor';
 import RegisterDoctor from './pages/register/RegisterDoctor';
 import Dashboard from "./pages/admin-dashboard/Dashboard";
+import PianoTilesSandbox from "./features/gamification/PianoTilesSandbox";
 
 import { useLenis } from "./hooks/useLenis";
 import { useScrollReveal } from "./hooks/useGsapAnimations";
@@ -155,6 +156,10 @@ function App() {
       <Routes>
         {/* Jalur ke Landing Page (Halaman Utama) */}
         <Route path="/" element={<LandingPage />} />
+
+        {/* Jalur ke Gamification Sandbox - Rhythm Piano Tiles */}
+        <Route path="/piano-tiles" element={<PianoTilesSandbox />} />
+        <Route path="/game-test" element={<PianoTilesSandbox />} />
 
         {/* Jalur ke 3D Hand Tracking View */}
         <Route path="/tracking-3d" element={<Tracking3DView />} />
