@@ -189,43 +189,25 @@ export function Model(props) {
             }
 
             let deviationRaw = 0;
-            if (wristDotX !== null) {
-              if (isCalibrated) {
-                if (lowerArmBaselineXRef.current === null) {
-                  lowerArmBaselineXRef.current = wristDotX;
-                }
-                deviationRaw = wristDotX - lowerArmBaselineXRef.current;
-                const SENSITIVITY = 3.5;
-                swizzled.z = deviationRaw * SENSITIVITY;
-              } else {
-                lowerArmBaselineXRef.current = null;
-                swizzled.z = 0;
+            if (wristDotX !== null && isCalibrated) {
+              if (lowerArmBaselineXRef.current === null) {
+                lowerArmBaselineXRef.current = wristDotX;
               }
+              deviationRaw = wristDotX - lowerArmBaselineXRef.current;
+              const SENSITIVITY = 3.5;
+              swizzled.z = THREE.MathUtils.clamp(
+                deviationRaw * SENSITIVITY,
+                -0.35,
+                0.35,
+              );
             } else {
               lowerArmBaselineXRef.current = null;
               swizzled.z = 0;
             }
             swizzled.x = 0;
-
-            // --- DIAGNOSTIC LOG SEMENTARA (SNAPSHOT ON-DEMAND 'L' / 'O') ---
-            if (window.__captureLog) {
-              console.log("%c[SNAPSHOT]", "color: lime; font-weight: bold", {
-                handedness,
-                isLeftHand,
-                wristDotX: wristDotX !== null ? wristDotX.toFixed(4) : null,
-                baselineX:
-                  lowerArmBaselineXRef.current !== null
-                    ? lowerArmBaselineXRef.current.toFixed(4)
-                    : null,
-                deviationRaw: deviationRaw.toFixed(4),
-                swizzledZ: swizzled.z.toFixed(4),
-              });
-              window.__captureLog = false;
-            }
-            // --- END DIAGNOSTIC LOG ---
           }
 
-          // --- WRIST KINEMATICS (HAND LANDMARKS PIPE 0 & 9 + READY POSE CLAMP) ---
+          // --- WRIST KINEMATICS ---
           if (isWrist) {
             const handLandmarks = visionState.handLandmarks;
 
@@ -270,6 +252,7 @@ export function Model(props) {
 
           // --- FINGER KINEMATICS ---
           const isMCP = key.endsWith("_mcp");
+          const isPIP = key.endsWith("_pip");
           const fingerName = key.split("_")[0];
           const {
             x: multX,
@@ -278,6 +261,76 @@ export function Model(props) {
           } = inversionMap[key] ??
           inversionMap[fingerName] ??
           inversionMap.default;
+
+          // Landmark-driven fallback: activate when exercise tracking pipe is NOT feeding live data
+          // RESET_POSE.wrist = { x: Math.PI/3, y: 0, z: 0 }, so check y===0 && z===0 as "idle" indicator
+          const handLandmarks = visionState.handLandmarks;
+          const isExerciseTrackingIdle =
+            !pose.wrist || (pose.wrist.y === 0 && pose.wrist.z === 0);
+          if (
+            handLandmarks &&
+            handLandmarks.length > 0 &&
+            isExerciseTrackingIdle
+          ) {
+            const singleHand = Array.isArray(handLandmarks[0])
+              ? handLandmarks[0]
+              : handLandmarks;
+            const wrist = singleHand[0];
+            const fingerLm = {
+              thumb: { tip: 4, mcp: 2 },
+              index: { tip: 8, mcp: 5 },
+              middle: { tip: 12, mcp: 9 },
+              ring: { tip: 16, mcp: 13 },
+              pinky: { tip: 20, mcp: 17 },
+            }[fingerName];
+
+            if (
+              wrist &&
+              fingerLm &&
+              singleHand[fingerLm.tip] &&
+              singleHand[fingerLm.mcp]
+            ) {
+              const tipPt = singleHand[fingerLm.tip];
+              const mcpPt = singleHand[fingerLm.mcp];
+              const dx1 = tipPt.x - wrist.x,
+                dy1 = tipPt.y - wrist.y,
+                dz1 = (tipPt.z || 0) - (wrist.z || 0);
+              const tipToWrist = Math.sqrt(dx1 * dx1 + dy1 * dy1 + dz1 * dz1);
+              const dx2 = mcpPt.x - wrist.x,
+                dy2 = mcpPt.y - wrist.y,
+                dz2 = (mcpPt.z || 0) - (wrist.z || 0);
+              const mcpToWrist = Math.sqrt(dx2 * dx2 + dy2 * dy2 + dz2 * dz2);
+
+              if (mcpToWrist > 0) {
+                const ratio = tipToWrist / mcpToWrist;
+                let flexNorm = 0;
+                if (ratio <= 1.45) {
+                  flexNorm = Math.max(0, Math.min(1, (1.45 - ratio) / 0.35));
+                }
+                const baseFlexAngle = flexNorm * 0.6;
+                // Curl/flexion axis is swizzled.x (doubled by MCP block, then applied to euler.x)
+                if (fingerName === "thumb") {
+                  if (isMCP) {
+                    swizzled.x = baseFlexAngle * 0.8;
+                    swizzled.y = 0;
+                    swizzled.z = baseFlexAngle * 0.8;
+                  } else {
+                    swizzled.x = -baseFlexAngle * 1.0;
+                    swizzled.y = 0;
+                    swizzled.z = 0;
+                  }
+                } else {
+                  if (isMCP) {
+                    swizzled.x = -baseFlexAngle;
+                    swizzled.y = 0;
+                  } else if (isPIP) {
+                    swizzled.x = -baseFlexAngle * 0.8;
+                    swizzled.y = 0;
+                  }
+                }
+              }
+            }
+          }
 
           if (isMCP && key !== "thumb_mcp") {
             swizzled.x = swizzled.x * 2.0;

@@ -1,55 +1,82 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
+import { useVisionStore } from '../../store/zustand/VisionStore';
 
 // --- CONSTANTS & CONFIGURATION ---
 const LANE_COUNT = 4;
-const DEFAULT_BPM = 75;
-const SPAWN_INTERVAL_MS = 1600; // 60000 / 75 * 2 beats = exactly 1600ms (zero-drift)
-const FALL_DURATION_MS = 2000; // Calibrated: y=0% to y=80% takes exactly 1600ms (2 beats)
+const DEFAULT_BPM = 60;
+const SPAWN_INTERVAL_MS = 2400; // 2400ms per tile (reduced spawn frequency for smooth performance)
+const FALL_DURATION_MS = 3692.3; // Calibrated: y=0% to y=65% takes exactly 2400ms
+const TILE_POOL_SIZE = 12; // Static pool size to eliminate Garbage Collection allocations
 
-// Hit line sits at y=80%. Tolerance window is 72% to 88%
-const TARGET_Y = 80;
-const HIT_WINDOW_MIN = 72;
-const HIT_WINDOW_MAX = 88;
-const PERFECT_WINDOW_MIN = 77;
-const PERFECT_WINDOW_MAX = 83;
+// --- CALIBRATED FINGERTIPS HIT LINE (y=65%) ---
+const TARGET_Y = 65;
+const HIT_WINDOW_MIN = 53;
+const HIT_WINDOW_MAX = 77;
+const PERFECT_WINDOW_MIN = 61;
+const PERFECT_WINDOW_MAX = 69;
+
+// --- 30 FPS GLOBAL THROTTLING CONFIGURATION ---
+const TARGET_FPS = 30;
+const FRAME_INTERVAL_MS = 1000 / TARGET_FPS; // ~33.33ms per frame
 
 // Lane frequency mapping for Web Audio API (C Major chord: C5, E5, G5, C6)
 const LANE_FREQUENCIES = [523.25, 659.25, 783.99, 1046.50];
 
+// Mirrored Finger Mapping (Left to Right on Screen)
 export const FINGER_LANE_MAP = [
-  { lane: 0, finger: 'Index', keyPrimary: '1', keySecondary: 'a', color: '#00B8B0' }, // Clinical Teal
-  { lane: 1, finger: 'Middle', keyPrimary: '2', keySecondary: 's', color: '#2563EB' }, // Medical Blue
-  { lane: 2, finger: 'Ring', keyPrimary: '3', keySecondary: 'd', color: '#059669' }, // Clinical Emerald
-  { lane: 3, finger: 'Pinky', keyPrimary: '4', keySecondary: 'f', color: '#7C3AED' }, // Clinical Violet
+  { lane: 0, finger: 'Pinky', keyPrimary: '1', keySecondary: 'a', color: '#7C3AED' },  // Far Left (Lane 0)
+  { lane: 1, finger: 'Ring', keyPrimary: '2', keySecondary: 's', color: '#059669' },   // Mid Left (Lane 1)
+  { lane: 2, finger: 'Middle', keyPrimary: '3', keySecondary: 'd', color: '#2563EB' }, // Mid Right (Lane 2)
+  { lane: 3, finger: 'Index', keyPrimary: '4', keySecondary: 'f', color: '#00B8B0' },  // Far Right (Lane 3)
 ];
 
 export function usePianoTilesGame(bgmUrl = '/musics/fairytale.mp3') {
-  // --- UI REACT STATE ---
+  // --- UI REACT STATE (ONLY FOR DISCRETE SCORE/COMBO UPDATES) ---
   const [gameStatus, setGameStatus] = useState('idle'); // 'idle' | 'playing' | 'paused' | 'gameover'
+  const [isTrackingLost, setIsTrackingLost] = useState(false);
   const [score, setScore] = useState(0);
   const [combo, setCombo] = useState(0);
   const [maxCombo, setMaxCombo] = useState(0);
   const [stats, setStats] = useState({ perfect: 0, hit: 0, miss: 0 });
-  const [tiles, setTiles] = useState([]);
   const [activeLanePress, setActiveLanePress] = useState([false, false, false, false]);
   const [feedbackPopups, setFeedbackPopups] = useState([]);
 
-  // --- REFS FOR HIGH-FREQUENCY ANIMATION LOOP ---
-  const tilesRef = useRef([]);
+  // --- REFS FOR TRACKING LOSS MONITORING & AUDIO ---
+  const lastHandTimeRef = useRef(performance.now());
+  const handStableStartRef = useRef(0);
+  const autoPausedByTrackingRef = useRef(false);
+
+  // --- STATIC ZERO-GC OBJECT POOL (PRE-ALLOCATED 12 TILES) ---
+  const tilePoolRef = useRef(
+    Array.from({ length: TILE_POOL_SIZE }, (_, i) => ({
+      id: i,
+      lane: 0,
+      y: 0,
+      active: false,
+      status: 'inactive', // 'active' | 'hit' | 'missed' | 'inactive'
+    }))
+  );
+
+  // --- REFS FOR ANTI-REPEAT SPAWN TRACKING & GAME LOOP ---
+  const lastSpawnedLaneRef = useRef(-1);
+  const sameLaneCountRef = useRef(0);
   const animFrameIdRef = useRef(null);
   const lastSpawnTimeRef = useRef(0);
   const lastFrameTimeRef = useRef(0);
-  const tileIdCounterRef = useRef(1);
   const bgmRef = useRef(null);
   const audioCtxRef = useRef(null);
+  const frameTickCallbackRef = useRef(null);
+
+  // --- REGISTER DIRECT DOM TICK CALLBACK ---
+  const setOnFrameTick = useCallback((callback) => {
+    frameTickCallbackRef.current = callback;
+  }, []);
 
   // --- AUDIO SYNTHESIZER ---
   const initAudio = useCallback(() => {
     if (!audioCtxRef.current) {
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
-      if (AudioCtx) {
-        audioCtxRef.current = new AudioCtx();
-      }
+      if (AudioCtx) audioCtxRef.current = new AudioCtx();
     }
     if (audioCtxRef.current && audioCtxRef.current.state === 'suspended') {
       audioCtxRef.current.resume();
@@ -74,7 +101,6 @@ export function usePianoTilesGame(bgmUrl = '/musics/fairytale.mp3') {
       osc.type = isPerfect ? 'triangle' : 'sine';
       osc.frequency.setValueAtTime(freq, ctx.currentTime);
 
-      // Softened gain envelope for gentle chime SFX
       gain.gain.setValueAtTime(0.08, ctx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
 
@@ -84,7 +110,7 @@ export function usePianoTilesGame(bgmUrl = '/musics/fairytale.mp3') {
       osc.start();
       osc.stop(ctx.currentTime + 0.3);
     } catch {
-      // Ignore web audio context issues on un-muted user interaction
+      // Non-blocking Web Audio fallback
     }
   }, []);
 
@@ -108,24 +134,41 @@ export function usePianoTilesGame(bgmUrl = '/musics/fairytale.mp3') {
       osc.start();
       osc.stop(ctx.currentTime + 0.2);
     } catch {
-      // Non-blocking fallback
+      // Non-blocking Web Audio fallback
     }
   }, []);
 
-  // --- SPAWN LOGIC ---
-  const spawnTile = useCallback((timestamp) => {
-    const randomLane = Math.floor(Math.random() * LANE_COUNT);
-    const newTile = {
-      id: tileIdCounterRef.current++,
-      lane: randomLane,
-      y: 0,
-      spawnTimestamp: timestamp,
-      status: 'active',
-    };
-    tilesRef.current.push(newTile);
+  // --- ZERO-GC STRICT SINGLE-TILE SPAWN ENGINE ---
+  const spawnTile = useCallback(() => {
+    const pool = tilePoolRef.current;
+    // Find the first available inactive tile from the static pool
+    const inactiveTile = pool.find((t) => !t.active);
+    if (!inactiveTile) return; // Pool full safeguard
+
+    // Select STRICTLY 1 random lane from [0, 1, 2, 3]
+    let selectedLane = Math.floor(Math.random() * LANE_COUNT);
+
+    // Prevent selecting the same lane more than 2 times in a row
+    if (selectedLane === lastSpawnedLaneRef.current) {
+      sameLaneCountRef.current += 1;
+      if (sameLaneCountRef.current >= 2) {
+        selectedLane = (selectedLane + 1 + Math.floor(Math.random() * (LANE_COUNT - 1))) % LANE_COUNT;
+        sameLaneCountRef.current = 1;
+      }
+    } else {
+      sameLaneCountRef.current = 1;
+    }
+
+    lastSpawnedLaneRef.current = selectedLane;
+
+    // Activate EXACTLY ONE tile on selectedLane
+    inactiveTile.lane = selectedLane;
+    inactiveTile.y = 0;
+    inactiveTile.active = true;
+    inactiveTile.status = 'active';
   }, []);
 
-  // --- TRIGGER FEEDBACK POPUP ---
+  // --- FEEDBACK POPUPS ---
   const triggerFeedback = useCallback((lane, text, type) => {
     const popupId = Date.now() + Math.random();
     setFeedbackPopups((prev) => [...prev.slice(-5), { id: popupId, lane, text, type }]);
@@ -134,11 +177,10 @@ export function usePianoTilesGame(bgmUrl = '/musics/fairytale.mp3') {
     }, 800);
   }, []);
 
-  // --- LANE HIT ACTION ---
+  // --- STRICT ISOLATED LANE HIT DETECTION HANDLER ---
   const handleLaneHit = useCallback((laneIndex) => {
     if (gameStatus !== 'playing') return;
 
-    // Visual lane flash activation
     setActiveLanePress((prev) => {
       const next = [...prev];
       next[laneIndex] = true;
@@ -152,30 +194,36 @@ export function usePianoTilesGame(bgmUrl = '/musics/fairytale.mp3') {
       });
     }, 120);
 
-    // Find closest active tile in target lane within hit window
-    const targetTileIndex = tilesRef.current.findIndex((tile) => (
-      tile.lane === laneIndex &&
-      tile.status === 'active' &&
-      tile.y >= HIT_WINDOW_MIN &&
-      tile.y <= HIT_WINDOW_MAX
-    ));
+    // STRICT COLLISION: Search active tiles ONLY in target laneIndex
+    const pool = tilePoolRef.current;
+    let targetTile = null;
 
-    if (targetTileIndex === -1) {
-      // Empty lane tap or mistimed press
-      return;
+    for (let i = 0; i < TILE_POOL_SIZE; i++) {
+      const t = pool[i];
+      if (
+        t.active &&
+        t.status === 'active' &&
+        t.lane === laneIndex && // MANDATORY STRICT LANE ISOLATION
+        t.y >= HIT_WINDOW_MIN &&
+        t.y <= HIT_WINDOW_MAX
+      ) {
+        targetTile = t;
+        break;
+      }
     }
 
-    const hitTile = tilesRef.current[targetTileIndex];
-    const isPerfect = hitTile.y >= PERFECT_WINDOW_MIN && hitTile.y <= PERFECT_WINDOW_MAX;
+    if (!targetTile) return; // Ignore miss clicks on empty lanes
 
-    hitTile.status = 'hit';
+    const isPerfect = targetTile.y >= PERFECT_WINDOW_MIN && targetTile.y <= PERFECT_WINDOW_MAX;
+
+    // Deactivate ONLY targetTile in target laneIndex
+    targetTile.status = 'hit';
+    targetTile.active = false;
+
     playHitTone(laneIndex, isPerfect);
 
     const pts = isPerfect ? 15 : 10;
-    const feedbackText = isPerfect ? 'PERFECT!' : 'HIT!';
-    const feedbackType = isPerfect ? 'perfect' : 'hit';
-
-    triggerFeedback(laneIndex, feedbackText, feedbackType);
+    triggerFeedback(laneIndex, isPerfect ? 'PERFECT!' : 'HIT!', isPerfect ? 'perfect' : 'hit');
 
     setScore((prev) => prev + pts);
     setCombo((prev) => {
@@ -190,65 +238,69 @@ export function usePianoTilesGame(bgmUrl = '/musics/fairytale.mp3') {
     }));
   }, [gameStatus, playHitTone, triggerFeedback]);
 
-  // --- GAME LOOP ---
+  // --- 30 FPS ZERO-GC GAME LOOP (DIRECT DOM MUTATION TICK) ---
   const gameLoop = useCallback((timestamp) => {
+    animFrameIdRef.current = requestAnimationFrame(gameLoop);
+
     if (!lastFrameTimeRef.current) {
       lastFrameTimeRef.current = timestamp;
       lastSpawnTimeRef.current = timestamp;
     }
 
-    const delta = timestamp - lastFrameTimeRef.current;
-    lastFrameTimeRef.current = timestamp;
-
-    // Spawning tiles based on 75 BPM timer interval (exact 1600ms per 2 beats, zero-drift step)
-    if (timestamp - lastSpawnTimeRef.current >= SPAWN_INTERVAL_MS) {
-      spawnTile(timestamp);
-      lastSpawnTimeRef.current += SPAWN_INTERVAL_MS;
+    const elapsed = timestamp - lastFrameTimeRef.current;
+    if (elapsed < FRAME_INTERVAL_MS) {
+      return;
     }
 
-    // Move tiles down
+    lastFrameTimeRef.current = timestamp - (elapsed % FRAME_INTERVAL_MS);
+
+    // Spawning tiles based on 75 BPM timer interval (exact 1600ms per 2 beats, zero-drift)
+    if (timestamp - lastSpawnTimeRef.current >= SPAWN_INTERVAL_MS) {
+      spawnTile();
+      if (timestamp - lastSpawnTimeRef.current > SPAWN_INTERVAL_MS * 1.5) {
+        lastSpawnTimeRef.current = timestamp;
+      } else {
+        lastSpawnTimeRef.current += SPAWN_INTERVAL_MS;
+      }
+    }
+
+    // Move tiles down with zero memory allocations
     const speedPerMs = 100 / FALL_DURATION_MS;
-    const nextTiles = [];
+    const pool = tilePoolRef.current;
 
-    for (let i = 0; i < tilesRef.current.length; i++) {
-      const tile = tilesRef.current[i];
-      if (tile.status === 'active') {
-        tile.y += speedPerMs * delta;
+    for (let i = 0; i < TILE_POOL_SIZE; i++) {
+      const tile = pool[i];
+      if (tile.active && tile.status === 'active') {
+        tile.y += speedPerMs * elapsed;
 
-        // Auto miss detection when passing bottom tolerance boundary
         if (tile.y > HIT_WINDOW_MAX) {
           tile.status = 'missed';
+          tile.active = false;
           setCombo(0);
           setStats((prev) => ({ ...prev, miss: prev.miss + 1 }));
           triggerFeedback(tile.lane, 'MISS', 'miss');
           playMissTone();
-        } else {
-          nextTiles.push(tile);
         }
-      } else if (tile.status === 'hit' && tile.y < 100) {
-        // Retain hit visual brief fade
-        tile.y += speedPerMs * delta * 0.5;
-        if (tile.y < 95) nextTiles.push(tile);
       }
     }
 
-    tilesRef.current = nextTiles;
-    setTiles([...nextTiles]);
-
-    animFrameIdRef.current = requestAnimationFrame(gameLoop);
+    // Bypass React Reconciler: Mutate DOM directly via callback
+    if (typeof frameTickCallbackRef.current === 'function') {
+      frameTickCallbackRef.current(pool);
+    }
   }, [spawnTile, triggerFeedback, playMissTone]);
 
   // --- CONTROLS ---
   const startGame = useCallback(() => {
     initAudio();
 
-    if (bgmRef.current) {
-      bgmRef.current.currentTime = 0;
-      bgmRef.current.play().catch(() => {});
-    }
+    // Reset pool state
+    tilePoolRef.current.forEach((t) => {
+      t.active = false;
+      t.status = 'inactive';
+      t.y = 0;
+    });
 
-    tilesRef.current = [];
-    tileIdCounterRef.current = 1;
     lastFrameTimeRef.current = 0;
     lastSpawnTimeRef.current = 0;
 
@@ -256,8 +308,16 @@ export function usePianoTilesGame(bgmUrl = '/musics/fairytale.mp3') {
     setCombo(0);
     setMaxCombo(0);
     setStats({ perfect: 0, hit: 0, miss: 0 });
-    setTiles([]);
     setFeedbackPopups([]);
+
+    autoPausedByTrackingRef.current = false;
+    setIsTrackingLost(false);
+
+    if (bgmRef.current) {
+      bgmRef.current.currentTime = 0;
+      bgmRef.current.play().catch(() => {});
+    }
+
     setGameStatus('playing');
   }, [initAudio]);
 
@@ -270,6 +330,7 @@ export function usePianoTilesGame(bgmUrl = '/musics/fairytale.mp3') {
   const resumeGame = useCallback(() => {
     if (bgmRef.current) bgmRef.current.play().catch(() => {});
     lastFrameTimeRef.current = 0;
+    lastSpawnTimeRef.current = 0;
     setGameStatus('playing');
   }, []);
 
@@ -280,8 +341,12 @@ export function usePianoTilesGame(bgmUrl = '/musics/fairytale.mp3') {
     }
     if (animFrameIdRef.current) cancelAnimationFrame(animFrameIdRef.current);
 
-    tilesRef.current = [];
-    setTiles([]);
+    tilePoolRef.current.forEach((t) => {
+      t.active = false;
+      t.status = 'inactive';
+      t.y = 0;
+    });
+
     setScore(0);
     setCombo(0);
     setMaxCombo(0);
@@ -289,7 +354,6 @@ export function usePianoTilesGame(bgmUrl = '/musics/fairytale.mp3') {
     setGameStatus('idle');
   }, []);
 
-  // Sync animation frame loop with game playing state
   useEffect(() => {
     if (gameStatus === 'playing') {
       animFrameIdRef.current = requestAnimationFrame(gameLoop);
@@ -302,7 +366,6 @@ export function usePianoTilesGame(bgmUrl = '/musics/fairytale.mp3') {
     };
   }, [gameStatus, gameLoop]);
 
-  // Cleanup audio on unmount
   useEffect(() => {
     return () => {
       if (bgmRef.current) {
@@ -318,14 +381,16 @@ export function usePianoTilesGame(bgmUrl = '/musics/fairytale.mp3') {
 
   return {
     gameStatus,
+    isTrackingLost,
     score,
     combo,
     maxCombo,
     stats,
-    tiles,
     activeLanePress,
     feedbackPopups,
     targetY: TARGET_Y,
+    tilePoolRef,
+    setOnFrameTick,
     startGame,
     pauseGame,
     resumeGame,

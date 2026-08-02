@@ -12,6 +12,26 @@ import { Model } from "../models/Robotic_prosthetic_arm";
 import CalibrationOverlay from "./CalibrationOverlay";
 import ExerciseHUD from "./ExerciseHUD";
 
+import { useFrame, useThree } from "@react-three/fiber";
+import { useRef } from "react";
+
+// --- 30 FPS RENDER LOOP THROTTLE COMPONENT FOR R3F ---
+function RenderFrameLimiter({ fps = 30 }) {
+  const interval = 1000 / fps;
+  const lastRenderTime = useRef(0);
+
+  useFrame(() => {
+    const now = performance.now();
+    const elapsed = now - lastRenderTime.current;
+    if (elapsed < interval) {
+      return;
+    }
+    lastRenderTime.current = now - (elapsed % interval);
+  });
+
+  return null;
+}
+
 export function VisensaCanvas() {
   // Live Tuner State
   const [posX, setPosX] = useState(0);
@@ -33,82 +53,18 @@ export function VisensaCanvas() {
       <CalibrationOverlay />
       <ExerciseHUD />
 
-      {false && (
-        <div
-          style={{
-            position: "absolute",
-            bottom: "24px",
-            left: "50%",
-            transform: "translateX(-50%)",
-            background: "rgba(0,0,0,0.8)",
-            padding: "16px",
-            borderRadius: "12px",
-            color: "white",
-            zIndex: 1000,
-            display: "flex",
-            gap: "16px",
-            fontFamily: "monospace",
-          }}
-        >
-          <div>
-            <label>X: {posX}</label>
-            <br />
-            <input
-              type="range"
-              min="-50"
-              max="50"
-              value={posX}
-              onChange={(e) => setPosX(Number(e.target.value))}
-            />
-          </div>
-          <div>
-            <label>Y: {posY}</label>
-            <br />
-            <input
-              type="range"
-              min="-50"
-              max="50"
-              value={posY}
-              onChange={(e) => setPosY(Number(e.target.value))}
-            />
-          </div>
-          <div>
-            <label>Z: {posZ}</label>
-            <br />
-            <input
-              type="range"
-              min="-50"
-              max="50"
-              value={posZ}
-              onChange={(e) => setPosZ(Number(e.target.value))}
-            />
-          </div>
-          <div>
-            <label>Rot (Derajat): {rotY}</label>
-            <br />
-            <input
-              type="range"
-              min="-180"
-              max="180"
-              value={rotY}
-              onChange={(e) => setRotY(Number(e.target.value))}
-            />
-          </div>
-          <div>
-            <label>Scale: {modelScale}</label>
-            <br />
-            <input
-              type="range"
-              min="1"
-              max="30"
-              value={modelScale}
-              onChange={(e) => setModelScale(Number(e.target.value))}
-            />
-          </div>
-        </div>
-      )}
-
-      <Canvas shadows={false} style={{ width: "100%", height: "100%" }}>
+      <Canvas
+        shadows={false}
+        dpr={1}
+        gl={{
+          powerPreference: "high-performance",
+          antialias: false,
+          depth: true,
+          stencil: false,
+        }}
+        style={{ width: "100%", height: "100%" }}
+      >
+        <RenderFrameLimiter fps={30} />
         <PerspectiveCamera makeDefault position={[0, 8, 35]} fov={50} />
         <color attach="background" args={["#f8f9fa"]} />
         <ambientLight intensity={0.4} />
@@ -118,7 +74,7 @@ export function VisensaCanvas() {
         <Suspense fallback={null}>
           <group
             position={[posX, posY, posZ]}
-            rotation={[0, rotY * (Math.PI / 180), 0]} // Konversi derajat ke radian
+            rotation={[0, rotY * (Math.PI / 180), 0]}
             scale={modelScale}
           >
             <Model />

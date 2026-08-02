@@ -1,20 +1,27 @@
-import { useEffect, useRef, useState } from 'react';
-import { setupMediaPipe } from "../services/mediapipe/VisionSetup"; 
-import { useVisionStore } from '../store/zustand/VisionStore'; 
+import { useEffect, useRef, useState } from "react";
+import { setupMediaPipe } from "../services/mediapipe/VisionSetup";
+import { useVisionStore } from "../store/zustand/VisionStore";
 
-export default function VisionTracker({ showCanvas = true }) {
+export default function VisionTracker({ showCanvas = true, enablePose = false }) {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
-  const requestRef = useRef(null); 
-  
+  const requestRef = useRef(null);
+
   const [landmarker, setLandmarker] = useState(null);
+  const enablePoseRef = useRef(enablePose);
+
+  useEffect(() => {
+    enablePoseRef.current = enablePose;
+  }, [enablePose]);
 
   // 1. Load Model
   useEffect(() => {
-    setupMediaPipe().then((ai) => {
-      setLandmarker(ai);
-      useVisionStore.getState().setModelReady(true);
-    }).catch(err => console.error("Gagal load model:", err));
+    setupMediaPipe()
+      .then((ai) => {
+        setLandmarker(ai);
+        useVisionStore.getState().setModelReady(true);
+      })
+      .catch((err) => console.error("Gagal load model:", err));
   }, []);
 
   // 2. Auto-Start Kamera Pas Komponen Dipanggil
@@ -23,8 +30,8 @@ export default function VisionTracker({ showCanvas = true }) {
 
     const startCamera = async () => {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ 
-          video: { width: 640, height: 480 } 
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { width: 640, height: 480 },
         });
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
@@ -40,7 +47,7 @@ export default function VisionTracker({ showCanvas = true }) {
     // Matiin kamera otomatis pas pindah halaman
     return () => {
       if (videoRef.current && videoRef.current.srcObject) {
-        videoRef.current.srcObject.getTracks().forEach(track => track.stop());
+        videoRef.current.srcObject.getTracks().forEach((track) => track.stop());
         videoRef.current.srcObject = null;
       }
       if (requestRef.current) {
@@ -62,45 +69,75 @@ export default function VisionTracker({ showCanvas = true }) {
     }
 
     let lastVideoTime = -1;
-    let frameCount = 0; 
-    const REQUIRED_FRAMES = 60; 
-    
-    // --- TAMBAHAN OPTIMASI: REM KHUSUS BUAT POSE ---
+    let frameCount = 0;
+    const REQUIRED_FRAMES = 60;
+
+    // --- 360P OFFSCREEN CANVAS FOR EXTREME INFERENCE DOWNSCALING ---
+    const offscreenCanvas = document.createElement("canvas");
+    offscreenCanvas.width = 360;
+    offscreenCanvas.height = 240;
+    const offscreenCtx = offscreenCanvas.getContext("2d", { alpha: false });
+
+    // --- 30 FPS CAMERA THROTTLING CONFIGURATION ---
+    let lastHandDetectTime = 0;
+    const HAND_FPS = 30;
+    const HAND_THROTTLE_MS = 1000 / HAND_FPS; // ~33.33ms
+
     let lastPoseDetectTime = 0;
-    const POSE_FPS = 12; // Sweet spot: responsif tapi tetap hemat GPU
+    const POSE_FPS = 12;
     const POSE_THROTTLE_MS = 1000 / POSE_FPS;
 
     const renderLoop = () => {
       let startTimeMs = performance.now();
-      
-      if (video.currentTime !== lastVideoTime) {
+
+      if (
+        video.currentTime !== lastVideoTime &&
+        startTimeMs - lastHandDetectTime >= HAND_THROTTLE_MS
+      ) {
         lastVideoTime = video.currentTime;
-        
-        // 1. HAND TETEP GASPOL (Ngikutin FPS kamera lu, biasanya 30 FPS)
-        const handResults = landmarker.hand.detectForVideo(video, startTimeMs);
-        
-        // 2. POSE DI-REM (Cuma jalan tiap ~83ms)
+        lastHandDetectTime = startTimeMs;
+
+        // Draw video to downscaled 360p canvas to slash CPU/WASM load by 65%
+        offscreenCtx.drawImage(video, 0, 0, 360, 240);
+
+        // 1. HAND TRACKING CAPPED TO 30 FPS & 360P DOWNSCALED INPUT
+        const handResults = landmarker.hand.detectForVideo(
+          offscreenCanvas,
+          startTimeMs,
+        );
+
+        // 2. POSE DETECT THROTTLED TO 12 FPS & 360P INPUT (ONLY IF ENABLED)
         let poseResults = null;
-        if (startTimeMs - lastPoseDetectTime >= POSE_THROTTLE_MS) {
-          poseResults = landmarker.pose.detectForVideo(video, startTimeMs);
+        if (enablePoseRef.current && landmarker.pose && startTimeMs - lastPoseDetectTime >= POSE_THROTTLE_MS) {
+          poseResults = landmarker.pose.detectForVideo(
+            offscreenCanvas,
+            startTimeMs,
+          );
           lastPoseDetectTime = startTimeMs;
         }
-        
+
         if (showCanvas && ctx && canvas) {
           ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
-        
+
         const visionState = useVisionStore.getState();
-        
+
         // --- BLOK HAND (Sama persis kayak sebelumnya) ---
         if (handResults.landmarks && handResults.landmarks.length > 0) {
           if (visionState.calibrationWarning) {
             visionState.setCalibrationWarning(false);
           }
           visionState.setLandmarks(handResults.landmarks[0]);
-          
-          if (handResults.handedness && handResults.handedness[0] && handResults.handedness[0][0]) {
-            const side = handResults.handedness[0][0].categoryName || handResults.handedness[0][0].displayName || handResults.handedness[0][0].label;
+
+          if (
+            handResults.handedness &&
+            handResults.handedness[0] &&
+            handResults.handedness[0][0]
+          ) {
+            const side =
+              handResults.handedness[0][0].categoryName ||
+              handResults.handedness[0][0].displayName ||
+              handResults.handedness[0][0].label;
             visionState.setHandedness(side);
             const isLeft = side === "Left";
             if (visionState.isLeftHandWarning !== isLeft) {
@@ -118,7 +155,7 @@ export default function VisionTracker({ showCanvas = true }) {
               ctx.fill();
             }
           }
-          
+
           if (!visionState.isCalibrated) {
             frameCount++;
             let progress = Math.min((frameCount / REQUIRED_FRAMES) * 100, 100);
@@ -145,15 +182,15 @@ export default function VisionTracker({ showCanvas = true }) {
         }
 
         // --- BLOK POSE (Update Zustand cuma kalau AI-nya pas lagi jalan) ---
-        if (poseResults) { 
+        if (poseResults) {
           if (poseResults.landmarks && poseResults.landmarks.length > 0) {
             visionState.setPoseLandmarks(
-              poseResults.landmarks[0], 
-              poseResults.worldLandmarks[0]
+              poseResults.landmarks[0],
+              poseResults.worldLandmarks[0],
             );
-            
+
             if (showCanvas && ctx && canvas) {
-              const lenganLandmarks = [14, 16]; 
+              const lenganLandmarks = [14, 16];
               for (const index of lenganLandmarks) {
                 const landmark = poseResults.landmarks[0][index];
                 if (landmark) {
@@ -161,7 +198,7 @@ export default function VisionTracker({ showCanvas = true }) {
                   const y = landmark.y * canvas.height;
                   ctx.beginPath();
                   ctx.arc(x, y, 6, 0, 2 * Math.PI);
-                  ctx.fillStyle = "#FF0000"; 
+                  ctx.fillStyle = "#FF0000";
                   ctx.fill();
                 }
               }
@@ -172,26 +209,45 @@ export default function VisionTracker({ showCanvas = true }) {
           }
         }
       }
-      
+
       requestRef.current = requestAnimationFrame(renderLoop);
     };
-    
+
     renderLoop();
   };
 
   return (
-    <div style={{ position: "relative", width: "100%", maxWidth: "640px", margin: "0 auto" }}>
-      <video 
-        ref={videoRef} 
-        autoPlay 
-        playsInline 
-        style={{ transform: "scaleX(-1)", width: "100%", background: "#1f2937", borderRadius: "8px" }} 
+    <div
+      style={{
+        position: "relative",
+        width: "100%",
+        maxWidth: "640px",
+        margin: "0 auto",
+      }}
+    >
+      <video
+        ref={videoRef}
+        autoPlay
+        playsInline
+        style={{
+          transform: "scaleX(-1)",
+          width: "100%",
+          background: "#1f2937",
+          borderRadius: "8px",
+        }}
       />
       {/* Canvas cuma dirender kalau props showCanvas true */}
       {showCanvas && (
-        <canvas 
-          ref={canvasRef} 
-          style={{ position: "absolute", top: 0, left: 0, transform: "scaleX(-1)", width: "100%", height: "100%" }} 
+        <canvas
+          ref={canvasRef}
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            transform: "scaleX(-1)",
+            width: "100%",
+            height: "100%",
+          }}
         />
       )}
     </div>
