@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { setupMediaPipe } from '../services/mediapipe/visionSetup'; 
+import { setupMediaPipe } from "../services/mediapipe/VisionSetup"; 
 import { useVisionStore } from '../store/zustand/VisionStore'; 
 
 export default function VisionTracker({ showCanvas = true }) {
