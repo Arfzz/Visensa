@@ -2,55 +2,121 @@ const sessionService = require('../services/session.service');
 const { parsePagination } = require('../utils/pagination');
 
 /**
- * SessionController — Handles HTTP layer for rehabilitation sessions.
+ * SessionController — HTTP layer for exercise & minigame session logging.
+ *
+ * All patient-facing endpoints read the patient table PK from req.user.profile.id
+ * (set by authenticate middleware after querying patient table).
  */
 const sessionController = {
+
+  // ====================================================
+  // EXERCISE LOGS
+  // ====================================================
+
   /**
-   * POST /api/v1/sessions — Patient: log a completed exercise session.
+   * POST /api/v1/sessions/exercise
+   * Patient: Log a completed exercise session.
+   * Body: { scheduleId, durationSeconds, maxAngle?, painLevel? }
    */
-  async create(req, res, next) {
+  async logExercise(req, res, next) {
     try {
-      const session = await sessionService.createSession(req.user.id, req.body);
-      return res.created({ message: 'Session logged successfully.', data: session });
+      const log = await sessionService.logExercise(req.body.scheduleId, req.body);
+      return res.created({ message: 'Exercise session logged successfully.', data: log });
     } catch (err) {
       next(err);
     }
   },
 
   /**
-   * GET /api/v1/sessions/me — Patient: get own session history.
+   * GET /api/v1/sessions/exercise/me
+   * Patient: Get own exercise history.
    */
-  async getMySessions(req, res, next) {
+  async getMyExerciseLogs(req, res, next) {
     try {
       const { page, limit } = parsePagination(req.query);
-      const { data, total } = await sessionService.getPatientSessions(req.user.id, { page, limit });
-      return res.paginate({ message: 'Session history retrieved.', data, page, limit, total });
+      const patientId = req.user.profile.id; // patient table PK
+      const { data, total } = await sessionService.getPatientExerciseLogs(patientId, { page, limit });
+      return res.paginate({ message: 'Exercise history retrieved.', data, page, limit, total });
     } catch (err) {
       next(err);
     }
   },
 
   /**
-   * GET /api/v1/sessions — Doctor: get all sessions (with optional patientId filter).
+   * GET /api/v1/sessions/exercise
+   * Doctor: Get all exercise logs (optional ?patientId= filter).
    */
-  async listAll(req, res, next) {
+  async getAllExerciseLogs(req, res, next) {
     try {
       const { page, limit } = parsePagination(req.query);
-      const { patientId } = req.query;
-      const { data, total } = await sessionService.getAllSessions({ page, limit, patientId });
-      return res.paginate({ message: 'All sessions retrieved.', data, page, limit, total });
+      const { patientId }   = req.query;
+      const { data, total } = await sessionService.getAllExerciseLogs({ page, limit, patientId });
+      return res.paginate({ message: 'All exercise logs retrieved.', data, page, limit, total });
     } catch (err) {
       next(err);
     }
   },
 
   /**
-   * GET /api/v1/sessions/:id — Get a single session detail.
+   * GET /api/v1/sessions/exercise/:id
+   * Doctor or Patient: Get a single exercise log by ID.
    */
-  async getById(req, res, next) {
+  async getExerciseLogById(req, res, next) {
     try {
-      const session = await sessionService.getById(req.params.id);
-      return res.ok({ message: 'Session detail retrieved.', data: session });
+      const log = await sessionService.getExerciseLogById(req.params.id);
+      return res.ok({ message: 'Exercise log retrieved.', data: log });
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  // ====================================================
+  // MINIGAME LOGS (Piano Tiles)
+  // ====================================================
+
+  /**
+   * POST /api/v1/sessions/minigame
+   * Patient: Log a completed Piano Tiles session.
+   * Body: { score, durationSeconds, maxCombo, scheduleId? }
+   */
+  async logMinigame(req, res, next) {
+    try {
+      const patientId = req.user.profile.id; // patient table PK
+      const log = await sessionService.logMinigame(patientId, req.body);
+      return res.created({ message: 'Minigame session logged successfully.', data: log });
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  /**
+   * GET /api/v1/sessions/minigame/me
+   * Patient: Get own minigame history.
+   */
+  async getMyMinigameLogs(req, res, next) {
+    try {
+      const { page, limit } = parsePagination(req.query);
+      const patientId = req.user.profile.id;
+      const { data, total } = await sessionService.getPatientMinigameLogs(patientId, { page, limit });
+      return res.paginate({ message: 'Minigame history retrieved.', data, page, limit, total });
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  // ====================================================
+  // STATS
+  // ====================================================
+
+  /**
+   * GET /api/v1/sessions/stats/me
+   * Patient: Get own gamification stats + trends.
+   */
+  async getMyStats(req, res, next) {
+    try {
+      const patientId = req.user.profile.id;
+      const stats = await sessionService.getPatientStats(patientId);
+      return res.ok({ message: 'Stats retrieved.', data: stats });
     } catch (err) {
       next(err);
     }

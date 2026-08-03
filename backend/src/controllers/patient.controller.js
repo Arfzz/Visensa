@@ -12,12 +12,24 @@ const patientController = {
     try {
       const { page, limit } = parsePagination(req.query);
       const search = req.query.search;
-      const { data, total } = await patientService.listAll({ page, limit, search });
+
+      // Resolve doctor's own patient table id to filter patients
+      const { supabase } = require('../config/supabase');
+      const { data: doctor } = await supabase
+        .from('doctor')
+        .select('id')
+        .eq('user_id', req.user.id)
+        .single();
+
+      const { data, total } = await patientService.listAll({
+        page, limit, search, doctorId: doctor?.id,
+      });
       return res.paginate({ message: 'Patients retrieved.', data, page, limit, total });
     } catch (err) {
       next(err);
     }
   },
+
 
   /**
    * GET /api/v1/patients/me — Patient: get own profile.
