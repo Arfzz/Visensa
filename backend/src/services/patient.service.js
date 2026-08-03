@@ -1,59 +1,86 @@
 const AppError = require('../utils/AppError');
+const { supabase } = require('../config/supabase');
 
 /**
  * PatientService — Business logic for patient management.
- * All DB calls are stubbed. Replace with Supabase when ready.
+ *
+ * Schema: public.patient
+ *   id (uuid PK), created_at, user_id (→ auth.users), doctor_id (→ doctor.id),
+ *   name (varchar), condition (text), notes (text)
  */
-
-const MOCK_PATIENTS = [
-  { id: 'p-001', name: 'Budi Santoso', email: 'budi@patient.com', role: 'patient', doctorId: 'd-001', dateOfBirth: '1990-05-12', createdAt: '2026-01-15T10:00:00Z' },
-  { id: 'p-002', name: 'Siti Rahayu', email: 'siti@patient.com', role: 'patient', doctorId: 'd-001', dateOfBirth: '1985-08-22', createdAt: '2026-02-01T09:00:00Z' },
-  { id: 'p-003', name: 'Ahmad Fauzi', email: 'ahmad@patient.com', role: 'patient', doctorId: 'd-002', dateOfBirth: '1992-11-30', createdAt: '2026-03-10T11:00:00Z' },
-];
-
 const patientService = {
   /**
-   * Get all patients (Doctor only).
+   * List all patients belonging to a specific doctor. Supports search + pagination.
    */
-  async listAll({ page, limit, search }) {
-    // TODO: Supabase query with pagination & search filter
-    let results = [...MOCK_PATIENTS];
-    if (search) {
-      results = results.filter((p) => p.name.toLowerCase().includes(search.toLowerCase()));
+  async listAll({ page, limit, search, doctorId }) {
+    let query = supabase
+      .from('patient')
+      .select('id, user_id, name, condition, notes, doctor_id, created_at', { count: 'exact' });
+
+    if (doctorId) {
+      query = query.eq('doctor_id', doctorId);
     }
-    const total = results.length;
-    const data = results.slice((page - 1) * limit, page * limit);
-    return { data, total };
+
+    if (search) {
+      query = query.ilike('name', `%${search}%`);
+    }
+
+    const from = (page - 1) * limit;
+    const to   = from + limit - 1;
+    query = query.range(from, to).order('created_at', { ascending: false });
+
+    const { data, error, count } = await query;
+    if (error) throw new AppError('Gagal mengambil data pasien: ' + error.message, 500);
+
+    return { data: data ?? [], total: count ?? 0 };
   },
 
   /**
-   * Get a single patient by ID.
+   * Get a single patient by their patient-table PK (uuid).
    */
   async getById(patientId) {
-    // TODO: Supabase .from('users').select('*').eq('id', patientId).single()
-    const patient = MOCK_PATIENTS.find((p) => p.id === patientId);
-    if (!patient) throw new AppError('Patient not found.', 404);
-    return patient;
+    const { data, error } = await supabase
+      .from('patient')
+      .select('id, user_id, name, condition, notes, doctor_id, created_at')
+      .eq('id', patientId)
+      .single();
+
+    if (error || !data) throw new AppError('Patient not found.', 404);
+    return data;
   },
 
   /**
-   * Get my own profile (Patient only).
+   * Get patient's own profile by auth user_id.
    */
   async getMyProfile(userId) {
-    // TODO: Supabase query
-    const patient = MOCK_PATIENTS.find((p) => p.id === userId);
-    if (!patient) throw new AppError('Profile not found.', 404);
-    return patient;
+    const { data, error } = await supabase
+      .from('patient')
+      .select('id, user_id, name, condition, notes, doctor_id, created_at')
+      .eq('user_id', userId)
+      .single();
+
+    if (error || !data) throw new AppError('Profile not found.', 404);
+    return data;
   },
 
   /**
-   * Update patient profile.
+   * Update patient profile (name, condition, notes only).
    */
-  async updateProfile(patientId, data) {
-    // TODO: Supabase .from('users').update(data).eq('id', patientId)
-    const patient = MOCK_PATIENTS.find((p) => p.id === patientId);
-    if (!patient) throw new AppError('Patient not found.', 404);
-    return { ...patient, ...data, updatedAt: new Date().toISOString() };
+  async updateProfile(userId, updates) {
+    const safeFields = {};
+    if (updates.name      !== undefined) safeFields.name      = updates.name;
+    if (updates.condition !== undefined) safeFields.condition = updates.condition;
+    if (updates.notes     !== undefined) safeFields.notes     = updates.notes;
+
+    const { data, error } = await supabase
+      .from('patient')
+      .update(safeFields)
+      .eq('user_id', userId)
+      .select()
+      .single();
+
+    if (error) throw new AppError('Gagal update profil: ' + error.message, 500);
+    return data;
   },
 };
 

@@ -78,6 +78,16 @@ const Dashboard = () => {
   // State untuk membuka/tutup Modal
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+    const handleLogout = () => {
+    // 1. Bersihin semua data sesi dari browser
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('user');
+
+    // 2. Arahin balik ke halaman login atau home
+    navigate('/login'); 
+  };
+
   return (
     <div style={{ width: "100%", height: "100vh", display: "flex", background: "#F0F2F5", fontFamily: "Space Grotesk, sans-serif", overflow: "hidden", padding: "24px", boxSizing: "border-box", gap: "32px", position: "relative" }}>
       
@@ -146,7 +156,7 @@ const Dashboard = () => {
               <div style={{ color: "#7AAAB4", fontSize: "12px" }}>Occupational Therapist</div>
             </div>
           </div>
-          <button onClick={() => navigate("/")} style={{ width: "100%", padding: "12px", background: "#FFE9E9", border: "1px solid rgba(192, 86, 76, 0.5)", borderRadius: "12px", color: "#C0574C", fontSize: "14.5px", fontWeight: "600", cursor: "pointer", display: "flex", justifyContent: "center", alignItems: "center", gap: "8px" }}>
+          <button onClick={handleLogout} style={{ width: "100%", padding: "12px", background: "#FFE9E9", border: "1px solid rgba(192, 86, 76, 0.5)", borderRadius: "12px", color: "#C0574C", fontSize: "14.5px", fontWeight: "600", cursor: "pointer", display: "flex", justifyContent: "center", alignItems: "center", gap: "8px" }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
             Sign out
           </button>
