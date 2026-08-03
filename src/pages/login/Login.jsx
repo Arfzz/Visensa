@@ -153,7 +153,7 @@ const Login = () => {
 
           {/* Action Button */}
           <button 
-            onClick={() => navigate('/intro')}
+            onClick={() => navigate('/patient-dashboard')}
             style={{ width: "100%", height: "48px", background: "#0099A6", border: "none", borderRadius: "24px", boxShadow: "0px 4px 12px rgba(200, 112, 74, 0.2)", display: "flex", justifyContent: "center", alignItems: "center", gap: "8px", cursor: "pointer", marginBottom:"16px" }}
           >
             <span style={{ color: "white", fontSize: "15px", fontFamily: "Space Grotesk, sans-serif", fontWeight: "600" }}>Sign in to VISENSA</span>
