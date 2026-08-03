@@ -1,3 +1,5 @@
+const { supabase } = require('./config/supabase.js');
+
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -9,7 +11,6 @@ const { globalErrorHandler, notFoundHandler } = require('./middlewares/errorHand
 const { responseFormatter } = require('./middlewares/responseFormatter');
 
 const app = express();
-
 // ==============================
 // Security Middlewares
 // ==============================
@@ -58,6 +59,30 @@ app.get('/health', (req, res) => {
   });
 });
 
+// ===============================
+// DB TEST
+// ===============================
+app.get('/api/test-db', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('doctor')
+      .select('*')
+      .limit(5);
+
+    if (error) throw error;
+
+    res.json({
+      status: 'success',
+      message: 'Berhasil nyambung ke Supabase!',
+      data: data
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 'error',
+      message: error.message
+    });
+  }
+});
 // ==============================
 // API Routes
 // ==============================

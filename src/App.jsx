@@ -41,6 +41,9 @@ import LoginDoctor from './pages/login/LoginDoctor';
 import RegisterDoctor from './pages/register/RegisterDoctor';
 import Dashboard from "./pages/admin-dashboard/Dashboard";
 
+// Import ProtectedRoute yang baru dibuat
+import ProtectedRoute from "./utils/ProtectedRoute"; // Sesuaikan path ini jika lu nyimpennya di folder lain
+
 import { useLenis } from "./hooks/useLenis";
 import { useScrollReveal } from "./hooks/useGsapAnimations";
 
@@ -153,38 +156,34 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Jalur ke Landing Page (Halaman Utama) */}
+        {/* ========================================== */}
+        {/* PUBLIC ROUTES (Bebas diakses tanpa login)  */}
+        {/* ========================================== */}
         <Route path="/" element={<LandingPage />} />
-
-        {/* Jalur ke 3D Hand Tracking View */}
-        <Route path="/tracking-3d" element={<Tracking3DView />} />
-
-        {/* Jalur ke Halaman Login Kamu */}
         <Route path="/login" element={<Login />} />
-
-        {/* Jalur ke Halaman Register Baru */}
         <Route path="/register" element={<Register />} />
-
-        {/* Jalur ke Halaman Intro */}
-        <Route path="/intro" element={<SessionIntro />} />
-
-        {/* Jalur ke Halaman Kamera */}
-        <Route path="/camera" element={<Camera />} />
-
-        {/* Jalur ke Halaman Sesi Selesai */}
-        <Route path="/session-complete" element={<SessionComplete />} />
-
-        {/* Jalur ke Halaman Login Dokter */}
         <Route path="/login-doctor" element={<LoginDoctor />} />
-
-        {/* Jalur ke Halaman Register Dokter */}
         <Route path="/register-doctor" element={<RegisterDoctor />} />
+       {/* ========================================== */}
+        {/* PROTECTED ROUTES KHUSUS PASIEN             */}
+        {/* ========================================== */}
+        <Route element={<ProtectedRoute allowedRoles={['patient']} />}>
+          <Route path="/intro" element={<SessionIntro />} />
+          <Route path="/camera" element={<Camera />} />
+          <Route path="/session-complete" element={<SessionComplete />} />
+          <Route path="/tracking-3d" element={<Tracking3DView />} />
+        </Route>
 
-        {/* Jalur ke Halaman Dashboard Admin */}
-        <Route path="/admin-dashboard" element={<Dashboard />} />
+        {/* ========================================== */}
+        {/* PROTECTED ROUTES KHUSUS DOKTER             */}
+        {/* ========================================== */}
+        <Route element={<ProtectedRoute allowedRoles={['doctor']} />}>
+          <Route path="/admin-dashboard" element={<Dashboard />} />
+        </Route>
+        
       </Routes>
     </Router>
   );
-} // <--- Kurung kurawal penutup fungsi App harus di sini!
+} 
 
 export default App;

@@ -1,45 +1,46 @@
 const AppError = require('../utils/AppError');
-const { generateAccessToken, generateRefreshToken } = require('../middlewares/authenticate');
-
-/**
- * AuthService — Business logic for authentication.
- *
- * All DB operations are stubbed with mock data.
- * Replace the STUB sections with Supabase calls when DB is ready.
- */
+const { supabase } = require('../config/supabase'); // Pastiin path import ini bener
 
 const authService = {
   /**
    * Register a new user.
-   * @param {{ name, email, password, role }} data
+   * @param {{ name, email, password, condition, role }} data
    */
   async register(data) {
-    // ---- STUB: Check if email already exists ----
-    // TODO: Replace with Supabase query:
-    // const { data: existing } = await supabase.from('users').select('id').eq('email', data.email).single();
-    // if (existing) throw new AppError('Email is already registered.', 409);
+    // 1. Daftarin ke Supabase Auth
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email: data.email,
+      password: data.password,
+    });
 
-    const mockExistingEmails = ['test@example.com'];
-    if (mockExistingEmails.includes(data.email)) {
-      throw new AppError('Email is already registered.', 409);
+    // Kalau email udah ada atau password kurang kuat, Supabase bakal ngeluarin error
+    if (authError) throw new AppError(authError.message, 400);
+
+    const userId = authData.user.id;
+
+    // 2. Masukin data profil ke tabel yang sesuai berdasarkan role
+    if (data.role === 'doctor') {
+      const { error: dbError } = await supabase
+        .from('doctor')
+        .insert([{ name: data.name }]);
+        
+      if (dbError) throw new AppError('Gagal menyimpan profil dokter: ' + dbError.message, 500);
+    } else {
+      const { error: dbError } = await supabase
+        .from('patient')
+        .insert([{ name: data.name, condition: data.condition }]);
+        
+      if (dbError) throw new AppError('Gagal menyimpan profil pasien: ' + dbError.message, 500);
     }
 
-    // ---- STUB: Hash password & create user ----
-    // TODO: const hashedPassword = await bcrypt.hash(data.password, 12);
-    // const { data: user } = await supabase.from('users').insert({ ...data, password: hashedPassword }).select().single();
-
-    const newUser = {
-      id: 'mock-uuid-' + Date.now(),
-      name: data.name,
-      email: data.email,
-      role: data.role,
-      createdAt: new Date().toISOString(),
+    // 3. Ambil token bawaan Supabase
+    const session = authData.session;
+    
+    return { 
+      user: { id: userId, name: data.name, email: data.email, role: data.role }, 
+      accessToken: session ? session.access_token : null, 
+      refreshToken: session ? session.refresh_token : null 
     };
-
-    const accessToken = generateAccessToken({ userId: newUser.id, email: newUser.email, role: newUser.role });
-    const refreshToken = generateRefreshToken({ userId: newUser.id });
-
-    return { user: newUser, accessToken, refreshToken };
   },
 
   /**
@@ -47,25 +48,43 @@ const authService = {
    * @param {{ email, password }} data
    */
   async login(data) {
-    // ---- STUB: Find user by email ----
-    // TODO: const { data: user } = await supabase.from('users').select('*').eq('email', data.email).single();
-    // if (!user) throw new AppError('Invalid email or password.', 401);
-
-    const mockUser = {
-      id: 'mock-uuid-123',
-      name: 'Mock User',
+    // Supabase yang ngurusin validasi hash password di belakang layar
+    const { data: authData, error } = await supabase.auth.signInWithPassword({
       email: data.email,
-      role: data.email.includes('doctor') ? 'doctor' : 'patient',
+      password: data.password,
+    });
+
+    if (error) throw new AppError('Email atau password salah.', 401);
+
+    const userId = authData.user.id;
+    let actualRole = 'patient';
+    let name = '';
+
+    // Cari tau ini dokter atau pasien buat balikan data
+    const { data: doctorData } = await supabase.from('doctor').select('name').eq('user_id', userId).single();
+    if (doctorData) {
+      actualRole = 'doctor';
+      name = doctorData.name;
+    } else {
+      const { data: patientData } = await supabase.from('patient').select('name').eq('user_id', userId).single();
+      if (patientData) name = patientData.name;
+    }
+
+    if (actualRole !== data.expectedRole) {
+      // Supabase udah kebacut ngasih session, jadi kita hancurin (sign out) di sisi server
+      await supabase.auth.signOut();
+      
+      throw new AppError(
+        `Akses ditolak! Akun ini tidak terdaftar sebagai ${data.expectedRole}. Silakan login dengan email terdaftar atau di portal yang sesuai.`, 
+        403
+      );
+    }
+
+    return { 
+      user: { id: userId, name, email: data.email, role: actualRole }, 
+      accessToken: authData.session.access_token, 
+      refreshToken: authData.session.refresh_token 
     };
-
-    // ---- STUB: Verify password ----
-    // TODO: const isValid = await bcrypt.compare(data.password, user.password);
-    // if (!isValid) throw new AppError('Invalid email or password.', 401);
-
-    const accessToken = generateAccessToken({ userId: mockUser.id, email: mockUser.email, role: mockUser.role });
-    const refreshToken = generateRefreshToken({ userId: mockUser.id });
-
-    return { user: mockUser, accessToken, refreshToken };
   },
 
   /**
@@ -73,22 +92,16 @@ const authService = {
    * @param {string} refreshToken
    */
   async refresh(refreshToken) {
-    const jwt = require('jsonwebtoken');
-    let decoded;
-    try {
-      decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
-    } catch {
-      throw new AppError('Invalid or expired refresh token.', 401);
-    }
-
-    // TODO: Verify userId still exists in DB
-    const newAccessToken = generateAccessToken({
-      userId: decoded.userId,
-      email: 'mock@email.com', // replace with DB user
-      role: 'patient',         // replace with DB user
+    const { data, error } = await supabase.auth.refreshSession({
+      refresh_token: refreshToken
     });
 
-    return { accessToken: newAccessToken };
+    if (error) throw new AppError('Invalid or expired refresh token.', 401);
+
+    return { 
+      accessToken: data.session.access_token,
+      refreshToken: data.session.refresh_token
+    };
   },
 };
 
