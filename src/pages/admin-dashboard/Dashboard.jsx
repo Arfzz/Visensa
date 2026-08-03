@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import visensaLogo from "../../assets/visensa-logo.png"; 
+import visensaLogo from "../../assets/visensa-logo.png";
 
 // ==========================================
 // 1. DATA MOCK (DUMMY DATA)
@@ -66,36 +66,36 @@ const notificationsData = [
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  
+
   // States
   const [activeTab, setActiveTab] = useState("Feedback");
-  const [hoveredIndex, setHoveredIndex] = useState(2); 
+  const [hoveredIndex, setHoveredIndex] = useState(2);
   const [showNotif, setShowNotif] = useState(false);
-  
+
   // State untuk pasien aktif (Bisa ganti-ganti kalau diklik di sidebar)
-  const [activePatient, setActivePatient] = useState(initialPatients[0]); 
-  
+  const [activePatient, setActivePatient] = useState(initialPatients[0]);
+
   // State untuk membuka/tutup Modal
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-    const handleLogout = () => {
+  const handleLogout = () => {
     // 1. Bersihin semua data sesi dari browser
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('user');
 
     // 2. Arahin balik ke halaman login atau home
-    navigate('/login'); 
+    navigate('/login');
   };
 
   return (
     <div style={{ width: "100%", height: "100vh", display: "flex", background: "#F0F2F5", fontFamily: "Space Grotesk, sans-serif", overflow: "hidden", padding: "24px", boxSizing: "border-box", gap: "32px", position: "relative" }}>
-      
+
       {/* ============================== */}
       {/* SIDEBAR (KIRI)                 */}
       {/* ============================== */}
       <div style={{ width: "320px", minWidth: "320px", background: "#151E2C", borderRadius: "24px", boxShadow: "0px 13px 80px rgba(226, 236, 249, 0.25)", display: "flex", flexDirection: "column", zIndex: 10, overflow: "hidden" }}>
-        
+
         {/* Logo Section */}
         <div style={{ padding: "40px 30px", display: "flex", alignItems: "center", gap: "15px" }}>
           <img src={visensaLogo} alt="VISENSA Logo" style={{ width: "28px", height: "auto" }} />
@@ -111,7 +111,7 @@ const Dashboard = () => {
               <div style={{ color: "#7AAAB4", fontSize: "11px", fontFamily: "Space Mono", letterSpacing: "1.2px" }}>PATIENTS (5)</div>
               <div style={{ background: "rgba(212, 168, 67, 0.12)", border: "1px solid rgba(212, 168, 67, 0.25)", borderRadius: "20px", padding: "2px 6px", color: "#D4A843", fontSize: "10px", fontFamily: "Space Mono", fontWeight: "700" }}>1!</div>
             </div>
-            
+
             {/* Tombol Add Patient (+) memicu isModalOpen */}
             <div onClick={() => setIsModalOpen(true)} style={{ width: "28px", height: "28px", background: "rgba(96.85, 242.61, 255, 0.08)", borderRadius: "8px", display: "flex", justifyContent: "center", alignItems: "center", cursor: "pointer", transition: "all 0.2s" }}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -124,9 +124,9 @@ const Dashboard = () => {
             {initialPatients.map((patient) => {
               const isSelected = activePatient.id === patient.id;
               return (
-                <div 
-                  key={patient.id} 
-                  onClick={() => setActivePatient(patient)} 
+                <div
+                  key={patient.id}
+                  onClick={() => setActivePatient(patient)}
                   style={{ padding: "12px 16px", background: isSelected ? "#F0FAFB" : "transparent", borderRadius: "12px", border: isSelected ? "1px solid #C4E8EC" : "1px solid transparent", display: "flex", alignItems: "center", gap: "12px", cursor: "pointer", transition: "all 0.2s" }}
                 >
                   <div style={{ width: "36px", height: "36px", background: isSelected ? "linear-gradient(135deg, #0099A6 0%, #007580 100%)" : "#1A2536", borderRadius: "50%", display: "flex", justifyContent: "center", alignItems: "center" }}>
@@ -167,14 +167,14 @@ const Dashboard = () => {
       {/* MAIN CONTENT (KANAN)           */}
       {/* ============================== */}
       <div style={{ flex: 1, overflowY: "auto", paddingRight: "12px", paddingBottom: "24px", display: "flex", flexDirection: "column" }}>
-        
+
         {/* Header Top & Notifications */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "40px", marginTop: "16px" }}>
           <div>
             <div style={{ color: "#9AABB8", fontSize: "15px", fontWeight: "500", marginBottom: "8px" }}>Hello, Dr. Sarah K.</div>
             <div style={{ color: "#1A2332", fontSize: "36px", fontWeight: "700" }}>Patient Monitoring</div>
           </div>
-          
+
           {/* Notification Bell */}
           <div style={{ position: "relative" }}>
             <div onClick={() => setShowNotif(!showNotif)} style={{ width: "48px", height: "48px", background: "white", borderRadius: "16px", boxShadow: "0px 2px 10px rgba(0,0,0,0.05)", display: "flex", justifyContent: "center", alignItems: "center", cursor: "pointer", border: showNotif ? "1.5px solid #0099A6" : "1.5px solid transparent", transition: "all 0.2s" }}>
@@ -232,9 +232,9 @@ const Dashboard = () => {
               <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "8px" }}>
                 <div style={{ color: "#0C2830", fontSize: "24px", fontWeight: "700" }}>{activePatient.name}</div>
                 {activePatient.isNew ? (
-                   <div style={{ background: "rgba(0, 153, 166, 0.08)", border: "1px solid rgba(0, 153, 166, 0.2)", borderRadius: "20px", padding: "4px 12px", color: "#0099A6", fontSize: "13px", fontFamily: "Space Mono", fontWeight: "700" }}>New patient</div>
+                  <div style={{ background: "rgba(0, 153, 166, 0.08)", border: "1px solid rgba(0, 153, 166, 0.2)", borderRadius: "20px", padding: "4px 12px", color: "#0099A6", fontSize: "13px", fontFamily: "Space Mono", fontWeight: "700" }}>New patient</div>
                 ) : (
-                   <div style={{ background: "rgba(75, 168, 130, 0.1)", border: "1px solid rgba(75, 168, 130, 0.2)", borderRadius: "20px", padding: "4px 12px", color: "#4BA882", fontSize: "13px", fontFamily: "Space Mono", fontWeight: "700" }}>Active</div>
+                  <div style={{ background: "rgba(75, 168, 130, 0.1)", border: "1px solid rgba(75, 168, 130, 0.2)", borderRadius: "20px", padding: "4px 12px", color: "#4BA882", fontSize: "13px", fontFamily: "Space Mono", fontWeight: "700" }}>Active</div>
                 )}
               </div>
               <div style={{ display: "flex", gap: "20px", color: "#7AAAB4", fontSize: "14.5px", fontFamily: "Space Mono" }}>
@@ -265,19 +265,19 @@ const Dashboard = () => {
           /* TAMPILAN EMPTY STATE (KOSONG)  */
           /* ============================== */
           <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", paddingBottom: "100px" }}>
-             <div style={{ width: "74px", height: "74px", background: "rgba(0, 153, 166, 0.08)", borderRadius: "21px", border: "1.34px solid rgba(0, 153, 166, 0.20)", display: "flex", justifyContent: "center", alignItems: "center", marginBottom: "18px" }}>
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0099A6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                   <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
-                </svg>
-             </div>
-             <div style={{ color: "#0C2830", fontSize: "21px", fontFamily: "Space Grotesk", fontWeight: "700", marginBottom: "8px" }}>No sessions yet</div>
-             <div style={{ color: "#7AAAB4", fontSize: "17px", fontFamily: "Space Grotesk", textAlign: "center", maxWidth: "380px", lineHeight: "1.5", marginBottom: "20px" }}>
-                {activePatient.name.toLowerCase()} has been registered but hasn't completed their first therapy session. Share their login link to get started.
-             </div>
-             <div style={{ background: "rgba(75, 168, 130, 0.07)", border: "1.34px solid rgba(75, 168, 130, 0.18)", borderRadius: "13px", padding: "12px 24px", display: "flex", alignItems: "center", gap: "10px", color: "#4BA882", fontSize: "15px", fontFamily: "Space Mono" }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-                Registration complete · login email sent
-             </div>
+            <div style={{ width: "74px", height: "74px", background: "rgba(0, 153, 166, 0.08)", borderRadius: "21px", border: "1.34px solid rgba(0, 153, 166, 0.20)", display: "flex", justifyContent: "center", alignItems: "center", marginBottom: "18px" }}>
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0099A6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+              </svg>
+            </div>
+            <div style={{ color: "#0C2830", fontSize: "21px", fontFamily: "Space Grotesk", fontWeight: "700", marginBottom: "8px" }}>No sessions yet</div>
+            <div style={{ color: "#7AAAB4", fontSize: "17px", fontFamily: "Space Grotesk", textAlign: "center", maxWidth: "380px", lineHeight: "1.5", marginBottom: "20px" }}>
+              {activePatient.name.toLowerCase()} has been registered but hasn't completed their first therapy session. Share their login link to get started.
+            </div>
+            <div style={{ background: "rgba(75, 168, 130, 0.07)", border: "1.34px solid rgba(75, 168, 130, 0.18)", borderRadius: "13px", padding: "12px 24px", display: "flex", alignItems: "center", gap: "10px", color: "#4BA882", fontSize: "15px", fontFamily: "Space Mono" }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+              Registration complete · login email sent
+            </div>
           </div>
         ) : (
           /* ============================== */
@@ -435,9 +435,9 @@ const Dashboard = () => {
       {/* ============================== */}
       {isModalOpen && (
         <div style={{ position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh", background: "rgba(12, 40, 48, 0.4)", zIndex: 9999, display: "flex", justifyContent: "center", alignItems: "center", backdropFilter: "blur(4px)" }}>
-          
+
           <div style={{ width: "840px", background: "white", borderRadius: "35px", boxShadow: "0px 35px 106px rgba(12, 40, 48, 0.18)", border: "1.77px solid #C4E8EC", overflow: "hidden", display: "flex", flexDirection: "column" }}>
-            
+
             {/* Modal Header */}
             <div style={{ padding: "35px 42px 28px", borderBottom: "1.77px solid #C4E8EC", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <div style={{ display: "flex", flexDirection: "column" }}>
@@ -449,7 +449,7 @@ const Dashboard = () => {
                 </div>
                 <div style={{ color: "#7AAAB4", fontSize: "21px", fontFamily: "Space Grotesk", paddingLeft: "65px" }}>Patient will receive login credentials via email</div>
               </div>
-              
+
               <div onClick={() => setIsModalOpen(false)} style={{ cursor: "pointer", padding: "8px" }}>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7AAAB4" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
               </div>
@@ -457,7 +457,7 @@ const Dashboard = () => {
 
             {/* Modal Body */}
             <div style={{ padding: "35px 42px", display: "flex", flexDirection: "column", gap: "28px" }}>
-              
+
               <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                 <div style={{ fontSize: "21px", fontFamily: "Space Grotesk", fontWeight: "600" }}>
                   <span style={{ color: "#3A6870" }}>Full name </span><span style={{ color: "#C0574C" }}>*</span>
@@ -470,14 +470,14 @@ const Dashboard = () => {
                   <span style={{ color: "#3A6870" }}>Diagnosis / condition </span><span style={{ color: "#C0574C" }}>*</span>
                 </div>
                 <div style={{ position: "relative" }}>
-                   <select style={{ width: "100%", height: "73px", padding: "0 24px", background: "white", border: "1.77px solid #C4E8EC", borderRadius: "17px", color: "rgba(12, 40, 48, 0.50)", fontSize: "22px", fontFamily: "Space Grotesk", boxSizing: "border-box", outline: "none", appearance: "none" }}>
-                      <option>Select condition</option>
-                      <option>Stroke / Hemiparesis</option>
-                      <option>Phantom Limb Pain</option>
-                   </select>
-                   <div style={{ position: "absolute", right: "24px", top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}>
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7AAAB4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                   </div>
+                  <select style={{ width: "100%", height: "73px", padding: "0 24px", background: "white", border: "1.77px solid #C4E8EC", borderRadius: "17px", color: "rgba(12, 40, 48, 0.50)", fontSize: "22px", fontFamily: "Space Grotesk", boxSizing: "border-box", outline: "none", appearance: "none" }}>
+                    <option>Select condition</option>
+                    <option>Stroke / Hemiparesis</option>
+                    <option>Phantom Limb Pain</option>
+                  </select>
+                  <div style={{ position: "absolute", right: "24px", top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7AAAB4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                  </div>
                 </div>
               </div>
 
@@ -491,12 +491,12 @@ const Dashboard = () => {
 
             {/* Modal Footer */}
             <div style={{ padding: "24px 42px 35px", borderTop: "1.77px solid #C4E8EC", display: "flex", justifyContent: "flex-end", gap: "17px" }}>
-               <button onClick={() => setIsModalOpen(false)} style={{ padding: "15px 31px", background: "white", border: "1.77px solid #C4E8EC", borderRadius: "17px", color: "#3A6870", fontSize: "23px", fontFamily: "Space Grotesk", fontWeight: "500", cursor: "pointer" }}>
-                  Cancel
-               </button>
-               <button onClick={() => setIsModalOpen(false)} style={{ padding: "15px 38px", background: "linear-gradient(135deg, #0099A6 0%, #007580 100%)", boxShadow: "0px 3.5px 21px rgba(0, 153, 166, 0.28)", border: "none", borderRadius: "17px", color: "white", fontSize: "23px", fontFamily: "Space Grotesk", fontWeight: "700", cursor: "pointer" }}>
-                  Register patient
-               </button>
+              <button onClick={() => setIsModalOpen(false)} style={{ padding: "15px 31px", background: "white", border: "1.77px solid #C4E8EC", borderRadius: "17px", color: "#3A6870", fontSize: "23px", fontFamily: "Space Grotesk", fontWeight: "500", cursor: "pointer" }}>
+                Cancel
+              </button>
+              <button onClick={() => setIsModalOpen(false)} style={{ padding: "15px 38px", background: "linear-gradient(135deg, #0099A6 0%, #007580 100%)", boxShadow: "0px 3.5px 21px rgba(0, 153, 166, 0.28)", border: "none", borderRadius: "17px", color: "white", fontSize: "23px", fontFamily: "Space Grotesk", fontWeight: "700", cursor: "pointer" }}>
+                Register patient
+              </button>
             </div>
 
           </div>

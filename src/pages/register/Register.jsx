@@ -58,6 +58,11 @@ const Register = () => {
       const data = await response.json();
 
       if (!response.ok) {
+        if (data.errors && data.errors.length > 0) {
+          // Kalau ada pesan detail dari Zod validator, gabungkan semuanya
+          const errorMessages = data.errors.map(err => err.message).join(' | ');
+          throw new Error(errorMessages);
+        }
         throw new Error(data.message || 'Gagal register, coba lagi deh.');
       }
 
@@ -66,8 +71,8 @@ const Register = () => {
       localStorage.setItem('refreshToken', data.data.refreshToken);
       localStorage.setItem('user', JSON.stringify(data.data.user));
 
-      // Arahin ke halaman intro/dashboard
-      navigate('/intro');
+      // Arahin ke halaman dashboard
+      navigate('/patient-dashboard');
       
     } catch (error) {
       setErrorMessage(error.message);

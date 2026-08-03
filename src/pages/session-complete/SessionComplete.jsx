@@ -564,7 +564,7 @@ const SessionComplete = () => {
 
           {/* Action Button */}
           <button
-            onClick={() => navigate("/intro")}
+            onClick={() => navigate("/patient-dashboard")}
             style={{
               width: "100%",
               padding: "18px",
@@ -583,7 +583,7 @@ const SessionComplete = () => {
               gap: "8px",
             }}
           >
-            Submit and Exercise again
+            Back to Dashboard
           </button>
         </div>
       </div>

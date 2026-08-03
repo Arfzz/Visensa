@@ -1,5 +1,5 @@
 const AppError = require('../utils/AppError');
-const { supabase } = require('../config/supabase'); // Pastiin path import ini bener
+const { supabase, createAuthClient } = require('../config/supabase');
 
 const authService = {
   /**
@@ -7,8 +7,9 @@ const authService = {
    * @param {{ name, email, password, condition, role }} data
    */
   async register(data) {
-    // 1. Daftarin ke Supabase Auth
-    const { data: authData, error: authError } = await supabase.auth.signUp({
+    // 1. Daftarin ke Supabase Auth pake client terpisah biar gak ngotorin admin singleton
+    const authClient = createAuthClient();
+    const { data: authData, error: authError } = await authClient.auth.signUp({
       email: data.email,
       password: data.password,
     });
@@ -22,13 +23,13 @@ const authService = {
     if (data.role === 'doctor') {
       const { error: dbError } = await supabase
         .from('doctor')
-        .insert([{ name: data.name }]);
+        .insert([{ user_id: userId, name: data.name }]);
         
       if (dbError) throw new AppError('Gagal menyimpan profil dokter: ' + dbError.message, 500);
     } else {
       const { error: dbError } = await supabase
         .from('patient')
-        .insert([{ name: data.name, condition: data.condition }]);
+        .insert([{ user_id: userId, name: data.name, condition: data.condition }]);
         
       if (dbError) throw new AppError('Gagal menyimpan profil pasien: ' + dbError.message, 500);
     }
@@ -49,7 +50,8 @@ const authService = {
    */
   async login(data) {
     // Supabase yang ngurusin validasi hash password di belakang layar
-    const { data: authData, error } = await supabase.auth.signInWithPassword({
+    const authClient = createAuthClient();
+    const { data: authData, error } = await authClient.auth.signInWithPassword({
       email: data.email,
       password: data.password,
     });
@@ -72,7 +74,7 @@ const authService = {
 
     if (actualRole !== data.expectedRole) {
       // Supabase udah kebacut ngasih session, jadi kita hancurin (sign out) di sisi server
-      await supabase.auth.signOut();
+      await authClient.auth.signOut();
       
       throw new AppError(
         `Akses ditolak! Akun ini tidak terdaftar sebagai ${data.expectedRole}. Silakan login dengan email terdaftar atau di portal yang sesuai.`, 
@@ -92,7 +94,8 @@ const authService = {
    * @param {string} refreshToken
    */
   async refresh(refreshToken) {
-    const { data, error } = await supabase.auth.refreshSession({
+    const authClient = createAuthClient();
+    const { data, error } = await authClient.auth.refreshSession({
       refresh_token: refreshToken
     });
 

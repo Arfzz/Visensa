@@ -59,8 +59,8 @@ const Login = () => {
       localStorage.setItem("refreshToken", data.data.refreshToken);
       localStorage.setItem("user", JSON.stringify(data.data.user));
 
-      // 5. Lempar ke halaman exercise (karena dasbor belum ada)
-      navigate("/intro");
+      // 5. Lempar ke halaman dashboard
+      navigate("/patient-dashboard");
 
     } catch (error) {
       setErrorMessage(error.message);
