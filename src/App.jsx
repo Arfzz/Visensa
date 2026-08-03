@@ -38,6 +38,7 @@ import SessionIntro from "./pages/intro/SessionIntro";
 import Camera from "./pages/camera/Camera";
 import SessionComplete from "./pages/session-complete/SessionComplete";
 import PatientDashboard from './pages/patient-dashboard/PatientDashboard';
+import StreakSandbox from './features/gamification/streak/StreakSandbox';
 
 // Import Pages Dokter/Admin
 import LoginDoctor from './pages/login/LoginDoctor';
@@ -189,6 +190,11 @@ function App() {
 
         {/* Jalur ke Halaman Dashboard Pasien (Baru Ditambahkan) */}
         <Route path="/patient-dashboard" element={<PatientDashboard />} />
+        <Route path="/interactive-practice" element={<PatientDashboard initialTab="Interactive Practice" />} />
+
+        {/* Jalur ke Sandbox Streak Mini-Games */}
+        <Route path="/streak-test" element={<StreakSandbox />} />
+        <Route path="/streak-sandbox" element={<StreakSandbox />} />
       </Routes>
     </Router>
   );

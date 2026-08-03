@@ -2,6 +2,10 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import visensaLogo from "../../assets/visensa-logo.png";
 import avatarHands from "../../assets/avatar-hands.png";
+import PatientSidebar from "./PatientSidebar";
+import InteractivePracticeHub from "../../features/gamification/interactive-practice/InteractivePracticeHub";
+import InteractivePracticeDashboardCTA from "../../features/gamification/interactive-practice/InteractivePracticeDashboardCTA";
+
 
 // ==========================================
 // 1. DATA MOCK (DUMMY DATA)
@@ -168,9 +172,9 @@ const CustomSelect = ({ label, value, options, isOpen, onToggle, onSelect }) => 
 // ==========================================
 // 2. KOMPONEN UTAMA
 // ==========================================
-const PatientDashboard = () => {
+const PatientDashboard = ({ initialTab = "Dashboard" }) => {
   const navigate = useNavigate();
-  const [activeMenu, setActiveMenu] = useState("Dashboard"); 
+  const [activeMenu, setActiveMenu] = useState(initialTab); 
   const [activeFilter, setActiveFilter] = useState("All sessions");
   
   // State Session & Notif
@@ -244,42 +248,16 @@ const PatientDashboard = () => {
       {/* ============================== */}
       {/* 1. SIDEBAR (KIRI)              */}
       {/* ============================== */}
-      <div style={{ width: "300px", minWidth: "300px", background: "#151E2C", borderRadius: "24px", display: "flex", flexDirection: "column", padding: "35px 25px", boxSizing: "border-box", zIndex: 10, boxShadow: "0px 13px 80px rgba(226, 236, 249, 0.25)" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "12px", paddingLeft: "15px", marginBottom: "45px" }}>
-          <img src={visensaLogo} alt="VISENSA" style={{ width: "24px", height: "auto" }} />
-          <div style={{ color: "#F0FAFB", fontSize: "26px", fontWeight: "800", letterSpacing: "1px" }}>VISENSA</div>
-        </div>
-        
-        {/* Menu Navigation */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "12px", flex: 1 }}>
-          {["Dashboard", "Sessions", "Settings"].map((menu) => {
-            const isActive = activeMenu === menu;
-            return (
-              <div 
-                key={menu}
-                onClick={() => {
-                  setActiveMenu(menu);
-                  setSelectedSession(null); 
-                  setOpenDropdown(null);
-                  setIsEditingEmail(false);
-                }}
-                style={{ padding: "16px 20px", background: isActive ? "linear-gradient(135deg, #C8F135 0%, #96C000 100%)" : "transparent", borderRadius: "16px", display: "flex", alignItems: "center", gap: "15px", cursor: "pointer", boxShadow: isActive ? "0px 5px 17px rgba(31, 168, 143, 0.30)" : "none", transition: "all 0.2s" }}
-              >
-                {renderIcon(menu, isActive)}
-                <div style={{ color: isActive ? "#1A2332" : "#7AAAB4", fontSize: "17px", fontWeight: isActive ? "700" : "500" }}>{menu}</div>
-              </div>
-            );
-          })}
-        </div>
-        
-        <div style={{ background: "rgba(59, 184, 176, 0.06)", border: "1.5px solid rgba(59, 184, 176, 0.16)", borderRadius: "16px", padding: "18px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "6px" }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3ED8C8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 15l-2 5-9-5 9-5 2 5z"></path><circle cx="12" cy="8" r="6"></circle></svg>
-            <div style={{ color: "#3ED8C8", fontSize: "15.5px", fontWeight: "700" }}>4-week streak</div>
-          </div>
-          <div style={{ color: "#7AAAB4", fontSize: "14px" }}>Consistent recovery progress.</div>
-        </div>
-      </div>
+      <PatientSidebar
+        activeMenu={activeMenu}
+        onSelectMenu={(menu) => {
+          setActiveMenu(menu);
+          setSelectedSession(null); 
+          setOpenDropdown(null);
+          setIsEditingEmail(false);
+        }}
+      />
+
 
       {/* ============================== */}
       {/* 2. AREA TENGAH DINAMIS         */}
@@ -342,6 +320,9 @@ const PatientDashboard = () => {
                 </div>
               </div>
             </div>
+
+            {/* INTERAKTIF PRACTICE SECONDARY CTA BANNER */}
+            <InteractivePracticeDashboardCTA onNavigate={() => setActiveMenu("Interactive Practice")} />
 
             {/* INTERAKTIF: Grafik Pain Trend (Garis) dengan Tooltip Kotak Putih */}
             <div style={{ background: "white", borderRadius: "20px", border: "1.5px solid #C4E8EC", padding: "28px", boxShadow: "0 2px 10px rgba(0,0,0,0.02)", flexShrink: 0, position: "relative" }}>
@@ -668,6 +649,13 @@ const PatientDashboard = () => {
             </>
           )}
 
+        </div>
+      )}
+
+      {/* --- INTERACTIVE PRACTICE ACTIVE --- */}
+      {activeMenu === "Interactive Practice" && (
+        <div data-lenis-prevent="true" style={{ flex: 1, padding: "10px 20px 40px 20px", overflowY: "auto", display: "flex", flexDirection: "column", minHeight: 0 }}>
+          <InteractivePracticeHub />
         </div>
       )}
 
