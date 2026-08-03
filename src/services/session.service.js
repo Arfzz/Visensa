@@ -1,63 +1,259 @@
 const AppError = require('../utils/AppError');
+const { supabase } = require('../config/supabase');
 
 /**
- * SessionService — Business logic for rehabilitation sessions.
- * All DB calls are stubbed. Replace with Supabase when ready.
+ * SessionService — Business logic for exercise & minigame sessions.
+ *
+ * Schema:
+ *   patient_schedules: id, created_at, patient_id, exercise_id, interval_days,
+ *                      next_reminder_at, is_active
+ *   exercise_logs:     id, schedule_id (→ patient_schedules), duration_seconds,
+ *                      max_angle, pain_level, created_at
+ *   minigame_logs:     id, patient_id (→ patient), schedule_id (→ patient_schedules),
+ *                      score, duration_seconds, max_combo, played_at
+ *   gamification_stats: patient_id (→ patient), total_scheduled_exercises,
+ *                       completed_exercises, total_minigame_score,
+ *                       current_streak, highest_streak, updated_at
  */
-
-const MOCK_SESSIONS = [
-  { id: 's-001', patientId: 'p-001', exerciseId: 'ex-001', exerciseName: 'Finger Spread', durationSeconds: 120, repsCompleted: 15, status: 'completed', createdAt: '2026-07-28T08:00:00Z' },
-  { id: 's-002', patientId: 'p-001', exerciseId: 'ex-002', exerciseName: 'Hand Open/Close', durationSeconds: 90, repsCompleted: 20, status: 'completed', createdAt: '2026-07-29T08:30:00Z' },
-  { id: 's-003', patientId: 'p-002', exerciseId: 'ex-001', exerciseName: 'Finger Spread', durationSeconds: 60, repsCompleted: 8, status: 'completed', createdAt: '2026-07-30T09:00:00Z' },
-];
-
 const sessionService = {
+
+  // ==============================================================
+  // EXERCISE LOGS
+  // ==============================================================
+
   /**
-   * Create a new session after user completes an exercise.
+   * Log a completed exercise session.
+   * Requires an active patient_schedule.
+   *
+   * @param {string} scheduleId  — patient_schedules.id (uuid)
+   * @param {object} data        — { durationSeconds, maxAngle, painLevel }
    */
-  async createSession(patientId, data) {
-    // TODO: Supabase insert
-    const newSession = {
-      id: 's-' + Date.now(),
-      patientId,
-      ...data,
-      status: 'completed',
-      createdAt: new Date().toISOString(),
+  async logExercise(scheduleId, data) {
+    // Validate schedule exists
+    const { data: schedule, error: sErr } = await supabase
+      .from('patient_schedules')
+      .select('id, patient_id, is_active')
+      .eq('id', scheduleId)
+      .single();
+
+    if (sErr || !schedule) throw new AppError('Jadwal latihan tidak ditemukan.', 404);
+    if (!schedule.is_active) throw new AppError('Jadwal latihan sudah tidak aktif.', 400);
+
+    // Insert exercise log
+    const { data: log, error } = await supabase
+      .from('exercise_logs')
+      .insert([{
+        schedule_id:      scheduleId,
+        duration_seconds: data.durationSeconds,
+        max_angle:        data.maxAngle  ?? null,
+        pain_level:       data.painLevel ?? null,
+      }])
+      .select()
+      .single();
+
+    if (error) throw new AppError('Gagal menyimpan log latihan: ' + error.message, 500);
+
+    // Update gamification_stats: increment completed_exercises
+    await supabase.rpc('increment_completed_exercises', { p_patient_id: schedule.patient_id })
+      .then(() => {}) // Non-blocking — fails silently if RPC not set up yet
+      .catch(() => {});
+
+    return log;
+  },
+
+  /**
+   * Get exercise history for the logged-in patient (via patient_schedules join).
+   *
+   * @param {string} patientId  — patient.id (table PK, NOT user_id)
+   */
+  async getPatientExerciseLogs(patientId, { page, limit }) {
+    const from = (page - 1) * limit;
+    const to   = from + limit - 1;
+
+    // exercise_logs → patient_schedules → filter by patient_id
+    const { data, error, count } = await supabase
+      .from('exercise_logs')
+      .select(
+        'id, duration_seconds, max_angle, pain_level, created_at, schedule:schedule_id(id, exercise_id, patient_id)',
+        { count: 'exact' }
+      )
+      .eq('schedule.patient_id', patientId)
+      .order('created_at', { ascending: false })
+      .range(from, to);
+
+    if (error) throw new AppError('Gagal mengambil riwayat latihan: ' + error.message, 500);
+    return { data: data ?? [], total: count ?? 0 };
+  },
+
+  /**
+   * Doctor: get all exercise logs, optionally filtered by patientId.
+   */
+  async getAllExerciseLogs({ page, limit, patientId }) {
+    const from = (page - 1) * limit;
+    const to   = from + limit - 1;
+
+    let query = supabase
+      .from('exercise_logs')
+      .select(
+        'id, duration_seconds, max_angle, pain_level, created_at, schedule:schedule_id(id, exercise_id, patient_id, patient:patient_id(id, name))',
+        { count: 'exact' }
+      )
+      .order('created_at', { ascending: false })
+      .range(from, to);
+
+    if (patientId) {
+      query = query.eq('schedule.patient_id', patientId);
+    }
+
+    const { data, error, count } = await query;
+    if (error) throw new AppError('Gagal mengambil semua log latihan: ' + error.message, 500);
+    return { data: data ?? [], total: count ?? 0 };
+  },
+
+  /**
+   * Get a single exercise log by ID.
+   */
+  async getExerciseLogById(logId) {
+    const { data, error } = await supabase
+      .from('exercise_logs')
+      .select('id, duration_seconds, max_angle, pain_level, created_at, schedule:schedule_id(id, exercise_id, patient_id)')
+      .eq('id', logId)
+      .single();
+
+    if (error || !data) throw new AppError('Exercise log not found.', 404);
+    return data;
+  },
+
+  // ==============================================================
+  // MINIGAME LOGS (Piano Tiles)
+  // ==============================================================
+
+  /**
+   * Log a completed Piano Tiles minigame session.
+   *
+   * @param {string} patientId   — patient.id (table PK)
+   * @param {object} data        — { scheduleId?, score, durationSeconds, maxCombo }
+   */
+  async logMinigame(patientId, data) {
+    const { data: log, error } = await supabase
+      .from('minigame_logs')
+      .insert([{
+        patient_id:       patientId,
+        schedule_id:      data.scheduleId ?? null,
+        score:            data.score,
+        duration_seconds: data.durationSeconds,
+        max_combo:        data.maxCombo ?? 0,
+        played_at:        new Date().toISOString(),
+      }])
+      .select()
+      .single();
+
+    if (error) throw new AppError('Gagal menyimpan hasil minigame: ' + error.message, 500);
+
+    // Update gamification_stats — upsert total_minigame_score, streaks
+    await sessionService._upsertGamificationStats(patientId, data.score);
+
+    return log;
+  },
+
+  /**
+   * Get minigame history for a patient, paginated.
+   */
+  async getPatientMinigameLogs(patientId, { page, limit }) {
+    const from = (page - 1) * limit;
+    const to   = from + limit - 1;
+
+    const { data, error, count } = await supabase
+      .from('minigame_logs')
+      .select('id, score, duration_seconds, max_combo, played_at', { count: 'exact' })
+      .eq('patient_id', patientId)
+      .order('played_at', { ascending: false })
+      .range(from, to);
+
+    if (error) throw new AppError('Gagal mengambil riwayat minigame: ' + error.message, 500);
+    return { data: data ?? [], total: count ?? 0 };
+  },
+
+  // ==============================================================
+  // GAMIFICATION STATS
+  // ==============================================================
+
+  /**
+   * Get aggregated gamification stats for a patient.
+   * Reads from gamification_stats table + computes trend from minigame_logs.
+   *
+   * @param {string} patientId — patient.id (table PK)
+   */
+  async getPatientStats(patientId) {
+    // Aggregated stats from gamification_stats table
+    const { data: stats } = await supabase
+      .from('gamification_stats')
+      .select('total_scheduled_exercises, completed_exercises, total_minigame_score, current_streak, highest_streak, updated_at')
+      .eq('patient_id', patientId)
+      .single();
+
+    // Last 7 minigame sessions for score trend
+    const { data: trend } = await supabase
+      .from('minigame_logs')
+      .select('score, max_combo, duration_seconds, played_at')
+      .eq('patient_id', patientId)
+      .order('played_at', { ascending: false })
+      .limit(7);
+
+    // Last 7 exercise logs for exercise trend (via patient_schedules)
+    const { data: exerciseTrend } = await supabase
+      .from('exercise_logs')
+      .select('duration_seconds, max_angle, pain_level, created_at, schedule:schedule_id(patient_id)')
+      .eq('schedule.patient_id', patientId)
+      .order('created_at', { ascending: false })
+      .limit(7);
+
+    return {
+      gamification: stats ?? {
+        total_scheduled_exercises: 0,
+        completed_exercises: 0,
+        total_minigame_score: 0,
+        current_streak: 0,
+        highest_streak: 0,
+      },
+      minigameTrend:  (trend ?? []).reverse(),
+      exerciseTrend:  (exerciseTrend ?? []).reverse(),
     };
-    return newSession;
   },
 
-  /**
-   * Get all sessions for a patient.
-   */
-  async getPatientSessions(patientId, { page, limit }) {
-    // TODO: Supabase paginated query
-    const all = MOCK_SESSIONS.filter((s) => s.patientId === patientId);
-    const total = all.length;
-    const data = all.slice((page - 1) * limit, page * limit);
-    return { data, total };
-  },
+  // ==============================================================
+  // INTERNAL HELPERS
+  // ==============================================================
 
   /**
-   * Get all sessions (Doctor overview).
+   * Upsert gamification_stats after a minigame session.
+   * Increments total_minigame_score and recalculates streak.
    */
-  async getAllSessions({ page, limit, patientId }) {
-    // TODO: Supabase paginated query with optional patientId filter
-    let all = [...MOCK_SESSIONS];
-    if (patientId) all = all.filter((s) => s.patientId === patientId);
-    const total = all.length;
-    const data = all.slice((page - 1) * limit, page * limit);
-    return { data, total };
-  },
+  async _upsertGamificationStats(patientId, newScore) {
+    try {
+      const { data: existing } = await supabase
+        .from('gamification_stats')
+        .select('total_minigame_score, current_streak, highest_streak')
+        .eq('patient_id', patientId)
+        .single();
 
-  /**
-   * Get a single session by ID.
-   */
-  async getById(sessionId) {
-    // TODO: Supabase single query
-    const session = MOCK_SESSIONS.find((s) => s.id === sessionId);
-    if (!session) throw new AppError('Session not found.', 404);
-    return session;
+      const today          = new Date().toDateString();
+      const currentStreak  = existing ? existing.current_streak + 1 : 1;
+      const highestStreak  = existing ? Math.max(existing.highest_streak, currentStreak) : 1;
+      const totalScore     = existing ? existing.total_minigame_score + newScore : newScore;
+
+      await supabase
+        .from('gamification_stats')
+        .upsert({
+          patient_id:          patientId,
+          total_minigame_score: totalScore,
+          current_streak:       currentStreak,
+          highest_streak:       highestStreak,
+          updated_at:           new Date().toISOString(),
+        }, { onConflict: 'patient_id' });
+    } catch {
+      // Non-blocking — stat update failure should not block session logging
+    }
   },
 };
 
