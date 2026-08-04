@@ -13,8 +13,29 @@ const SessionComplete = () => {
   // State untuk menyimpan nilai slider rasa sakit (0 - 10)
   const [painScore, setPainScore] = useState(7);
   const [isSaving, setIsSaving] = useState(false);
+  const [previousPain, setPreviousPain] = useState(null);
 
-  const handleSubmit = async () => {
+  useEffect(() => {
+    const fetchPreviousPain = async () => {
+      try {
+        const token = localStorage.getItem('accessToken');
+        const res = await fetch(`${API_BASE}/sessions/exercise/me`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.length > 0) {
+            setPreviousPain(data[0].pain_level ?? null);
+          }
+        }
+      } catch (e) {
+        console.error("Failed to fetch previous pain", e);
+      }
+    };
+    fetchPreviousPain();
+  }, []);
+
+  const handleSubmit = async (navigateToInteractive = false) => {
     if (isSaving) return;
     setIsSaving(true);
     try {
@@ -47,7 +68,11 @@ const SessionComplete = () => {
     } 
     
     // If successful, navigate
-    navigate('/patient-dashboard');
+    if (navigateToInteractive) {
+      navigate('/patient-dashboard', { state: { activeMenu: 'Interactive Practice' } });
+    } else {
+      navigate('/patient-dashboard');
+    }
   };
 
   // Logika dinamis untuk warna, teks, dan emoji berdasarkan score
@@ -607,42 +632,78 @@ const SessionComplete = () => {
               Before this session
             </div>
             <div style={{ color: "#3A6870", fontSize: "16px" }}>
-              Your pain was{" "}
-              <span style={{ color: "#0C2830", fontWeight: "700" }}>6/10</span>{" "}
-              — that's{" "}
-              <span style={{ color: "#4BA882", fontWeight: "600" }}>
-                {Math.max(0, 6 - painScore)} points lower
-              </span>{" "}
-              now.
+              {previousPain === null ? (
+                <>
+                  Your first session! Slide to indicate your current pain level.
+                </>
+              ) : (
+                <>
+                  Your pain was{" "}
+                  <span style={{ color: "#0C2830", fontWeight: "700" }}>{previousPain}/10</span>{" "}
+                  — that's{" "}
+                  <span style={{ color: painScore <= previousPain ? "#4BA882" : "#C84A4A", fontWeight: "600" }}>
+                    {Math.abs(previousPain - painScore)} points {painScore <= previousPain ? "lower" : "higher"}
+                  </span>{" "}
+                  now.
+                </>
+              )}
             </div>
           </div>
 
-          {/* Action Button */}
-          <button
-            onClick={handleSubmit}
-            disabled={isSaving}
-            style={{
-              width: "100%",
-              padding: "18px",
-              background: isSaving
-                ? "#7AAAB4"
-                : "linear-gradient(135deg, #0099A6 0%, #007580 100%)",
-              boxShadow: isSaving ? "none" : "0px 4px 20px rgba(0, 153, 166, 0.3)",
-              borderRadius: "16px",
-              border: "none",
-              color: "white",
-              fontSize: "18px",
-              fontFamily: "Space Grotesk",
-              fontWeight: "600",
-              cursor: isSaving ? "not-allowed" : "pointer",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              gap: "8px",
-            }}
-          >
-            {isSaving ? "Saving..." : "Back to Dashboard"}
-          </button>
+          {/* Action Buttons */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+            <button
+              onClick={() => handleSubmit(false)}
+              disabled={isSaving}
+              style={{
+                width: "100%",
+                padding: "18px",
+                background: isSaving
+                  ? "#7AAAB4"
+                  : "linear-gradient(135deg, #0099A6 0%, #007580 100%)",
+                boxShadow: isSaving ? "none" : "0px 4px 20px rgba(0, 153, 166, 0.3)",
+                borderRadius: "16px",
+                border: "none",
+                color: "white",
+                fontSize: "18px",
+                fontFamily: "Space Grotesk",
+                fontWeight: "600",
+                cursor: isSaving ? "not-allowed" : "pointer",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: "8px",
+                transition: "all 0.2s ease"
+              }}
+            >
+              {isSaving ? "Saving..." : "Back to Dashboard"}
+            </button>
+            <button
+              onClick={() => handleSubmit(true)}
+              disabled={isSaving}
+              style={{
+                width: "100%",
+                padding: "18px",
+                background: isSaving
+                  ? "#E2E8F0"
+                  : "#FFFFFF",
+                borderRadius: "16px",
+                border: "2px solid #0099A6",
+                color: isSaving ? "#7AAAB4" : "#0099A6",
+                fontSize: "17px",
+                fontFamily: "Space Grotesk",
+                fontWeight: "700",
+                cursor: isSaving ? "not-allowed" : "pointer",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: "8px",
+                transition: "all 0.2s ease"
+              }}
+            >
+              Go to warm up (Rhythm Piano Tiles)
+            </button>
+          </div>
         </div>
       </div>
     </div>
