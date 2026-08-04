@@ -10,7 +10,7 @@ const topStats = [
   { label: "RECOVERY", val: "Week 4", sub: "of programme", color: "#0C2830" },
   { label: "SESSIONS", val: "21", sub: "total done", color: "#0C2830" },
   { label: "PAIN", val: "4 / 10", sub: "current level", color: "#0C2830" },
-  { label: "STREAK", val: "4 wks", sub: "consecutive", color: "#0C2830" },
+  { label: "STREAK", val: "4 weeks", sub: "consecutive", color: "#0C2830" },
 ];
 
 const chartPoints = [
@@ -160,7 +160,7 @@ const FunctionalRightPanel = ({ navigate, selectedPlanData, selectedPlanDate }) 
             </div>
             
             {selectedPlanData.status === "today" && (
-              <button onClick={() => navigate('/intro')} style={{ width: "100%", padding: "16px", background: "#C8704A", color: "white", border: "none", borderRadius: "14px", fontSize: "16px", fontFamily: "Space Grotesk", fontWeight: "700", cursor: "pointer", boxShadow: "0 4px 12px rgba(200, 112, 74, 0.25)", transition: "transform 0.2s" }} onMouseEnter={(e) => e.target.style.transform = "scale(1.02)"} onMouseLeave={(e) => e.target.style.transform = "scale(1)"}>
+              <button onClick={() => navigate('/intro')} style={{ width: "100%", padding: "16px", background: "linear-gradient(135deg, #C2EB30 0%, #9AC404 100%)", color: "white", border: "none", borderRadius: "14px", fontSize: "16px", fontFamily: "Space Grotesk", fontWeight: "700", cursor: "pointer", boxShadow: "0 4px 12px rgba(200, 112, 74, 0.25)", transition: "transform 0.2s" }} onMouseEnter={(e) => e.target.style.transform = "scale(1.02)"} onMouseLeave={(e) => e.target.style.transform = "scale(1)"}>
                 Start Session Now
               </button>
             )}
@@ -486,33 +486,6 @@ const PatientDashboard = () => {
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between", color: "#7AAAB4", fontSize: "12px", fontFamily: "Space Mono", padding: "0 20px", marginTop: "16px", borderTop: "1px dashed #E2E8F0", paddingTop: "12px", paddingBottom: "12px" }}>
                   {chartPoints.map((pt, i) => <span key={i}>{pt.date}</span>)}
-                </div>
-              </div>
-
-              <div style={{ background: "white", borderRadius: "18px", border: "1px solid #E2E8F0", overflow: "hidden", flexShrink: 0 }}>
-                <div style={{ padding: "20px 24px", borderBottom: "1px solid #E2E8F0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <div style={{ color: "#0C2830", fontSize: "16px", fontWeight: "700" }}>Recent sessions</div>
-                  <div style={{ color: "#7AAAB4", fontSize: "13px", fontFamily: "Space Mono" }}>last 8</div>
-                </div>
-                <div>
-                  {recentSessions.map((session, i) => (
-                    <div key={i} style={{ padding: "16px 24px", borderBottom: "1px solid #E2E8F0", display: "flex", alignItems: "center", background: session.isToday ? "rgba(200, 112, 74, 0.02)" : "white" }}>
-                      <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: session.isToday ? "#0099A6" : "#E2E8F0", marginRight: "16px" }} />
-                      <div style={{ flex: 1 }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
-                          <span style={{ color: "#0C2830", fontSize: "15px", fontWeight: "600" }}>{session.date}</span>
-                          <span style={{ background: session.statusBg, border: `1px solid ${session.statusColor}30`, color: session.statusColor, padding: "2px 10px", borderRadius: "14px", fontSize: "12px", fontFamily: "Space Mono", fontWeight: "700" }}>{session.status}</span>
-                          {session.isToday && <span style={{ color: "#0099A6", fontSize: "12px", fontFamily: "Space Mono" }}>today</span>}
-                        </div>
-                        <div style={{ color: "#7AAAB4", fontSize: "13px", fontFamily: "Space Mono" }}>{session.desc}</div>
-                      </div>
-                      <div style={{ display: "flex", alignItems: "center", gap: "8px", fontFamily: "Space Mono", fontWeight: "700" }}>
-                        <span style={{ color: "#D4A843", fontSize: "15px" }}>{session.oldPain}</span>
-                        <span style={{ color: "#7AAAB4", fontSize: "12px", fontWeight: "400" }}>→</span>
-                        <span style={{ color: "#D4A843", fontSize: "15px" }}>{session.newPain}</span>
-                      </div>
-                    </div>
-                  ))}
                 </div>
               </div>
             </div>
