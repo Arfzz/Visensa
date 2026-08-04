@@ -180,6 +180,7 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
   const [selectedPlanDate, setSelectedPlanDate] = useState(9);
   const [openDropdown, setOpenDropdown] = useState(null);
   const [isEditingEmail, setIsEditingEmail] = useState(false);
+  const [activeBarIndex, setActiveBarIndex] = useState(null);
 
   // ── Dynamic session data ──
   const [sessionLogs, setSessionLogs] = useState([]);      
