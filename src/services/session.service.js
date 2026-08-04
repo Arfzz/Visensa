@@ -5,11 +5,11 @@ const { supabase } = require('../config/supabase');
  * SessionService — Business logic for exercise & minigame sessions.
  *
  * Schema:
- *   patient_schedules: id, created_at, patient_id, exercise_id, interval_days,
- *                      next_reminder_at, is_active
+ *   patient_schedules: id, created_at, patient_id, interval_days, next_reminder_at,
+ *                      is_active, target_sessions, completed_sessions, status
  *   exercise_logs:     id, schedule_id (→ patient_schedules), duration_seconds,
- *                      max_angle, pain_level, created_at
- *   minigame_logs:     id, patient_id (→ patient), schedule_id (→ patient_schedules),
+ *                      session_number, pain_level, created_at
+ *   minigame_logs:     id, patient_id (→ patient), minigame_id (→ minigame),
  *                      score, duration_seconds, max_combo, played_at
  *   gamification_stats: patient_id (→ patient), total_scheduled_exercises,
  *                       completed_exercises, total_minigame_score,
@@ -25,8 +25,8 @@ const sessionService = {
    * Log a completed exercise session.
    * Requires an active patient_schedule.
    *
-   * @param {string} scheduleId  — patient_schedules.id (uuid)
-   * @param {object} data        — { durationSeconds, maxAngle, painLevel }
+   * @param {string} scheduleId    — patient_schedules.id (uuid)
+   * @param {object} data          — { durationSeconds, sessionNumber, painLevel }
    */
   async logExercise(scheduleId, data) {
     // Validate schedule exists
@@ -45,8 +45,8 @@ const sessionService = {
       .insert([{
         schedule_id:      scheduleId,
         duration_seconds: data.durationSeconds,
-        max_angle:        data.maxAngle  ?? null,
-        pain_level:       data.painLevel ?? null,
+        session_number:   data.sessionNumber ?? null,
+        pain_level:       data.painLevel     ?? null,
       }])
       .select()
       .single();
@@ -56,6 +56,61 @@ const sessionService = {
     // Update gamification_stats: increment completed_exercises
     await supabase.rpc('increment_completed_exercises', { p_patient_id: schedule.patient_id })
       .then(() => {}) // Non-blocking — fails silently if RPC not set up yet
+      .catch(() => {});
+
+    return log;
+  },
+
+  /**
+   * Log a completed therapy session directly from the patient's JWT identity.
+   * Does NOT require a patient_schedule — used by SessionComplete page.
+   *
+   * @param {string} patientId   — patient.id (table PK, from req.user.profile.id)
+   * @param {object} data        — { durationSeconds, painLevel, sessionNumber? }
+   */
+  async logExerciseDirect(patientId, data) {
+    // 1. Always create a new schedule to bypass the accidental UNIQUE constraint on schedule_id in exercise_logs
+    const { data: newSchedule, error: nsError } = await supabase
+      .from('patient_schedules')
+      .insert([{
+        patient_id: patientId,
+        interval_days: 0,
+        is_active: false, // False so it doesn't clutter active schedules
+        target_sessions: 1,
+        completed_sessions: 1,
+        status: 'completed'
+      }])
+      .select('id')
+      .single();
+
+    if (nsError) throw new AppError('Gagal membuat jadwal latihan: ' + nsError.message, 500);
+    const schedule = newSchedule;
+
+    // 2. Derive running session number for this schedule
+    const { count: totalLogs } = await supabase
+      .from('exercise_logs')
+      .select('id', { count: 'exact', head: true })
+      .eq('schedule_id', schedule.id);
+
+    const sessionNumber = (totalLogs ?? 0) + 1;
+
+    // 3. Insert the log
+    const { data: log, error } = await supabase
+      .from('exercise_logs')
+      .insert([{
+        schedule_id:      schedule.id,
+        duration_seconds: data.durationSeconds ?? 0,
+        session_number:   data.sessionNumber ?? sessionNumber,
+        pain_level:       data.painLevel ?? null,
+      }])
+      .select()
+      .single();
+
+    if (error) throw new AppError('Gagal menyimpan sesi latihan: ' + error.message, 500);
+
+    // Best-effort: update gamification_stats
+    await supabase.rpc('increment_completed_exercises', { p_patient_id: patientId })
+      .then(() => {})
       .catch(() => {});
 
     return log;
@@ -74,7 +129,7 @@ const sessionService = {
     const { data, error, count } = await supabase
       .from('exercise_logs')
       .select(
-        'id, duration_seconds, max_angle, pain_level, created_at, schedule:schedule_id(id, exercise_id, patient_id)',
+        'id, duration_seconds, session_number, pain_level, created_at, schedule:schedule_id(id, patient_id)',
         { count: 'exact' }
       )
       .eq('schedule.patient_id', patientId)
@@ -95,7 +150,7 @@ const sessionService = {
     let query = supabase
       .from('exercise_logs')
       .select(
-        'id, duration_seconds, max_angle, pain_level, created_at, schedule:schedule_id(id, exercise_id, patient_id, patient:patient_id(id, name))',
+        'id, duration_seconds, session_number, pain_level, created_at, schedule:schedule_id(id, patient_id, patient:patient_id(id, name))',
         { count: 'exact' }
       )
       .order('created_at', { ascending: false })
@@ -116,7 +171,7 @@ const sessionService = {
   async getExerciseLogById(logId) {
     const { data, error } = await supabase
       .from('exercise_logs')
-      .select('id, duration_seconds, max_angle, pain_level, created_at, schedule:schedule_id(id, exercise_id, patient_id)')
+      .select('id, duration_seconds, session_number, pain_level, created_at, schedule:schedule_id(id, patient_id)')
       .eq('id', logId)
       .single();
 
@@ -132,14 +187,14 @@ const sessionService = {
    * Log a completed Piano Tiles minigame session.
    *
    * @param {string} patientId   — patient.id (table PK)
-   * @param {object} data        — { scheduleId?, score, durationSeconds, maxCombo }
+   * @param {object} data        — { minigameId?, score, durationSeconds, maxCombo }
    */
   async logMinigame(patientId, data) {
     const { data: log, error } = await supabase
       .from('minigame_logs')
       .insert([{
         patient_id:       patientId,
-        schedule_id:      data.scheduleId ?? null,
+        minigame_id:      data.minigameId ?? null,
         score:            data.score,
         duration_seconds: data.durationSeconds,
         max_combo:        data.maxCombo ?? 0,

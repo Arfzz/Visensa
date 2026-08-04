@@ -18,7 +18,7 @@ router.use(authenticate);
 // EXERCISE LOG ROUTES
 // ====================================================
 
-// POST   /api/v1/sessions/exercise           → Patient: log exercise
+// POST   /api/v1/sessions/exercise           → Patient: log exercise (requires scheduleId)
 router.post(
   '/exercise',
   authorize(ROLES.PATIENT),
@@ -26,7 +26,14 @@ router.post(
   sessionController.logExercise
 );
 
-// GET    /api/v1/sessions/exercise/me        → Patient: own exercise history
+// POST   /api/v1/sessions/exercise/direct     → Patient: log session from camera (no scheduleId needed)
+router.post(
+  '/exercise/direct',
+  authorize(ROLES.PATIENT),
+  sessionController.logExerciseDirect
+);
+
+// GET    /api/v1/sessions/exercise/me         → Patient: own exercise history
 router.get(
   '/exercise/me',
   authorize(ROLES.PATIENT),
