@@ -111,19 +111,8 @@ export default function Navbar() {
 
         {/* ── Actions ───────────────────────────────────────────── */}
         <div className="navbar__actions">
-          {/* SIGN IN SEKARANG BISA DIKLIK */}
           <Link
             to="/login"
-            className="navbar__signin"
-            id="nav-signin"
-            style={{ textDecoration: "none" }}
-          >
-            Sign in
-          </Link>
-
-          {/* GET STARTED JUGA BISA DIKLIK */}
-          <Link
-            to="/register"
             className="navbar__cta btn-primary"
             id="nav-get-started"
             style={{ textDecoration: "none" }}

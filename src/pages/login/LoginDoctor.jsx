@@ -103,67 +103,6 @@ const LoginDoctor = () => {
             ← Back to home
           </div>
 
-          {/* TOGGLE TAB */}
-          <div
-            style={{
-              height: "46px",
-              padding: "4px",
-              background: "#C4E8EC",
-              borderRadius: "14px",
-              display: "flex",
-              boxSizing: "border-box",
-              marginBottom: "24px",
-              flexShrink: 0,
-            }}
-          >
-            <div
-              style={{
-                flex: "1 1 0",
-                width: "50%",
-                background: "white",
-                boxShadow: "0px 1px 4px rgba(28, 24, 22, 0.08)",
-                borderRadius: "12px",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                cursor: "default",
-              }}
-            >
-              <div
-                style={{
-                  color: "#18687E",
-                  fontSize: "14px",
-                  fontFamily: "Space Grotesk, sans-serif",
-                  fontWeight: "600",
-                }}
-              >
-                Sign in
-              </div>
-            </div>
-            <div
-              onClick={() => navigate("/register-doctor")}
-              style={{
-                flex: "1 1 0",
-                width: "50%",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                cursor: "pointer",
-              }}
-            >
-              <div
-                style={{
-                  color: "#7AAAB4",
-                  fontSize: "14px",
-                  fontFamily: "Space Grotesk, sans-serif",
-                  fontWeight: "600",
-                }}
-              >
-                Create account
-              </div>
-            </div>
-          </div>
-
           {/* Form Header */}
           <div style={{ marginBottom: "24px" }}>
             <div
