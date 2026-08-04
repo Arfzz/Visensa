@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef } from "react";
 import { usePianoTilesGame, FINGER_LANE_MAP } from "./usePianoTilesGame";
 import { usePianoTilesHandTrigger } from "./usePianoTilesHandTrigger";
+import { useStreakPlaytimeTracker } from "./streak/useStreakPlaytimeTracker";
 import "./PianoTilesGame.css";
 
 // --- DUAL-INPUT FALLBACK KEYBOARD MAPPING (MIRRORED DISPLAY) ---
@@ -137,6 +138,9 @@ export const PianoTilesGame = ({
     resetGame,
     handleLaneHit,
   } = usePianoTilesGame(bgmUrl);
+
+  // --- AUTOMATIC 5S BATCHED STREAK PLAYTIME TRACKER (ZERO 3D FRAME DROP) ---
+  useStreakPlaytimeTracker(gameStatus === "playing");
 
   // --- REFS & CACHED MEASUREMENTS (ELIMINATES REFLOW THRASHING) ---
   const tileDomRefs = useRef([]);

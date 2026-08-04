@@ -1,23 +1,21 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
-import { Flame, Activity, Clock, X, Trophy } from "lucide-react";
+import { useState, useCallback, useMemo } from "react";
+import { Flame, Activity, X } from "lucide-react";
 import { useStreakStore } from "../streak/useStreakStore";
 import SevenDayTrackerCard from "./SevenDayTrackerCard";
 import PersonalBestCard from "./PersonalBestCard";
 import MinigameCard from "./MinigameCard";
+import { PianoTilesGame } from "../PianoTilesGame";
+import StreakCelebrationModal from "../streak/StreakCelebrationModal";
 
 export const InteractivePracticeHub = () => {
   // --- STORE DATA & ACTIONS ---
   const currentStreak = useStreakStore((state) => state.currentStreak);
   const todayActiveSeconds = useStreakStore((state) => state.todayActiveSeconds);
   const dailyTargetSeconds = useStreakStore((state) => state.dailyTargetSeconds);
-  const addActivePlaytime = useStreakStore((state) => state.addActivePlaytime);
 
   // --- GAME SESSION MODAL STATE ---
   const [activeGameId, setActiveGameId] = useState(null);
   const [isSessionActive, setIsSessionActive] = useState(false);
-  const [gameScore, setGameScore] = useState(0);
-  const [gameTimer, setGameTimer] = useState(60);
-  const [activeLane, setActiveLane] = useState(0);
 
   // --- MINIGAMES LIST CONFIGURATION ---
   const minigames = useMemo(
@@ -34,39 +32,17 @@ export const InteractivePracticeHub = () => {
     []
   );
 
-  // --- WARM-UP GAME SIMULATION LOOP ---
-  useEffect(() => {
-    let interval = null;
-    if (isSessionActive && gameTimer > 0) {
-      interval = setInterval(() => {
-        setGameTimer((prev) => prev - 1);
-        setActiveLane(Math.floor(Math.random() * 4));
-        addActivePlaytime(1);
-      }, 1000);
-    } else if (gameTimer === 0) {
-      setIsSessionActive(false);
-      setActiveGameId(null);
-    }
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [isSessionActive, gameTimer, addActivePlaytime]);
-
   // --- START GAME SESSION ---
   const handleStartGame = useCallback((gameId) => {
     setActiveGameId(gameId);
-    setGameScore(0);
-    setGameTimer(60);
     setIsSessionActive(true);
   }, []);
 
-  // --- TILE HIT HANDLER ---
-  const handleTileTap = useCallback((laneIndex) => {
-    if (laneIndex === activeLane) {
-      setGameScore((prev) => prev + 10);
-      setActiveLane(Math.floor(Math.random() * 4));
-    }
-  }, [activeLane]);
+  // --- CLOSE GAME SESSION ---
+  const handleCloseSession = useCallback(() => {
+    setIsSessionActive(false);
+    setActiveGameId(null);
+  }, []);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "24px", width: "100%", boxSizing: "border-box" }}>
@@ -134,7 +110,7 @@ export const InteractivePracticeHub = () => {
       </div>
 
       {/* ========================================== */}
-      {/* ZONA 2: PROGRESS & STAT CARDS (MOVED UP)   */}
+      {/* ZONA 2: PROGRESS & STAT CARDS              */}
       {/* ========================================== */}
       <div style={{ display: "flex", gap: "20px", flexWrap: "wrap", flexShrink: 0 }}>
         <SevenDayTrackerCard />
@@ -168,9 +144,9 @@ export const InteractivePracticeHub = () => {
       </div>
 
       {/* ========================================== */}
-      {/* RHYTHM PIANO TILES CANVAS MODAL            */}
+      {/* REAL RHYTHM PIANO TILES INTERACTIVE MODAL  */}
       {/* ========================================== */}
-      {isSessionActive && (
+      {isSessionActive && activeGameId === "rhythm_piano_tiles" && (
         <div
           style={{
             position: "fixed",
@@ -178,8 +154,8 @@ export const InteractivePracticeHub = () => {
             left: 0,
             width: "100vw",
             height: "100vh",
-            background: "rgba(15, 23, 42, 0.75)",
-            backdropFilter: "blur(6px)",
+            background: "rgba(15, 23, 42, 0.85)",
+            backdropFilter: "blur(8px)",
             zIndex: 1000,
             display: "flex",
             justifyContent: "center",
@@ -194,101 +170,52 @@ export const InteractivePracticeHub = () => {
               borderRadius: "24px",
               border: "1.5px solid #0099A6",
               width: "100%",
-              maxWidth: "520px",
-              padding: "28px",
-              boxShadow: "0 20px 60px rgba(0,0,0,0.4)",
+              maxWidth: "680px",
+              maxHeight: "92vh",
+              overflowY: "auto",
+              padding: "24px",
+              boxShadow: "0 20px 60px rgba(0,0,0,0.5)",
               display: "flex",
               flexDirection: "column",
-              gap: "20px",
+              gap: "16px",
               color: "white",
               fontFamily: "Space Grotesk, sans-serif",
+              position: "relative",
             }}
           >
             {/* MODAL HEADER */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1.5px solid rgba(255,255,255,0.1)", paddingBottom: "16px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1.5px solid rgba(255,255,255,0.1)", paddingBottom: "12px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                 <div style={{ width: "36px", height: "36px", borderRadius: "10px", background: "#0099A6", display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <Activity size={20} color="white" />
                 </div>
                 <div>
                   <div style={{ fontSize: "20px", fontWeight: "700" }}>Rhythm Piano Tiles</div>
-                  <div style={{ color: "#7AAAB4", fontSize: "13px" }}>4-Finger Reflex Warm-Up</div>
+                  <div style={{ color: "#7AAAB4", fontSize: "13px" }}>4-Finger Reflex Warm-Up (Live Tracked)</div>
                 </div>
               </div>
               <button
-                onClick={() => {
-                  setIsSessionActive(false);
-                  setActiveGameId(null);
-                }}
+                onClick={handleCloseSession}
                 style={{ background: "transparent", border: "none", color: "#7AAAB4", cursor: "pointer", padding: "4px" }}
               >
                 <X size={24} />
               </button>
             </div>
 
-            {/* MODAL HUD STATS */}
-            <div style={{ display: "flex", justifyContent: "space-between", background: "rgba(0,0,0,0.3)", padding: "12px 20px", borderRadius: "14px", fontFamily: "Space Mono, monospace", fontSize: "14px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <Clock size={16} color="#3ED8C8" />
-                <span>Timer: <strong style={{ color: "#3ED8C8" }}>{gameTimer}s</strong></span>
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <Trophy size={16} color="#D4A843" />
-                <span>Score: <strong style={{ color: "#D4A843" }}>{gameScore}</strong></span>
-              </div>
-            </div>
-
-            {/* GAME TILES CANVAS (4 LANES) */}
-            <div style={{ display: "flex", justifyContent: "center", gap: "12px", padding: "20px 0" }}>
-              {[0, 1, 2, 3].map((lane) => {
-                const isActive = lane === activeLane;
-                return (
-                  <button
-                    key={lane}
-                    onClick={() => handleTileTap(lane)}
-                    style={{
-                      width: "80px",
-                      height: "180px",
-                      borderRadius: "16px",
-                      background: isActive ? "linear-gradient(180deg, #3ED8C8 0%, #0099A6 100%)" : "rgba(255,255,255,0.05)",
-                      border: isActive ? "2px solid #C8F135" : "1.5px solid rgba(255,255,255,0.1)",
-                      boxShadow: isActive ? "0 0 20px rgba(62, 216, 200, 0.5)" : "none",
-                      display: "flex",
-                      flexDirection: "column",
-                      justifyContent: "flex-end",
-                      alignItems: "center",
-                      padding: "16px",
-                      cursor: "pointer",
-                      transition: "all 0.15s ease",
-                      transform: isActive ? "scale(1.05)" : "scale(1)",
-                    }}
-                  >
-                    <span style={{ fontSize: "12px", fontFamily: "Space Mono, monospace", fontWeight: "700", color: isActive ? "#1A2332" : "#7AAAB4" }}>
-                      Finger {lane + 1}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* MODAL FOOTER */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1.5px solid rgba(255,255,255,0.1)", paddingTop: "16px" }}>
-              <span style={{ color: "#7AAAB4", fontSize: "13px" }}>
-                Tap the highlighted lane to train your reflex!
-              </span>
-              <button
-                onClick={() => {
-                  setIsSessionActive(false);
-                  setActiveGameId(null);
-                }}
-                style={{ padding: "10px 20px", background: "white", border: "none", borderRadius: "12px", color: "#1A2332", fontSize: "14px", fontWeight: "700", cursor: "pointer" }}
-              >
-                Complete
-              </button>
+            {/* REAL PIANO TILES GAME ENGINE */}
+            <div style={{ width: "100%", minHeight: "520px" }}>
+              <PianoTilesGame
+                bgmUrl="/musics/fairytale.mp3"
+                enableHandTracking={true}
+                overlayMode={true}
+              />
             </div>
           </div>
         </div>
       )}
+
+      {/* DEFERRED STREAK CELEBRATION MODAL (ONLY VISIBLE OUTSIDE ACTIVE GAMEPLAY) */}
+      {!isSessionActive && <StreakCelebrationModal />}
 
     </div>
   );

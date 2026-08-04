@@ -118,6 +118,9 @@ export const useStreakStore = create(
       dismissCelebration: () => {
         set({ showStreakCelebration: false });
       },
+      resetCelebrationState: () => {
+        set({ showStreakCelebration: false });
+      },
 
       // ==========================================
       // INFINITE SIMULATION / DEV CONTROLS ACTIONS
