@@ -1,1 +1,4 @@
 /* App-level reset — section styles defined in component CSS files */
+html {
+  scroll-behavior: smooth;
+}
