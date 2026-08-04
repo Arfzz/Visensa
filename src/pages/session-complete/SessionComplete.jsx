@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
 const API_BASE = 'http://localhost:3000/api/v1';
@@ -23,9 +23,10 @@ const SessionComplete = () => {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (res.ok) {
-          const data = await res.json();
-          if (data && data.length > 0) {
-            setPreviousPain(data[0].pain_level ?? null);
+          const responseBody = await res.json();
+          const logs = responseBody.data;
+          if (logs && logs.length > 0) {
+            setPreviousPain(logs[0].pain_level ?? null);
           }
         }
       } catch (e) {
@@ -65,8 +66,8 @@ const SessionComplete = () => {
       alert('Network error: ' + e.message);
       setIsSaving(false);
       return;
-    } 
-    
+    }
+
     // If successful, navigate
     if (navigateToInteractive) {
       navigate('/patient-dashboard', { state: { activeMenu: 'Interactive Practice' } });
@@ -88,9 +89,9 @@ const SessionComplete = () => {
 
   const getStatusFromPain = (painLevel) => {
     if (painLevel <= 3) return { status: 'Excellent', color: '#4BA882' };
-    if (painLevel <= 5) return { status: 'Good',      color: '#3ED8C8' };
-    if (painLevel <= 7) return { status: 'Fair',      color: '#D4A843' };
-    return              { status: 'Poor',      color: '#C0574C' };
+    if (painLevel <= 5) return { status: 'Good', color: '#3ED8C8' };
+    if (painLevel <= 7) return { status: 'Fair', color: '#D4A843' };
+    return { status: 'Poor', color: '#C0574C' };
   };
 
   const currentPain = getPainDetails(painScore);
@@ -683,25 +684,29 @@ const SessionComplete = () => {
               disabled={isSaving}
               style={{
                 width: "100%",
-                padding: "18px",
+                padding: "24px 20px",
                 background: isSaving
                   ? "#E2E8F0"
                   : "#FFFFFF",
                 borderRadius: "16px",
                 border: "2px solid #0099A6",
                 color: isSaving ? "#7AAAB4" : "#0099A6",
-                fontSize: "17px",
+                fontSize: "15px",
                 fontFamily: "Space Grotesk",
                 fontWeight: "700",
                 cursor: isSaving ? "not-allowed" : "pointer",
                 display: "flex",
+                flexDirection: "column",
                 justifyContent: "center",
                 alignItems: "center",
+                textAlign: "center",
+                lineHeight: "1.6",
+                whiteSpace: "normal",
                 gap: "8px",
                 transition: "all 0.2s ease"
               }}
             >
-              Go to warm up (Rhythm Piano Tiles)
+              Wahai Kesatria, sebelum dikau menantang gelanggang yang sesungguhnya, berangkatlah menuju Balairung Penempaan Irama. Di sanalah jemari dikau akan ditempa tanpa belas kasihan, hingga setiap sentuhan menjelma setepat bidikan pemanah terbaik di seluruh negeri. Janganlah kembali sebelum irama itu tunduk kepada kehendakmu.
             </button>
           </div>
         </div>
