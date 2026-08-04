@@ -129,7 +129,7 @@ const sessionService = {
     const { data, error, count } = await supabase
       .from('exercise_logs')
       .select(
-        'id, duration_seconds, session_number, pain_level, created_at, schedule:schedule_id(id, patient_id)',
+        'id, duration_seconds, session_number, pain_level, created_at, schedule:schedule_id!inner(id, patient_id)',
         { count: 'exact' }
       )
       .eq('schedule.patient_id', patientId)
@@ -150,7 +150,7 @@ const sessionService = {
     let query = supabase
       .from('exercise_logs')
       .select(
-        'id, duration_seconds, session_number, pain_level, created_at, schedule:schedule_id(id, patient_id, patient:patient_id(id, name))',
+        'id, duration_seconds, session_number, pain_level, created_at, schedule:schedule_id!inner(id, patient_id, patient:patient_id(id, name))',
         { count: 'exact' }
       )
       .order('created_at', { ascending: false })
