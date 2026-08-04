@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
+const API_BASE = 'http://localhost:3000/api/v1';
 import { useNavigate } from "react-router-dom";
 import visensaLogo from "../../assets/visensa-logo.png";
 import avatarHands from "../../assets/avatar-hands.png";
@@ -146,6 +148,11 @@ const PatientDashboard = () => {
   const [selectedSession, setSelectedSession] = useState(null);
   const [showNotif, setShowNotif] = useState(false);
 
+  // ── Dynamic session data ──
+  const [sessionLogs, setSessionLogs] = useState([]);      // all exercise logs from DB
+  const [schedule, setSchedule] = useState(null);          // patient schedule from DB
+  const [sessionLoading, setSessionLoading] = useState(true);
+
   // States Interaktif untuk Chart
   const [hoveredPainPoint, setHoveredPainPoint] = useState(null);
   const [activeBarIndex, setActiveBarIndex] = useState(null);
@@ -193,9 +200,159 @@ const PatientDashboard = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("user");
-    localStorage.removeItem("token"); // if token exists
+    localStorage.removeItem("token");
     navigate("/");
   };
+
+  // ── Helper: derive status label and color from pain_level ──
+  const getStatusFromPain = (painLevel) => {
+    if (painLevel === null || painLevel === undefined) return { status: 'Completed', statusColor: '#0099A6', statusBg: 'rgba(0, 153, 166, 0.10)' };
+    if (painLevel <= 3) return { status: 'Excellent', statusColor: '#4BA882', statusBg: 'rgba(75, 168, 130, 0.10)' };
+    if (painLevel <= 5) return { status: 'Good',      statusColor: '#3ED8C8', statusBg: 'rgba(62, 216, 200, 0.10)' };
+    if (painLevel <= 7) return { status: 'Fair',      statusColor: '#D4A843', statusBg: 'rgba(212, 168, 67, 0.10)' };
+    return               { status: 'Poor',      statusColor: '#C0574C', statusBg: 'rgba(192, 87, 76, 0.10)' };
+  };
+
+  // ── Helper: format a raw exercise_log record into the UI shape ──
+  const formatLog = (log, index, allLogs) => {
+    const d = new Date(log.created_at);
+    const day   = d.getDate().toString();
+    const month = d.toLocaleString('default', { month: 'short' });
+    const today = new Date();
+    const isToday = d.toDateString() === today.toDateString();
+    const isYesterday = new Date(today - 86400000).toDateString() === d.toDateString();
+    const dayName = d.toLocaleString('default', { weekday: 'short' });
+    const year = d.getFullYear();
+    const title = isToday
+      ? `Today, ${day} ${month} ${year}`
+      : isYesterday
+      ? `Yesterday, ${day} ${month} ${year}`
+      : `${dayName}, ${day} ${month} ${year}`;
+
+    const durationMin = log.duration_seconds ? Math.round(log.duration_seconds / 60) : 0;
+    
+    // newPain is the current session's pain level
+    const newPain = log.pain_level ?? null;
+    
+    // oldPain is the previous session's pain level (the next item in the descending array)
+    const prevSession = allLogs[index + 1];
+    const oldPain = prevSession?.pain_level ?? newPain;
+
+    const { status, statusColor, statusBg } = getStatusFromPain(newPain);
+
+    let painDiff = "no change";
+    let diffColor = "#7AAAB4";
+    
+    if (oldPain !== null && newPain !== null) {
+      const diff = newPain - oldPain;
+      if (diff > 0) {
+        painDiff = `↑${diff} pts`;
+        diffColor = "#C0574C"; // Worse (red)
+      } else if (diff < 0) {
+        painDiff = `↓${Math.abs(diff)} pts`;
+        diffColor = "#4BA882"; // Better (green)
+      }
+    }
+
+    return {
+      id:          log.id,
+      day,
+      month,
+      title,
+      isToday,
+      status,
+      statusColor,
+      statusBg,
+      exercises:   log.session_number ? `Session #${log.session_number}` : 'Session',
+      time:        `${durationMin} min`,
+      // Keep accuracy as mock per requirements
+      accuracy:    '97% accuracy',
+      oldPain:     oldPain ?? '—',
+      newPain:     newPain ?? '—',
+      painDiff,
+      diffColor,
+      boxBg:       isToday ? 'rgba(0, 153, 166, 0.08)' : '#F0FAFB',
+      // raw for recentSessions row
+      date:        `${day} ${month}`,
+      desc:        `${durationMin} min session`,
+    };
+  };
+
+  // ── Fetch exercise logs & schedule from backend ──
+  useEffect(() => {
+    const fetchSessionData = async () => {
+      try {
+        const token = localStorage.getItem('accessToken');
+        const headers = { Authorization: `Bearer ${token}` };
+
+        // 1. Fetch exercise logs for this patient
+        const logsRes = await fetch(`${API_BASE}/sessions/exercise/me`, { headers });
+        if (logsRes.ok) {
+          const logsJson = await logsRes.json();
+          const data = logsJson.data ?? [];
+          setSessionLogs(data.map(formatLog));
+        }
+
+        // 2. Fetch patient's own schedule to display next session info
+        const scheduleRes = await fetch(`${API_BASE}/sessions/stats/me`, { headers });
+        if (scheduleRes.ok) {
+          const scheduleJson = await scheduleRes.json();
+          setSchedule(scheduleJson.data ?? null);
+        }
+      } catch (e) {
+        console.error('Failed to fetch session data:', e);
+      } finally {
+        setSessionLoading(false);
+      }
+    };
+    fetchSessionData();
+  }, []);
+
+  // Derive recent (last 3) and all sessions from dynamic state
+  const recentSessionsDynamic  = sessionLogs.slice(0, 3);
+  const filteredSessionsDynamic = activeFilter === 'All sessions'
+    ? sessionLogs
+    : sessionLogs.filter(s => s.status === activeFilter);
+
+  // ── Derived dynamic stats for Dashboard cards ──
+  const currentPainRaw = sessionLogs.length > 0 ? sessionLogs[0].newPain : null;
+  const currentPain = currentPainRaw !== null && currentPainRaw !== '—' ? currentPainRaw : 0;
+  
+  const startPainRaw = sessionLogs.length > 0 ? sessionLogs[sessionLogs.length - 1].newPain : null;
+  const startPain = startPainRaw !== null && startPainRaw !== '—' ? startPainRaw : currentPain;
+  
+  const painImprovement = startPain - currentPain;
+  
+  const totalSessionsDone = sessionLogs.length;
+  
+  const currentMonthStr = new Date().toLocaleString('default', { month: 'short' });
+  const sessionsThisMonth = sessionLogs.filter(s => s.month === currentMonthStr).length;
+
+  const dynamicTopStats = [
+    { label: "RECOVERY", val: "Week 4", sub: "of programme", color: "#0C2830" },
+    { label: "SESSIONS", val: totalSessionsDone.toString(), sub: "total done", color: "#0C2830" },
+    { label: "PAIN", val: sessionLogs.length > 0 ? `${currentPain} / 10` : '—', sub: "current level", color: "#0C2830" },
+    { label: "STREAK", val: "4 wks", sub: "consecutive", color: "#0C2830" },
+  ];
+
+  const chartPointsBase = sessionLogs.slice(0, 5).reverse();
+  const dynamicChartPoints = chartPointsBase.map((log, index) => {
+    const step = chartPointsBase.length > 1 ? 850 / (chartPointsBase.length - 1) : 0;
+    const x = chartPointsBase.length === 1 ? 475 : 50 + index * step;
+    const painVal = log.newPain !== '—' ? log.newPain : 0;
+    const y = 160 - ((painVal / 10) * 110);
+    return { date: log.date, x, y, pain: painVal.toString() };
+  });
+
+  const polylinePoints = dynamicChartPoints.map(pt => `${pt.x},${pt.y}`).join(" ");
+  const polygonPoints = dynamicChartPoints.length > 0 
+    ? `50,160 ${polylinePoints} ${dynamicChartPoints[dynamicChartPoints.length - 1].x},160`
+    : "50,160 50,160";
+  
+  const painTrendPercentage = startPain > 0 ? Math.round((painImprovement / startPain) * 100) : 0;
+  const painTrendString = painImprovement > 0 ? `↘ −${painTrendPercentage}%` : painImprovement < 0 ? `↗ +${Math.abs(painTrendPercentage)}%` : `0%`;
+  const painTrendColor = painImprovement > 0 ? "#4BA882" : painImprovement < 0 ? "#C0574C" : "#7AAAB4";
+  const painTrendBg = painImprovement > 0 ? "rgba(75, 168, 130, 0.1)" : painImprovement < 0 ? "rgba(192, 87, 76, 0.1)" : "rgba(122, 170, 180, 0.1)";
 
   const renderIcon = (menu, isActive) => {
     const color = isActive ? "#1A2332" : "#7AAAB4";
@@ -284,7 +441,7 @@ const PatientDashboard = () => {
             </div>
 
             <div style={{ display: "flex", background: "white", padding: "24px", borderRadius: "20px", border: "1.5px solid #C4E8EC", boxShadow: "0 2px 10px rgba(0,0,0,0.02)", flexShrink: 0 }}>
-              {topStats.map((stat, i) => (
+              {dynamicTopStats.map((stat, i) => (
                 <div key={i} style={{ flex: 1, borderRight: i < 3 ? "1.5px solid #E2E8F0" : "none", paddingLeft: i === 0 ? "0" : "24px", paddingRight: i === 3 ? "0" : "24px" }}>
                   <div style={{ color: "#7AAAB4", fontSize: "13px", fontFamily: "Space Mono", letterSpacing: "1px", marginBottom: "8px", textTransform: "uppercase" }}>{stat.label}</div>
                   <div style={{ color: stat.color, fontSize: "24px", fontWeight: "800", marginBottom: "4px" }}>{stat.val}</div>
@@ -297,10 +454,12 @@ const PatientDashboard = () => {
               <div style={{ flex: 1, background: "linear-gradient(135deg, #0099A6 0%, #007580 100%)", borderRadius: "24px", padding: "24px", color: "white", display: "flex", flexDirection: "column" }}>
                 <div style={{ fontSize: "14.5px", opacity: 0.8, marginBottom: "12px" }}>Pain today</div>
                 <div style={{ display: "flex", alignItems: "baseline", gap: "4px", marginBottom: "4px" }}>
-                  <span style={{ fontSize: "42px", fontFamily: "Space Mono", fontWeight: "700" }}>4</span>
+                  <span style={{ fontSize: "42px", fontFamily: "Space Mono", fontWeight: "700" }}>{currentPain}</span>
                   <span style={{ fontSize: "18px", fontFamily: "Space Mono", opacity: 0.8 }}>/10</span>
                 </div>
-                <div style={{ fontSize: "14px", opacity: 0.8, marginBottom: "auto" }}>↓ from 8.5 at start</div>
+                <div style={{ fontSize: "14px", opacity: 0.8, marginBottom: "auto" }}>
+                  {painImprovement > 0 ? `↓ from ${startPain} at start` : painImprovement < 0 ? `↑ from ${startPain} at start` : `Same as start (${startPain})`}
+                </div>
                 <div style={{ display: "flex", gap: "6px", height: "45px", alignItems: "flex-end", marginTop: "20px" }}>
                   {[0.4, 0.5, 0.6, 0.7, 0.8, 1].map((o, i) => <div key={i} style={{ flex: 1, background: "rgba(255,255,255,0.25)", height: `${40 + i*12}%`, borderRadius: "4px", opacity: o }} />)}
                 </div>
@@ -308,7 +467,7 @@ const PatientDashboard = () => {
               <div style={{ flex: 1, background: "linear-gradient(135deg, #3ED8C8 0%, #28C0AE 100%)", borderRadius: "24px", padding: "24px", color: "white", display: "flex", flexDirection: "column" }}>
                 <div style={{ fontSize: "14.5px", opacity: 0.8, marginBottom: "12px" }}>Sessions this month</div>
                 <div style={{ display: "flex", alignItems: "baseline", gap: "4px", marginBottom: "4px" }}>
-                  <span style={{ fontSize: "42px", fontFamily: "Space Mono", fontWeight: "700" }}>7</span>
+                  <span style={{ fontSize: "42px", fontFamily: "Space Mono", fontWeight: "700" }}>{sessionsThisMonth}</span>
                   <span style={{ fontSize: "18px", fontFamily: "Space Mono", opacity: 0.8 }}>sessions</span>
                 </div>
                 <div style={{ fontSize: "14px", opacity: 0.8, marginBottom: "auto" }}>Goal: 8/month</div>
@@ -334,9 +493,9 @@ const PatientDashboard = () => {
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "20px" }}>
                 <div>
                   <div style={{ color: "#0C2830", fontSize: "17px", fontWeight: "700", marginBottom: "4px" }}>Pain trend</div>
-                  <div style={{ color: "#7AAAB4", fontSize: "15px" }}>Monthly average</div>
+                  <div style={{ color: "#7AAAB4", fontSize: "15px" }}>Overall progress</div>
                 </div>
-                <div style={{ background: "rgba(75, 168, 130, 0.1)", border: "1.5px solid rgba(75, 168, 130, 0.2)", color: "#4BA882", padding: "6px 14px", borderRadius: "20px", fontSize: "15px", fontWeight: "600", display: "flex", alignItems: "center" }}>↘ −53%</div>
+                <div style={{ background: painTrendBg, border: `1.5px solid ${painTrendColor}33`, color: painTrendColor, padding: "6px 14px", borderRadius: "20px", fontSize: "15px", fontWeight: "600", display: "flex", alignItems: "center" }}>{painTrendString}</div>
               </div>
               
               <div style={{ position: "relative", height: "160px", width: "100%", borderBottom: "1.5px solid #E2E8F0", marginBottom: "15px" }}>
@@ -361,7 +520,7 @@ const PatientDashboard = () => {
                       <stop offset="100%" stopColor="rgba(0, 153, 166, 0)" />
                     </linearGradient>
                   </defs>
-                  <polygon points="50,160 50,50 260,65 470,80 680,95 900,110 900,160" fill="url(#painGradient)" />
+                  <polygon points={polygonPoints} fill="url(#painGradient)" />
                   <line x1="50" y1="40" x2="900" y2="40" stroke="#F1F5F9" strokeWidth="1.5" strokeDasharray="4 4" />
                   <line x1="50" y1="90" x2="900" y2="90" stroke="#F1F5F9" strokeWidth="1.5" strokeDasharray="4 4" />
                   
@@ -370,9 +529,13 @@ const PatientDashboard = () => {
                     <line x1={hoveredPainPoint.x} y1="0" x2={hoveredPainPoint.x} y2="160" stroke="#C4E8EC" strokeWidth="2" />
                   )}
 
-                  <polyline points="50,50 260,65 470,80 680,95 900,110" fill="none" stroke="#0099A6" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" />
+                  {dynamicChartPoints.length > 1 ? (
+                    <polyline points={polylinePoints} fill="none" stroke="#0099A6" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" />
+                  ) : dynamicChartPoints.length === 1 ? (
+                    <circle cx={dynamicChartPoints[0].x} cy={dynamicChartPoints[0].y} r="5" fill="#0099A6" />
+                  ) : null}
                   
-                  {chartPoints.map((pt, i) => (
+                  {dynamicChartPoints.map((pt, i) => (
                     <circle 
                       key={i} cx={pt.x} cy={pt.y} r={hoveredPainPoint?.date === pt.date ? "9" : "6"} 
                       fill="#0099A6" stroke={hoveredPainPoint?.date === pt.date ? "#0099A6" : "white"} strokeWidth="3" 
@@ -384,17 +547,22 @@ const PatientDashboard = () => {
                 </svg>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between", color: "#7AAAB4", fontSize: "13px", fontFamily: "Space Mono", padding: "0 25px" }}>
-                {chartPoints.map((pt, i) => <span key={i}>{pt.date}</span>)}
+                {dynamicChartPoints.map((pt, i) => <span key={i} style={{ flex: 1, textAlign: i === 0 ? "left" : i === dynamicChartPoints.length - 1 ? "right" : "center" }}>{pt.date}</span>)}
               </div>
             </div>
 
             <div style={{ background: "white", borderRadius: "20px", border: "1.5px solid #C4E8EC", overflow: "hidden", flexShrink: 0 }}>
               <div style={{ padding: "24px", borderBottom: "1.5px solid #E2E8F0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <div style={{ color: "#0C2830", fontSize: "17px", fontWeight: "700" }}>Recent sessions</div>
-                <div style={{ color: "#7AAAB4", fontSize: "14px", fontFamily: "Space Mono" }}>last 8</div>
+                <div style={{ color: "#7AAAB4", fontSize: "14px", fontFamily: "Space Mono" }}>last {recentSessionsDynamic.length > 0 ? recentSessionsDynamic.length : '—'}</div>
               </div>
               <div>
-                {recentSessions.map((session, i) => (
+                {sessionLoading ? (
+                  <div style={{ padding: "24px", color: "#7AAAB4", fontSize: "14px", fontFamily: "Space Mono", textAlign: "center" }}>Loading sessions...</div>
+                ) : recentSessionsDynamic.length === 0 ? (
+                  <div style={{ padding: "24px", color: "#7AAAB4", fontSize: "14px", fontFamily: "Space Mono", textAlign: "center" }}>No sessions recorded yet.</div>
+                ) : null}
+                {recentSessionsDynamic.map((session, i) => (
                   <div key={i} style={{ padding: "20px 24px", borderBottom: "1px solid #E2E8F0", display: "flex", alignItems: "center", background: session.isToday ? "rgba(200, 112, 74, 0.02)" : "white" }}>
                     <div style={{ width: "10px", height: "10px", borderRadius: "50%", background: session.isToday ? "#0099A6" : "#C4E8EC", marginRight: "20px" }} />
                     <div style={{ flex: 1 }}>
@@ -449,15 +617,17 @@ const PatientDashboard = () => {
                <div style={{ position: "absolute", top: "35%", left: "-5%", background: "white", padding: "18px", borderRadius: "20px", boxShadow: "0 10px 30px rgba(200,112,74,0.12)", border: "1.5px solid rgba(200,112,74,0.2)", zIndex: 3 }}>
                   <div style={{ color: "#7AAAB4", fontSize: "12px", fontFamily: "Space Mono", marginBottom: "10px", letterSpacing: "1px" }}>PAIN LEVEL</div>
                   <div style={{ display: "flex", alignItems: "baseline", gap: "4px", marginBottom: "6px" }}>
-                     <span style={{ color: "#0099A6", fontSize: "32px", fontFamily: "Space Mono", fontWeight: "700" }}>4</span>
+                     <span style={{ color: "#0099A6", fontSize: "32px", fontFamily: "Space Mono", fontWeight: "700" }}>{currentPain}</span>
                      <span style={{ color: "#7AAAB4", fontSize: "16px", fontFamily: "Space Mono" }}>/10</span>
                   </div>
-                  <div style={{ color: "#4BA882", fontSize: "13px", fontWeight: "600" }}>↓ from 8.5</div>
+                  <div style={{ color: painTrendColor, fontSize: "13px", fontWeight: "600" }}>
+                    {painImprovement > 0 ? `↓ from ${startPain}` : painImprovement < 0 ? `↑ from ${startPain}` : `Same as start`}
+                  </div>
                </div>
                <div style={{ position: "absolute", bottom: "25%", right: "5%", background: "white", padding: "18px", borderRadius: "20px", boxShadow: "0 10px 30px rgba(75,168,130,0.1)", border: "1.5px solid rgba(75,168,130,0.2)", zIndex: 3 }}>
                   <div style={{ color: "#7AAAB4", fontSize: "12px", fontFamily: "Space Mono", marginBottom: "10px", letterSpacing: "1px" }}>RECOVERY</div>
                   <div style={{ color: "#4BA882", fontSize: "26px", fontFamily: "Space Mono", fontWeight: "700", marginBottom: "6px" }}>Week 4</div>
-                  <div style={{ color: "#7AAAB4", fontSize: "13px" }}>21 sessions done</div>
+                  <div style={{ color: "#7AAAB4", fontSize: "13px" }}>{totalSessionsDone} sessions done</div>
                </div>
             </div>
 
@@ -492,11 +662,16 @@ const PatientDashboard = () => {
                     </div>
                   ))}
                 </div>
-                <div style={{ color: "#7AAAB4", fontSize: "16px", fontFamily: "Space Mono" }}>{allSessionsData.length} sessions</div>
+                <div style={{ color: "#7AAAB4", fontSize: "16px", fontFamily: "Space Mono" }}>{filteredSessionsDynamic.length} sessions</div>
               </div>
 
               <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                {allSessionsData.map((session) => (
+                {sessionLoading ? (
+                  <div style={{ padding: "40px", color: "#7AAAB4", fontSize: "15px", fontFamily: "Space Mono", textAlign: "center" }}>Loading sessions...</div>
+                ) : filteredSessionsDynamic.length === 0 ? (
+                  <div style={{ padding: "40px", color: "#7AAAB4", fontSize: "15px", fontFamily: "Space Mono", textAlign: "center" }}>No sessions recorded yet. Complete a therapy session to see your history here.</div>
+                ) : null}
+                {filteredSessionsDynamic.map((session) => (
                   <div key={session.id} onClick={() => { setSelectedSession(session); }} style={{ background: "white", borderRadius: "24px", border: "1.5px solid #C4E8EC", padding: "28px 32px", display: "flex", alignItems: "center", gap: "28px", boxShadow: "0px 2px 10px rgba(28, 24, 22, 0.04)", cursor: "pointer", transition: "transform 0.2s", flexShrink: 0 }}>
                     <div style={{ width: "76px", height: "76px", background: session.boxBg, borderRadius: "20px", border: "1.5px solid #C4E8EC", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", flexShrink: 0 }}>
                       <div style={{ color: "#0099A6", fontSize: "26px", fontFamily: "Space Mono", fontWeight: "700", lineHeight: "1" }}>{session.day}</div>

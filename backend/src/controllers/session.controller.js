@@ -28,6 +28,25 @@ const sessionController = {
   },
 
   /**
+   * POST /api/v1/sessions/exercise/direct
+   * Patient: Log a completed therapy session without a scheduleId.
+   * Used by SessionComplete page after finishing therapy at /camera.
+   * Body: { durationSeconds, painLevel? }
+   */
+  async logExerciseDirect(req, res, next) {
+    try {
+      const patientId = req.user.profile?.id;
+      if (!patientId) {
+        return res.status(400).json({ success: false, message: 'Patient profile not found in token.' });
+      }
+      const log = await sessionService.logExerciseDirect(patientId, req.body);
+      return res.created({ message: 'Session logged successfully.', data: log });
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  /**
    * GET /api/v1/sessions/exercise/me
    * Patient: Get own exercise history.
    */

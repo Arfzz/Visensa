@@ -19,6 +19,7 @@ export const useExerciseStore = create((set, get) => ({
   isCompleted: false,
   isSessionFinished: false,
   elapsedTime: 0,
+  totalElapsedTime: 0,
   isTimerRunning: true,
   avgDistance: 0,
   thresholdOpen: 0.35,
@@ -52,7 +53,10 @@ export const useExerciseStore = create((set, get) => ({
 
   tickTimer: () => {
     if (get().isTimerRunning && !get().isCompleted && !get().isSessionFinished) {
-      set((state) => ({ elapsedTime: state.elapsedTime + 1 }));
+      set((state) => ({ 
+        elapsedTime: state.elapsedTime + 1,
+        totalElapsedTime: state.totalElapsedTime + 1 
+      }));
     }
   },
 
@@ -93,6 +97,7 @@ export const useExerciseStore = create((set, get) => ({
       isCompleted: false,
       isSessionFinished: false,
       elapsedTime: 0,
+      totalElapsedTime: 0,
       isTimerRunning: true,
       holdTimeRemaining: 10,
     });
@@ -112,6 +117,7 @@ export const useExerciseStore = create((set, get) => ({
       isCompleted: false,
       isSessionFinished: false,
       elapsedTime: 0,
+      totalElapsedTime: 0,
       isTimerRunning: true,
       avgDistance: 0,
       holdTimeRemaining: 10,

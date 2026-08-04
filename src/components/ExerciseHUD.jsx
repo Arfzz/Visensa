@@ -19,6 +19,7 @@ export function ExerciseHUD() {
   const phase = useExerciseStore((state) => state.phase);
   const isCompleted = useExerciseStore((state) => state.isCompleted);
   const elapsedTime = useExerciseStore((state) => state.elapsedTime);
+  const totalElapsedTime = useExerciseStore((state) => state.totalElapsedTime);
   const isTimerRunning = useExerciseStore((state) => state.isTimerRunning);
   const holdTimeRemaining = useExerciseStore((state) => state.holdTimeRemaining);
 
@@ -48,8 +49,9 @@ export function ExerciseHUD() {
     // Handle end-session redirect if Exercise 8 completed
     if (activeExerciseId >= EXERCISES_LIST.length) {
       endSession();
+      const durationAtEnd = totalElapsedTime; // capture total time before store resets
       const redirectTimer = setTimeout(() => {
-        navigate("/session-complete");
+        navigate("/session-complete", { state: { durationSeconds: durationAtEnd } });
       }, 2500);
       return () => clearTimeout(redirectTimer);
     }

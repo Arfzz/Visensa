@@ -1,25 +1,80 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+
+const API_BASE = 'http://localhost:3000/api/v1';
 
 const SessionComplete = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Duration in seconds passed from ExerciseHUD via navigate state
+  const durationSeconds = location.state?.durationSeconds ?? 0;
 
   // State untuk menyimpan nilai slider rasa sakit (0 - 10)
   const [painScore, setPainScore] = useState(7);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSubmit = async () => {
+    if (isSaving) return;
+    setIsSaving(true);
+    try {
+      const token = localStorage.getItem('accessToken');
+      const res = await fetch(`${API_BASE}/sessions/exercise/direct`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          durationSeconds,
+          painLevel: painScore,
+        }),
+      });
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error('Backend error:', errorText);
+        alert('Gagal menyimpan sesi: ' + errorText);
+        setIsSaving(false);
+        return; // Don't navigate if it failed
+      }
+
+    } catch (e) {
+      console.error('Failed to save session:', e);
+      alert('Network error: ' + e.message);
+      setIsSaving(false);
+      return;
+    } 
+    
+    // If successful, navigate
+    navigate('/patient-dashboard');
+  };
 
   // Logika dinamis untuk warna, teks, dan emoji berdasarkan score
   const getPainDetails = (score) => {
     if (score <= 2)
-      return { label: "No pain", color: "#4BA882", emojiIndex: 0 }; // Hijau
-    if (score <= 4) return { label: "Mild", color: "#D4A843", emojiIndex: 1 }; // Kuning
+      return { label: "Excellent", color: "#4BA882", emojiIndex: 0 }; // Hijau
+    if (score <= 4) return { label: "Good", color: "#3ED8C8", emojiIndex: 1 }; // Tosca
     if (score <= 6)
-      return { label: "Moderate", color: "#E89B2D", emojiIndex: 2 }; // Oranye
-    if (score <= 8) return { label: "Severe", color: "#D86D60", emojiIndex: 3 }; // Merah Muda
-    return { label: "Worst pain", color: "#C84A4A", emojiIndex: 4 }; // Merah Gelap
+      return { label: "Fair", color: "#D4A843", emojiIndex: 2 }; // Kuning
+    if (score <= 8) return { label: "Poor", color: "#C0574C", emojiIndex: 3 }; // Merah Muda
+    return { label: "Very Poor", color: "#C84A4A", emojiIndex: 4 }; // Merah Gelap
+  };
+
+  const getStatusFromPain = (painLevel) => {
+    if (painLevel <= 3) return { status: 'Excellent', color: '#4BA882' };
+    if (painLevel <= 5) return { status: 'Good',      color: '#3ED8C8' };
+    if (painLevel <= 7) return { status: 'Fair',      color: '#D4A843' };
+    return              { status: 'Poor',      color: '#C0574C' };
   };
 
   const currentPain = getPainDetails(painScore);
+  const quality = getStatusFromPain(painScore);
   const emojis = ["😌", "🙂", "😐", "😟", "😣"];
+
+  const mins = Math.floor(durationSeconds / 60);
+  const secs = durationSeconds % 60;
+  const formattedDuration = `${mins}:${secs.toString().padStart(2, "0")}`;
 
   return (
     <div
@@ -39,38 +94,38 @@ const SessionComplete = () => {
       {/* CSS Khusus untuk Slider agar bentuknya cantik seperti desain Figma */}
       <style>
         {`
-          .custom-slider {
-            -webkit-appearance: none;
-            width: 100%;
-            height: 8px;
-            background: #E2E8F0;
-            outline: none;
-            border-radius: 4px;
-            margin: 20px 0;
-          }
-          .custom-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 20px;
-            height: 24px;
-            background: #1C1816;
-            cursor: pointer;
-            border-radius: 4px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-            transition: transform 0.1s;
-          }
-          .custom-slider::-webkit-slider-thumb:hover {
-            transform: scale(1.1);
-          }
-          .custom-slider::-moz-range-thumb {
-            width: 20px;
-            height: 24px;
-            background: #1C1816;
-            cursor: pointer;
-            border-radius: 4px;
-            border: none;
-          }
-        `}
+            .custom-slider {
+              -webkit-appearance: none;
+              width: 100%;
+              height: 8px;
+              background: #E2E8F0;
+              outline: none;
+              border-radius: 4px;
+              margin: 20px 0;
+            }
+            .custom-slider::-webkit-slider-thumb {
+              -webkit-appearance: none;
+              appearance: none;
+              width: 20px;
+              height: 24px;
+              background: #1C1816;
+              cursor: pointer;
+              border-radius: 4px;
+              box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+              transition: transform 0.1s;
+            }
+            .custom-slider::-webkit-slider-thumb:hover {
+              transform: scale(1.1);
+            }
+            .custom-slider::-moz-range-thumb {
+              width: 20px;
+              height: 24px;
+              background: #1C1816;
+              cursor: pointer;
+              border-radius: 4px;
+              border: none;
+            }
+          `}
       </style>
 
       {/* Container Utama: Dibagi 2 Kolom (Kiri & Kanan) */}
@@ -240,7 +295,7 @@ const SessionComplete = () => {
                     fontWeight: "700",
                   }}
                 >
-                  11:42
+                  {formattedDuration}
                 </div>
                 <div style={{ color: "#7AAAB4", fontSize: "14px" }}>
                   Minutes
@@ -268,12 +323,12 @@ const SessionComplete = () => {
                 </div>
                 <div
                   style={{
-                    color: "#0C2830",
+                    color: quality.color,
                     fontSize: "22px",
                     fontWeight: "700",
                   }}
                 >
-                  Good
+                  {quality.status}
                 </div>
                 <div style={{ color: "#7AAAB4", fontSize: "14px" }}>
                   Movement
@@ -466,7 +521,7 @@ const SessionComplete = () => {
                 letterSpacing: "1px",
               }}
             >
-              0 · No pain
+              0 · Excellent
             </div>
             <div
               style={{
@@ -477,7 +532,7 @@ const SessionComplete = () => {
                 letterSpacing: "1px",
               }}
             >
-              5 · Moderate
+              5 · Fair
             </div>
             <div
               style={{
@@ -488,7 +543,7 @@ const SessionComplete = () => {
                 letterSpacing: "1px",
               }}
             >
-              10 · Severe
+              10 · Very Poor
             </div>
           </div>
 
@@ -564,26 +619,29 @@ const SessionComplete = () => {
 
           {/* Action Button */}
           <button
-            onClick={() => navigate("/patient-dashboard")}
+            onClick={handleSubmit}
+            disabled={isSaving}
             style={{
               width: "100%",
               padding: "18px",
-              background: "linear-gradient(135deg, #0099A6 0%, #007580 100%)",
-              boxShadow: "0px 4px 20px rgba(0, 153, 166, 0.3)",
+              background: isSaving
+                ? "#7AAAB4"
+                : "linear-gradient(135deg, #0099A6 0%, #007580 100%)",
+              boxShadow: isSaving ? "none" : "0px 4px 20px rgba(0, 153, 166, 0.3)",
               borderRadius: "16px",
               border: "none",
               color: "white",
               fontSize: "18px",
               fontFamily: "Space Grotesk",
               fontWeight: "600",
-              cursor: "pointer",
+              cursor: isSaving ? "not-allowed" : "pointer",
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
               gap: "8px",
             }}
           >
-            Back to Dashboard
+            {isSaving ? "Saving..." : "Back to Dashboard"}
           </button>
         </div>
       </div>
