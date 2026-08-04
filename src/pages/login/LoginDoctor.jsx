@@ -164,44 +164,6 @@ const LoginDoctor = () => {
             ← Back to home
           </div>
 
-          {/* TAB LABEL STATIS (Tinggal Sign In aja) */}
-          <div
-            style={{
-              height: "46px",
-              padding: "4px",
-              background: "#C4E8EC",
-              borderRadius: "14px",
-              display: "flex",
-              boxSizing: "border-box",
-              marginBottom: "24px",
-              flexShrink: 0,
-            }}
-          >
-            <div
-              style={{
-                flex: "1 1 0",
-                width: "100%", 
-                background: "white",
-                boxShadow: "0px 1px 4px rgba(28, 24, 22, 0.08)",
-                borderRadius: "12px",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                cursor: "default",
-              }}
-            >
-              <div
-                style={{
-                  color: "#18687E",
-                  fontSize: "14px",
-                  fontFamily: "Space Grotesk, sans-serif",
-                  fontWeight: "600",
-                }}
-              >
-                Clinician Sign In
-              </div>
-            </div>
-          </div>
 
           {/* Form Header */}
           <div style={{ marginBottom: "24px" }}>

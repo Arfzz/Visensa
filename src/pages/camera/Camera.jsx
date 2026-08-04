@@ -86,16 +86,15 @@ const Camera = () => {
   const [cameraStatus, setCameraStatus] = useState("requesting");
   const [timeLeft, setTimeLeft] = useState(exercises[0].duration);
 
-  // State untuk Modals (Pause & Exit)
+  // State untuk Modal Pause 
   const [isPaused, setIsPaused] = useState(false);
-  const [isExiting, setIsExiting] = useState(false);
 
   const videoRef = useRef(null);
   const [stream, setStream] = useState(null);
 
   // Logika Timer
   useEffect(() => {
-    if (cameraStatus !== "granted" || isPaused || isExiting) return;
+    if (cameraStatus !== "granted" || isPaused) return;
 
     const timer = setInterval(() => {
       setTimeLeft((prevTime) => {
@@ -111,7 +110,7 @@ const Camera = () => {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [cameraStatus, isPaused, isExiting, currentStep, setActiveExerciseId]);
+  }, [cameraStatus, isPaused, currentStep, setActiveExerciseId]);
 
   // Logika Izin Kamera
   const handleRequestPermission = async () => {
@@ -249,7 +248,7 @@ const Camera = () => {
           zIndex: 10,
         }}
       >
-        {/* Tombol Kiri (Pause & Close) */}
+        {/* Tombol Kiri (Pause Saja) */}
         <div style={{ display: "flex", gap: "9.99px" }}>
           <div
             onClick={() => setIsPaused(true)}
@@ -283,32 +282,6 @@ const Camera = () => {
                 }}
               />
             </div>
-          </div>
-          <div
-            onClick={() => setIsExiting(true)}
-            style={{
-              width: "44.95px",
-              height: "44.95px",
-              background: "rgba(255, 255, 255, 0.07)",
-              borderRadius: "50%",
-              outline: "1.25px rgba(255, 255, 255, 0.08) solid",
-              outlineOffset: "-1.25px",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              cursor: "pointer",
-              transition: "all 0.2s",
-            }}
-          >
-            <span
-              style={{
-                color: "#445570",
-                fontSize: "16px",
-                fontFamily: "Space Grotesk",
-              }}
-            >
-              ✕
-            </span>
           </div>
         </div>
 
@@ -1031,8 +1004,8 @@ const Camera = () => {
         </div>
       )}
 
-      {/* MODALS SESSION CONTROL (Pause & Exit) */}
-      {(isPaused || isExiting) && (
+      {/* MODAL SESSION CONTROL (Pause Saja) */}
+      {isPaused && (
         <div
           style={{
             position: "absolute",
@@ -1049,219 +1022,118 @@ const Camera = () => {
           }}
         >
           {/* Modal: Pause */}
-          {isPaused && (
+          <div
+            style={{
+              width: "420px",
+              padding: "40px 32px",
+              background: "#1F252C",
+              boxShadow: "0px 10px 40px rgba(0, 0, 0, 0.5)",
+              borderRadius: "16px",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+            }}
+          >
             <div
               style={{
-                width: "420px",
-                padding: "40px 32px",
-                background: "#1F252C",
-                boxShadow: "0px 10px 40px rgba(0, 0, 0, 0.5)",
+                width: "56px",
+                height: "56px",
+                background: "rgba(255, 255, 255, 0.05)",
                 borderRadius: "16px",
+                border: "1px solid rgba(255, 255, 255, 0.1)",
                 display: "flex",
-                flexDirection: "column",
+                justifyContent: "center",
                 alignItems: "center",
+                marginBottom: "24px",
               }}
             >
-              <div
-                style={{
-                  width: "56px",
-                  height: "56px",
-                  background: "rgba(255, 255, 255, 0.05)",
-                  borderRadius: "16px",
-                  border: "1px solid rgba(255, 255, 255, 0.1)",
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  marginBottom: "24px",
-                }}
-              >
-                <div style={{ display: "flex", gap: "4px" }}>
-                  <div
-                    style={{
-                      width: "3px",
-                      height: "14px",
-                      background: "#F2EDE8",
-                      borderRadius: "2px",
-                    }}
-                  />
-                  <div
-                    style={{
-                      width: "3px",
-                      height: "14px",
-                      background: "#F2EDE8",
-                      borderRadius: "2px",
-                    }}
-                  />
-                </div>
+              <div style={{ display: "flex", gap: "4px" }}>
+                <div
+                  style={{
+                    width: "3px",
+                    height: "14px",
+                    background: "#F2EDE8",
+                    borderRadius: "2px",
+                  }}
+                />
+                <div
+                  style={{
+                    width: "3px",
+                    height: "14px",
+                    background: "#F2EDE8",
+                    borderRadius: "2px",
+                  }}
+                />
               </div>
-              <div
-                style={{
-                  textAlign: "center",
-                  color: "white",
-                  fontSize: "22px",
-                  fontFamily: "Space Grotesk",
-                  fontWeight: "700",
-                  marginBottom: "12px",
-                }}
-              >
-                Session paused
-              </div>
-              <div
-                style={{
-                  textAlign: "center",
-                  color: "rgba(255,255,255,0.6)",
-                  fontSize: "14px",
-                  fontFamily: "Space Grotesk",
-                  lineHeight: "22px",
-                  marginBottom: "32px",
-                }}
-              >
-                Take your time. When you’re ready, continue from where you left
-                off.
-              </div>
-              <button
-                onClick={() => setIsPaused(false)}
-                style={{
-                  width: "100%",
-                  padding: "15px",
-                  background: "#0099A6",
-                  borderRadius: "30px",
-                  border: "none",
-                  color: "white",
-                  fontSize: "15px",
-                  fontFamily: "Space Grotesk",
-                  fontWeight: "600",
-                  cursor: "pointer",
-                  marginBottom: "12px",
-                }}
-              >
-                Resume session
-              </button>
-              <button
-                onClick={handleRest}
-                style={{
-                  width: "100%",
-                  padding: "15px",
-                  background: "transparent",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                  borderRadius: "30px",
-                  color: "rgba(255,255,255,0.6)",
-                  fontSize: "15px",
-                  fontFamily: "Space Grotesk",
-                  fontWeight: "600",
-                  cursor: "pointer",
-                  transition: "all 0.2s",
-                }}
-                onMouseEnter={(e) =>
-                  (e.target.style.background = "rgba(255,255,255,0.05)")
-                }
-                onMouseLeave={(e) =>
-                  (e.target.style.background = "transparent")
-                }
-              >
-                Rest for 1 minute
-              </button>
             </div>
-          )}
-
-          {/* Modal: Exit */}
-          {isExiting && (
             <div
               style={{
-                width: "420px",
-                padding: "40px 32px",
-                background: "#1F252C",
-                boxShadow: "0px 10px 40px rgba(0, 0, 0, 0.5)",
-                borderRadius: "16px",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
+                textAlign: "center",
+                color: "white",
+                fontSize: "22px",
+                fontFamily: "Space Grotesk",
+                fontWeight: "700",
+                marginBottom: "12px",
               }}
             >
-              <div
-                style={{
-                  width: "56px",
-                  height: "56px",
-                  background: "rgba(216, 109, 96, 0.1)",
-                  borderRadius: "16px",
-                  border: "1px solid rgba(216, 109, 96, 0.2)",
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  marginBottom: "24px",
-                }}
-              >
-                <span style={{ fontSize: "20px", color: "#D86D60" }}>✕</span>
-              </div>
-              <div
-                style={{
-                  textAlign: "center",
-                  color: "white",
-                  fontSize: "22px",
-                  fontFamily: "Space Grotesk",
-                  fontWeight: "700",
-                  marginBottom: "12px",
-                }}
-              >
-                Leave this session?
-              </div>
-              <div
-                style={{
-                  textAlign: "center",
-                  color: "rgba(255,255,255,0.6)",
-                  fontSize: "14px",
-                  fontFamily: "Space Grotesk",
-                  lineHeight: "22px",
-                  marginBottom: "32px",
-                }}
-              >
-                You’ve completed {currentStep} of 8 exercises. Your progress
-                will be saved.
-              </div>
-              <button
-                onClick={() => setIsExiting(false)}
-                style={{
-                  width: "100%",
-                  padding: "15px",
-                  background: "#0099A6",
-                  borderRadius: "30px",
-                  border: "none",
-                  color: "white",
-                  fontSize: "15px",
-                  fontFamily: "Space Grotesk",
-                  fontWeight: "600",
-                  cursor: "pointer",
-                  marginBottom: "12px",
-                }}
-              >
-                Stay and continue
-              </button>
-              <button
-                onClick={() => navigate("/session-complete")}
-                style={{
-                  width: "100%",
-                  padding: "15px",
-                  background: "transparent",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                  borderRadius: "30px",
-                  color: "rgba(255,255,255,0.6)",
-                  fontSize: "15px",
-                  fontFamily: "Space Grotesk",
-                  fontWeight: "600",
-                  cursor: "pointer",
-                  transition: "all 0.2s",
-                }}
-                onMouseEnter={(e) =>
-                  (e.target.style.background = "rgba(255,255,255,0.05)")
-                }
-                onMouseLeave={(e) =>
-                  (e.target.style.background = "transparent")
-                }
-              >
-                Leave and save progress
-              </button>
+              Session paused
             </div>
-          )}
+            <div
+              style={{
+                textAlign: "center",
+                color: "rgba(255,255,255,0.6)",
+                fontSize: "14px",
+                fontFamily: "Space Grotesk",
+                lineHeight: "22px",
+                marginBottom: "32px",
+              }}
+            >
+              Take your time. When you’re ready, continue from where you left
+              off.
+            </div>
+            <button
+              onClick={() => setIsPaused(false)}
+              style={{
+                width: "100%",
+                padding: "15px",
+                background: "#0099A6",
+                borderRadius: "30px",
+                border: "none",
+                color: "white",
+                fontSize: "15px",
+                fontFamily: "Space Grotesk",
+                fontWeight: "600",
+                cursor: "pointer",
+                marginBottom: "12px",
+              }}
+            >
+              Resume session
+            </button>
+            <button
+              onClick={handleRest}
+              style={{
+                width: "100%",
+                padding: "15px",
+                background: "transparent",
+                border: "1px solid rgba(255,255,255,0.1)",
+                borderRadius: "30px",
+                color: "rgba(255,255,255,0.6)",
+                fontSize: "15px",
+                fontFamily: "Space Grotesk",
+                fontWeight: "600",
+                cursor: "pointer",
+                transition: "all 0.2s",
+              }}
+              onMouseEnter={(e) =>
+                (e.target.style.background = "rgba(255,255,255,0.05)")
+              }
+              onMouseLeave={(e) =>
+                (e.target.style.background = "transparent")
+              }
+            >
+              Rest for 1 minute
+            </button>
+          </div>
         </div>
       )}
     </div>
