@@ -1,0 +1,163 @@
+{
+  "info": {
+    "_postman_id": "visensa-api-collection",
+    "name": "Visensa API v1",
+    "description": "REST API collection for Visensa Rehabilitation Platform.\n\nSet the `base_url` collection variable to your server URL.\nAfter login, copy the `accessToken` and set it in the collection Authorization tab.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:3000/api/v1", "type": "string" },
+    { "key": "accessToken", "value": "", "type": "string" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+  },
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:3000/health",
+        "description": "Check if the server is running."
+      }
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/register",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Budi Santoso\",\n  \"email\": \"budi@patient.com\",\n  \"password\": \"Password1\",\n  \"role\": \"patient\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data?.accessToken) {",
+                  "  pm.collectionVariables.set('accessToken', res.data.accessToken);",
+                  "  console.log('Token saved to collection variable.');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"budi@patient.com\",\n  \"password\": \"Password1\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/refresh",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"<your_refresh_token>\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Me",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }] },
+            "method": "GET",
+            "url": "{{base_url}}/auth/me"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Patients",
+      "item": [
+        {
+          "name": "List All Patients (Doctor)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/patients?page=1&limit=10",
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "search", "value": "", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get My Profile (Patient)",
+          "request": { "method": "GET", "url": "{{base_url}}/patients/me" }
+        },
+        {
+          "name": "Update My Profile (Patient)",
+          "request": {
+            "method": "PATCH",
+            "url": "{{base_url}}/patients/me",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Budi Updated\",\n  \"phone\": \"081234567890\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Patient by ID (Doctor)",
+          "request": { "method": "GET", "url": "{{base_url}}/patients/p-001" }
+        }
+      ]
+    },
+    {
+      "name": "Sessions",
+      "item": [
+        {
+          "name": "Log Session (Patient)",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/sessions",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"exerciseId\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\n  \"durationSeconds\": 120,\n  \"repsCompleted\": 15\n}"
+            }
+          }
+        },
+        {
+          "name": "My Session History (Patient)",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/sessions/me?page=1&limit=10"
+          }
+        },
+        {
+          "name": "All Sessions (Doctor)",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/sessions?page=1&limit=10"
+          }
+        },
+        {
+          "name": "Session Detail",
+          "request": { "method": "GET", "url": "{{base_url}}/sessions/s-001" }
+        }
+      ]
+    }
+  ]
+}

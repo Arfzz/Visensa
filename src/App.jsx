@@ -31,17 +31,22 @@ import VisionTracker from './components/VisionTracker';
 import { useKalidokitBridge } from './services/kalidokit/useKalidokitBridge';
 import LeftHandWarningModal from './components/LeftHandWarningModal';
 
+// Import Pages Pasien
 import Login from "./pages/login/Login";
 import Register from "./pages/register/Register";
 import SessionIntro from "./pages/intro/SessionIntro";
 import Camera from "./pages/camera/Camera";
 import SessionComplete from "./pages/session-complete/SessionComplete";
+import PatientDashboard from './pages/patient-dashboard/PatientDashboard';
+import StreakSandbox from './features/gamification/streak/StreakSandbox';
 
+// Import Pages Dokter/Admin
 import LoginDoctor from './pages/login/LoginDoctor';
 import RegisterDoctor from './pages/register/RegisterDoctor';
 import Dashboard from "./pages/admin-dashboard/Dashboard";
 import PianoTilesSandbox from "./features/gamification/PianoTilesSandbox";
 
+// Import Hooks
 import { useLenis } from "./hooks/useLenis";
 import { useScrollReveal } from "./hooks/useGsapAnimations";
 
@@ -187,9 +192,17 @@ function App() {
 
         {/* Jalur ke Halaman Dashboard Admin */}
         <Route path="/admin-dashboard" element={<Dashboard />} />
+
+        {/* Jalur ke Halaman Dashboard Pasien (Baru Ditambahkan) */}
+        <Route path="/patient-dashboard" element={<PatientDashboard />} />
+        <Route path="/interactive-practice" element={<PatientDashboard initialTab="Interactive Practice" />} />
+
+        {/* Jalur ke Sandbox Streak Mini-Games */}
+        <Route path="/streak-test" element={<StreakSandbox />} />
+        <Route path="/streak-sandbox" element={<StreakSandbox />} />
       </Routes>
     </Router>
   );
-} // <--- Kurung kurawal penutup fungsi App harus di sini!
+} 
 
 export default App;
