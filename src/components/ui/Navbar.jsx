@@ -16,6 +16,28 @@ export default function Navbar() {
   const isClickScrolling = useRef(false);
   const clickTimerRef = useRef(null);
 
+  // ── User state from localStorage ─────────────────────────────────
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      try {
+        setUser(JSON.parse(userStr));
+      } catch (e) { }
+    }
+  }, []);
+
+  const formatName = (fullName, email) => {
+    if (!fullName) {
+      if (email) return email.split('@')[0];
+      return "User";
+    }
+    const parts = fullName.trim().split(" ");
+    if (parts.length === 1) return parts[0];
+    return `${parts[0]} ${parts[1][0]}`;
+  };
+
   // ── Scroll state (for subtle shadow bump) ──────────────────────────
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -111,40 +133,76 @@ export default function Navbar() {
 
         {/* ── Actions ───────────────────────────────────────────── */}
         <div className="navbar__actions">
-          {/* SIGN IN SEKARANG BISA DIKLIK */}
-          <Link
-            to="/login"
-            className="navbar__signin"
-            id="nav-signin"
-            style={{ textDecoration: "none" }}
-          >
-            Sign in
-          </Link>
+          {user ? (
+            <>
+              <Link
+                to={user.role === 'doctor' ? "/admin-dashboard" : "/patient-dashboard"}
+                className="navbar__signin"
+                id="nav-user-name"
+                style={{ textDecoration: "none" }}
+              >
+                {formatName(user.name, user.email)}
+              </Link>
+              <Link
+                to={user.role === 'doctor' ? "/admin-dashboard" : "/patient-dashboard"}
+                className="navbar__cta btn-primary"
+                id="nav-start-session"
+                style={{ textDecoration: "none" }}
+              >
+                Dashboard
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 14 14"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M2 7H12M12 7L8 3M12 7L8 11"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link
+                to="/login"
+                className="navbar__signin"
+                id="nav-signin"
+                style={{ textDecoration: "none" }}
+              >
+                Sign in
+              </Link>
 
-          {/* GET STARTED JUGA BISA DIKLIK */}
-          <Link
-            to="/register"
-            className="navbar__cta btn-primary"
-            id="nav-get-started"
-            style={{ textDecoration: "none" }}
-          >
-            Get started
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 14 14"
-              fill="none"
-              aria-hidden="true"
-            >
-              <path
-                d="M2 7H12M12 7L8 3M12 7L8 11"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </Link>
+              <Link
+                to="/register"
+                className="navbar__cta btn-primary"
+                id="nav-get-started"
+                style={{ textDecoration: "none" }}
+              >
+                Get started
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 14 14"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M2 7H12M12 7L8 3M12 7L8 11"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </Link>
+            </>
+          )}
         </div>
 
         {/* ── Mobile hamburger ──────────────────────────────────── */}

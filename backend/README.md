@@ -1,6 +1,7 @@
-# Visensa Backend — REST API
+# Visensa Backend — REST API (Supabase Integrated)
 
-Express.js backend for the Visensa Rehabilitation Platform. Built with a clean **Layered Architecture** (Routes → Controller → Service → DB) to allow plugging in Supabase without touching the HTTP layer.
+Express.js backend for the Visensa Rehabilitation Platform. 
+Fully integrated with **Supabase Auth** and **PostgreSQL**.
 
 ## Tech Stack
 
@@ -8,11 +9,10 @@ Express.js backend for the Visensa Rehabilitation Platform. Built with a clean *
 |---|---|
 | Framework | Express.js |
 | Validation | Zod |
-| Auth | JWT (jsonwebtoken) |
+| Database / Auth | Supabase (`@supabase/supabase-js`) |
 | Security | Helmet, CORS |
 | Logging | Morgan |
 | Performance | Compression |
-| Database *(pending)* | Supabase (PostgreSQL) |
 
 ## Folder Structure
 
@@ -21,104 +21,96 @@ backend/
 ├── src/
 │   ├── server.js              # Entry point & graceful shutdown
 │   ├── app.js                 # Express app + middleware setup
+│   ├── config/
+│   │   └── supabase.js        # Supabase client setup (using Service Role Key)
 │   ├── routes/
 │   │   ├── index.js           # Mount all resource routes at /api/v1
 │   │   ├── auth.routes.js
 │   │   ├── patient.routes.js
-│   │   └── session.routes.js
-│   ├── controllers/           # HTTP layer — no business logic here
+│   │   ├── session.routes.js  # Exercise & Minigame routes
+│   │   └── dashboard.routes.js# Dashboard Stats routes
+│   ├── controllers/           # HTTP layer
 │   │   ├── auth.controller.js
 │   │   ├── patient.controller.js
-│   │   └── session.controller.js
-│   ├── services/              # Business logic + DB calls (stubbed for now)
+│   │   ├── session.controller.js
+│   │   └── dashboard.controller.js
+│   ├── services/              # Business logic + Supabase Queries
 │   │   ├── auth.service.js
 │   │   ├── patient.service.js
-│   │   └── session.service.js
+│   │   ├── session.service.js
+│   │   └── dashboard.service.js
 │   ├── middlewares/
-│   │   ├── authenticate.js    # JWT verify + generateAccessToken/RefreshToken
+│   │   ├── authenticate.js    # Supabase JWT verify + Role Injection
 │   │   ├── authorize.js       # Role-based access control (ROLES.DOCTOR / ROLES.PATIENT)
-│   │   ├── validate.js        # Zod schema validation middleware factory
-│   │   ├── responseFormatter.js  # Attaches res.ok / res.created / res.paginate
-│   │   └── errorHandler.js    # Global error handler + 404 handler
+│   │   ├── validate.js        # Zod schema validation
+│   │   ├── responseFormatter.js
+│   │   └── errorHandler.js
 │   ├── validations/           # Zod schemas
 │   │   ├── auth.schema.js
 │   │   ├── patient.schema.js
 │   │   └── session.schema.js
 │   └── utils/
-│       ├── AppError.js        # Custom operational error class
-│       ├── responseHelper.js  # sendSuccess / sendError / sendPaginated
-│       ├── pagination.js      # parsePagination / parseSort
-│       └── dateFormatter.js   # formatToLocale / formatToISO / unixNow
+│       ├── AppError.js        
+│       ├── responseHelper.js  
+│       ├── pagination.js      
+│       └── dateFormatter.js   
 ├── docs/
 │   └── visensa_api.postman_collection.json
 ├── .env                       # Local env (not committed)
-├── .env.example               # Template for new devs
+├── .env.example               
 └── package.json
 ```
 
-## Getting Started
+## Setup & Run
 
 ```bash
 # Install dependencies
 npm install
 
 # Copy & fill in environment variables
+# You MUST fill SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY
 cp .env.example .env
 
 # Start dev server (with auto-reload)
 npm run dev
-
-# Start production server
-npm start
 ```
 
 ## API Endpoints
 
+### 🔐 Authentication (`/api/v1/auth`)
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| POST | `/register` | ❌ | Register a new user |
+| POST | `/login` | ❌ | Login with email and password |
+| POST | `/refresh` | ❌ | Refresh access token |
+| GET  | `/me` | ✅ | Get current authenticated user |
+
+### 🧑‍⚕️ Patients (`/api/v1/patients`)
 | Method | Endpoint | Auth | Role | Description |
 |---|---|---|---|---|
-| GET | `/health` | ❌ | — | Server health check |
-| POST | `/api/v1/auth/register` | ❌ | — | Register new user |
-| POST | `/api/v1/auth/login` | ❌ | — | Login |
-| POST | `/api/v1/auth/refresh` | ❌ | — | Refresh access token |
-| GET | `/api/v1/auth/me` | ✅ | Any | Get current user |
-| GET | `/api/v1/patients` | ✅ | Doctor | List all patients |
-| GET | `/api/v1/patients/me` | ✅ | Patient | Get own profile |
-| PATCH | `/api/v1/patients/me` | ✅ | Patient | Update own profile |
-| GET | `/api/v1/patients/:id` | ✅ | Doctor | Get patient by ID |
-| POST | `/api/v1/sessions` | ✅ | Patient | Log a session |
-| GET | `/api/v1/sessions/me` | ✅ | Patient | My session history |
-| GET | `/api/v1/sessions` | ✅ | Doctor | All sessions |
-| GET | `/api/v1/sessions/:id` | ✅ | Doctor/Patient | Session detail |
+| GET   | `/` | ✅ | Doctor | List all patients managed by this doctor |
+| GET   | `/me` | ✅ | Patient | Get own profile |
+| PATCH | `/me` | ✅ | Patient | Update own profile (name, condition, notes) |
+| GET   | `/:id` | ✅ | Doctor | Get patient by ID |
 
-## Standard Response Format
+### 🏋️ Sessions (`/api/v1/sessions`)
+| Method | Endpoint | Auth | Role | Description |
+|---|---|---|---|---|
+| POST | `/exercise` | ✅ | Patient | Log a completed exercise session |
+| GET  | `/exercise/me` | ✅ | Patient | View own exercise history |
+| GET  | `/exercise` | ✅ | Doctor | View all exercise logs |
+| GET  | `/exercise/:id` | ✅ | Doctor/Patient | View single exercise log |
+| POST | `/minigame` | ✅ | Patient | Log a completed Piano Tiles minigame session |
+| GET  | `/minigame/me` | ✅ | Patient | View own minigame history |
+| GET  | `/stats/me` | ✅ | Patient | Get own gamification stats & trends (Same as dashboard stats/me) |
 
-```json
-{
-  "success": true,
-  "message": "Patients retrieved.",
-  "data": [...],
-  "meta": {
-    "page": 1,
-    "limit": 10,
-    "total": 3,
-    "totalPages": 1,
-    "hasNextPage": false,
-    "hasPrevPage": false
-  }
-}
-```
+### 📊 Dashboard (`/api/v1/dashboard`)
+| Method | Endpoint | Auth | Role | Description |
+|---|---|---|---|---|
+| GET | `/` | ✅ | Doctor | Summary stats (total patients, active, exercises, minigames, recent logs) |
+| GET | `/patients/:patientId` | ✅ | Doctor | Drill-down detail for a specific patient |
+| GET | `/stats/me` | ✅ | Patient | Own aggregated exercise stats and trends |
 
-## Supabase Integration (Next Step)
-
-All `services/*.service.js` files contain `// TODO: Supabase query` comments.
-When Supabase is ready, install the client and replace mock data:
-
-```bash
-npm install @supabase/supabase-js
-```
-
-Then fill in `.env`:
-```
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
-```
+## Notes on Schema Mapping
+- The `authenticate.js` middleware parses the Supabase JWT. It then queries the `doctor` and `patient` tables to determine the user's role and attaches the specific table Primary Key (UUID) to `req.user.profile.id`.
+- Most operations use `req.user.profile.id` (table PK) rather than `req.user.id` (auth user UUID) for reliable relational queries.

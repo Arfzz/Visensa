@@ -136,38 +136,7 @@ const BellIcon = ({ showNotif, setShowNotif }) => (
   </div>
 );
 
-const CustomSelect = ({ label, value, options, isOpen, onToggle, onSelect }) => (
-  <div style={{ display: "flex", flexDirection: "column", gap: "8px", position: "relative" }}>
-    <label style={{ color: "#7AAAB4", fontSize: "14px", fontFamily: "Space Mono", textTransform: "uppercase", letterSpacing: "1px" }}>{label}</label>
-    
-    <div 
-      onClick={onToggle}
-      style={{ padding: "14px 20px", border: isOpen ? "1.5px solid #0099A6" : "1.5px solid #C4E8EC", borderRadius: "12px", fontSize: "17px", fontFamily: "Space Grotesk", color: "#0C2830", background: "white", display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer", userSelect: "none", transition: "all 0.2s" }}
-    >
-      <span>{value}</span>
-      <svg style={{ transform: isOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s", stroke: "#7AAAB4" }} width="20" height="20" viewBox="0 0 24 24" fill="none" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-    </div>
 
-    {isOpen && (
-      <div style={{ position: "absolute", top: "82px", left: 0, width: "100%", background: "white", borderRadius: "14px", border: "1.5px solid #C4E8EC", boxShadow: "0px 10px 30px rgba(12, 40, 48, 0.08)", zIndex: 50, overflow: "hidden", boxSizing: "border-box" }}>
-        {options.map((option) => (
-          <div 
-            key={option}
-            onClick={() => {
-              onSelect(option);
-              onToggle();
-            }}
-            style={{ padding: "14px 20px", color: option === value ? "#0099A6" : "#0C2830", background: option === value ? "rgba(0, 153, 166, 0.04)" : "white", fontSize: "16px", fontFamily: "Space Grotesk", fontWeight: option === value ? "600" : "400", cursor: "pointer", transition: "background 0.2s" }}
-            onMouseEnter={(e) => { if(option !== value) e.currentTarget.style.background = "#F8FAFA"; }}
-            onMouseLeave={(e) => { if(option !== value) e.currentTarget.style.background = "white"; }}
-          >
-            {option}
-          </div>
-        ))}
-      </div>
-    )}
-  </div>
-);
 
 // ==========================================
 // 2. KOMPONEN UTAMA
@@ -185,34 +154,51 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
   const [hoveredPainPoint, setHoveredPainPoint] = useState(null);
   const [activeBarIndex, setActiveBarIndex] = useState(null);
 
+  // ── Ambil User dari LocalStorage ──
+  const [user, setUser] = useState(() => {
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      try {
+        return JSON.parse(userStr);
+      } catch(e) {
+        return null;
+      }
+    }
+    return null;
+  });
+
+  // ── Dynamic Greeting ──
+  const hour = new Date().getHours();
+  const greeting = (hour >= 5 && hour < 12) ? "Good morning" : (hour >= 12 && hour < 18) ? "Good afternoon" : "Good evening";
+
   // States Konten Pengaturan (Settings)
-  const [fullName, setFullName] = useState(INITIAL_SETTINGS.fullName);
-  const [condition, setCondition] = useState(INITIAL_SETTINGS.condition);
-  const [therapyHand, setTherapyHand] = useState(INITIAL_SETTINGS.therapyHand);
-  const [sessionLength, setSessionLength] = useState(INITIAL_SETTINGS.sessionLength);
-  const [dailyReminders, setDailyReminders] = useState(INITIAL_SETTINGS.dailyReminders);
+  // States Konten Pengaturan (Settings)
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   
-  const [email, setEmail] = useState(INITIAL_SETTINGS.email);
-  const [isEditingEmail, setIsEditingEmail] = useState(false);
-  const [tempEmail, setTempEmail] = useState(INITIAL_SETTINGS.email);
-
-  const [openDropdown, setOpenDropdown] = useState(null);
-
-  const handleToggleDropdown = (type) => {
-    setOpenDropdown(openDropdown === type ? null : type);
-  };
+  // Update state once user is loaded
+  useState(() => {
+    if (user) {
+      if (user.name) setFullName(user.name);
+      if (user.email) setEmail(user.email);
+    }
+  });
 
   const hasChanges = 
-    fullName !== INITIAL_SETTINGS.fullName ||
-    condition !== INITIAL_SETTINGS.condition ||
-    therapyHand !== INITIAL_SETTINGS.therapyHand ||
-    sessionLength !== INITIAL_SETTINGS.sessionLength ||
-    dailyReminders !== INITIAL_SETTINGS.dailyReminders ||
-    email !== INITIAL_SETTINGS.email;
+    (user && fullName !== user.name) ||
+    (user && email !== user.email) ||
+    password !== "";
 
   const handleSaveChanges = () => {
     if (!hasChanges) return;
     alert("Changes saved successfully!");
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    localStorage.removeItem("token"); // if token exists
+    navigate("/");
   };
 
   const renderIcon = (menu, isActive) => {
@@ -269,8 +255,8 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
           <div data-lenis-prevent="true" style={{ flex: 1, padding: "10px 20px 40px 20px", overflowY: "auto", display: "flex", flexDirection: "column", gap: "24px", minHeight: 0 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0 }}>
               <div>
-                <div style={{ color: "#9AABB8", fontSize: "15px", fontWeight: "500", marginBottom: "4px" }}>Good Morning,</div>
-                <div style={{ color: "#1A2332", fontSize: "40px", fontWeight: "700" }}>Kenji Morales</div>
+                <div style={{ color: "#9AABB8", fontSize: "15px", fontWeight: "500", marginBottom: "4px" }}>{greeting},</div>
+                <div style={{ color: "#1A2332", fontSize: "40px", fontWeight: "700" }}>{user?.name || "Patient"}</div>
               </div>
               <BellIcon showNotif={showNotif} setShowNotif={setShowNotif} />
             </div>
@@ -685,55 +671,31 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
                     <label style={{ color: "#7AAAB4", fontSize: "14px", fontFamily: "Space Mono", textTransform: "uppercase", letterSpacing: "1px" }}>Full name</label>
                     <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} style={{ padding: "14px 20px", border: "1.5px solid #C4E8EC", borderRadius: "12px", fontSize: "17px", fontFamily: "Space Grotesk", color: "#0C2830", outline: "none", width: "100%", boxSizing: "border-box" }} />
                   </div>
-
-                  <CustomSelect 
-                    label="Condition"
-                    value={condition}
-                    options={conditionOptions}
-                    isOpen={openDropdown === 'condition'}
-                    onToggle={() => handleToggleDropdown('condition')}
-                    onSelect={(val) => setCondition(val)}
-                  />
-
-                  <CustomSelect 
-                    label="Therapy hand"
-                    value={therapyHand}
-                    options={handOptions}
-                    isOpen={openDropdown === 'hand'}
-                    onToggle={() => handleToggleDropdown('hand')}
-                    onSelect={(val) => setTherapyHand(val)}
-                  />
                   
-                </div>
-              </div>
-
-              <div style={{ background: "white", borderRadius: "20px", border: "1.5px solid #C4E8EC", overflow: "visible", boxShadow: "0 2px 10px rgba(0,0,0,0.02)" }}>
-                <div style={{ padding: "20px 24px", borderBottom: "1.5px solid #C4E8EC" }}>
-                  <div style={{ color: "#0C2830", fontSize: "18px", fontFamily: "Space Grotesk", fontWeight: "700" }}>Session preferences</div>
-                </div>
-                <div style={{ padding: "24px", display: "flex", flexDirection: "column", gap: "24px" }}>
-                  
-                  <CustomSelect 
-                    label="Session length"
-                    value={sessionLength}
-                    options={lengthOptions}
-                    isOpen={openDropdown === 'length'}
-                    onToggle={() => handleToggleDropdown('length')}
-                    onSelect={(val) => setSessionLength(val)}
-                  />
-
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "10px" }}>
-                    <div>
-                      <div style={{ color: "#0C2830", fontSize: "17px", fontFamily: "Space Grotesk", fontWeight: "600", marginBottom: "4px" }}>Daily reminders</div>
-                      <div style={{ color: "#7AAAB4", fontSize: "15px", fontFamily: "Space Grotesk" }}>Get a reminder to complete your session</div>
-                    </div>
-                    <div onClick={() => setDailyReminders(!dailyReminders)} style={{ width: "52px", height: "28px", background: dailyReminders ? "#0099A6" : "#C4E8EC", borderRadius: "100px", position: "relative", cursor: "pointer", transition: "background 0.3s" }}>
-                      <div style={{ width: "22px", height: "22px", background: "white", borderRadius: "50%", position: "absolute", top: "3px", left: dailyReminders ? "27px" : "3px", transition: "left 0.3s ease", boxShadow: "0 2px 5px rgba(0,0,0,0.15)" }} />
-                    </div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                    <label style={{ color: "#7AAAB4", fontSize: "14px", fontFamily: "Space Mono", textTransform: "uppercase", letterSpacing: "1px" }}>Email address</label>
+                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} style={{ padding: "14px 20px", border: "1.5px solid #C4E8EC", borderRadius: "12px", fontSize: "17px", fontFamily: "Space Grotesk", color: "#0C2830", outline: "none", width: "100%", boxSizing: "border-box" }} />
                   </div>
-
+                  
+                  <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                    <label style={{ color: "#7AAAB4", fontSize: "14px", fontFamily: "Space Mono", textTransform: "uppercase", letterSpacing: "1px" }}>Change password</label>
+                    <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Enter new password" style={{ padding: "14px 20px", border: "1.5px solid #C4E8EC", borderRadius: "12px", fontSize: "17px", fontFamily: "Space Grotesk", color: "#0C2830", outline: "none", width: "100%", boxSizing: "border-box" }} />
+                  </div>
+                  
+                  <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                     <button 
+                       onClick={handleSaveChanges}
+                       disabled={!hasChanges}
+                       style={{ padding: "12px 24px", background: hasChanges ? "#0099A6" : "#C4E8EC", color: "white", border: "none", borderRadius: "12px", fontSize: "16px", fontFamily: "Space Grotesk", fontWeight: "600", cursor: hasChanges ? "pointer" : "not-allowed", transition: "background 0.3s" }}
+                     >
+                       Save changes
+                     </button>
+                  </div>
+                  
                 </div>
               </div>
+
+
 
             </div>
 
@@ -746,52 +708,26 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
                 
                 <div style={{ padding: "24px", display: "flex", flexDirection: "column", gap: "24px" }}>
                   
-                  {!isEditingEmail ? (
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <div>
-                        <div style={{ color: "#0C2830", fontSize: "16px", fontFamily: "Space Grotesk", fontWeight: "600", marginBottom: "4px" }}>Email</div>
-                        <div style={{ color: "#7AAAB4", fontSize: "15px", fontFamily: "Space Grotesk" }}>{email}</div>
-                      </div>
-                      <div 
-                        onClick={() => {
-                          setTempEmail(email);
-                          setIsEditingEmail(true);
-                        }} 
-                        style={{ color: "#0099A6", fontSize: "15px", fontFamily: "Space Grotesk", fontWeight: "600", cursor: "pointer", userSelect: "none" }}
-                      >
-                        Change
-                      </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #F0FAFB", paddingBottom: "16px" }}>
+                    <div>
+                      <div style={{ color: "#0C2830", fontSize: "16px", fontFamily: "Space Grotesk", fontWeight: "600", marginBottom: "4px" }}>Full Name</div>
+                      <div style={{ color: "#7AAAB4", fontSize: "15px", fontFamily: "Space Grotesk" }}>{user?.name || "Not set"}</div>
                     </div>
-                  ) : (
-                    <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                      <label style={{ color: "#7AAAB4", fontSize: "13px", fontFamily: "Space Mono", textTransform: "uppercase" }}>New Email Address</label>
-                      <input 
-                        type="email" 
-                        value={tempEmail} 
-                        onChange={(e) => setTempEmail(e.target.value)}
-                        style={{ padding: "10px 14px", border: "1.5px solid #0099A6", borderRadius: "8px", fontSize: "15px", fontFamily: "Space Grotesk", color: "#0C2830", outline: "none" }}
-                      />
-                      <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end", marginTop: "4px" }}>
-                        <button 
-                          onClick={() => setIsEditingEmail(false)}
-                          style={{ padding: "6px 14px", background: "white", border: "1.5px solid #C4E8EC", borderRadius: "8px", color: "#7AAAB4", fontSize: "13.5px", fontFamily: "Space Grotesk", cursor: "pointer" }}
-                        >
-                          Cancel
-                        </button>
-                        <button 
-                          onClick={() => {
-                            setEmail(tempEmail);
-                            setIsEditingEmail(false);
-                          }}
-                          style={{ padding: "6px 14px", background: "#0099A6", border: "none", borderRadius: "8px", color: "white", fontSize: "13.5px", fontFamily: "Space Grotesk", fontWeight: "600", cursor: "pointer" }}
-                        >
-                          Apply
-                        </button>
-                      </div>
+                  </div>
+                  
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <div>
+                      <div style={{ color: "#0C2830", fontSize: "16px", fontFamily: "Space Grotesk", fontWeight: "600", marginBottom: "4px" }}>Account Role</div>
+                      <div style={{ color: "#7AAAB4", fontSize: "15px", fontFamily: "Space Grotesk", textTransform: "capitalize" }}>{user?.role || "Patient"}</div>
                     </div>
-                  )}
+                  </div>
 
-                  <button style={{ width: "100%", padding: "14px", background: "#FFE9E9", border: "1.5px solid #FFCECE", borderRadius: "100px", color: "#C0574C", fontSize: "16px", fontFamily: "Space Grotesk", fontWeight: "600", cursor: "pointer", transition: "background 0.2s" }} onMouseEnter={(e) => e.target.style.background = "#FFD6D6"} onMouseLeave={(e) => e.target.style.background = "#FFE9E9"}>
+                  <button 
+                    onClick={handleLogout}
+                    style={{ width: "100%", padding: "14px", background: "#FFE9E9", border: "1.5px solid #FFCECE", borderRadius: "100px", color: "#C0574C", fontSize: "16px", fontFamily: "Space Grotesk", fontWeight: "600", cursor: "pointer", transition: "background 0.2s" }} 
+                    onMouseEnter={(e) => e.target.style.background = "#FFD6D6"} 
+                    onMouseLeave={(e) => e.target.style.background = "#FFE9E9"}
+                  >
                     Sign out of VISENSA
                   </button>
                 </div>

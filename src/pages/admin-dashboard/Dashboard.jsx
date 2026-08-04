@@ -292,6 +292,16 @@ const Dashboard = () => {
   // State untuk membuka/tutup Modal
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const handleLogout = () => {
+    // 1. Bersihin semua data sesi dari browser
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("user");
+
+    // 2. Arahin balik ke halaman login atau home
+    navigate("/login");
+  };
+
   return (
     <div
       style={{

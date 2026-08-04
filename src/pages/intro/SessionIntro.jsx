@@ -4,15 +4,39 @@ import { useEffect, useRef } from "react";
 const SessionIntro = () => {
   const navigate = useNavigate();
   const videoRef = useRef(null);
+  const streamRef = useRef(null);
+
+  // const handleLogout = () => {
+  //   if (streamRef.current) {
+  //     streamRef.current.getTracks().forEach((track) => track.stop());
+  //   }
+
+  //   // Bersihin semua data sesi dari browser
+  //   localStorage.removeItem('accessToken');
+  //   localStorage.removeItem('refreshToken');
+  //   localStorage.removeItem('user');
+
+  //   // Arahin balik ke halaman login atau home
+  //   navigate('/login'); 
+  // };
 
   // Live camera preview — hanya untuk cek posisi & pencahayaan
   useEffect(() => {
-    let stream = null;
+    let isMounted = true; // Flag buat nyegah kamera nyala pas udah pindah page
+
     const startPreview = async () => {
       try {
-        stream = await navigator.mediaDevices.getUserMedia({
+        const stream = await navigator.mediaDevices.getUserMedia({
           video: { width: 1280, height: 720, facingMode: "user" },
         });
+
+        if (!isMounted) {
+          stream.getTracks().forEach((track) => track.stop());
+          return;
+        }
+
+        streamRef.current = stream; 
+        
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
         }
@@ -20,9 +44,14 @@ const SessionIntro = () => {
         console.warn("[SessionIntro] Camera preview not available:", err);
       }
     };
+    
     startPreview();
+
     return () => {
-      if (stream) stream.getTracks().forEach((t) => t.stop());
+      isMounted = false;
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((t) => t.stop());
+      }
     };
   }, []);
 
@@ -145,6 +174,21 @@ const SessionIntro = () => {
         <div style={{ marginTop: "60px", textAlign: "center", color: "#7AAAB4", fontSize: "16px", fontFamily: "Space Grotesk", maxWidth: "550px" }}>
           This is what you'll see during therapy. The mirrored hand guides each exercise.
         </div>
+        {/* <button 
+          onClick={handleLogout}
+          style={{
+            padding: "10px 20px",
+            backgroundColor: "#D32F2F", 
+            color: "white",
+            border: "none",
+            borderRadius: "8px",
+            cursor: "pointer",
+            fontWeight: "bold",
+            marginTop: "20px"
+          }}
+        >
+          Logout
+        </button> */}
       </div>
 
       {/* SISI KANAN: Panel Detail Sesi (VERSI ULTRA COMPACT) */}
@@ -155,7 +199,7 @@ const SessionIntro = () => {
           backgroundColor: "white",
           borderLeft: "1px solid #C4E8EC",
           overflowY: "auto",
-          padding: "16px 20px", // Padding atas-bawah sangat minim
+          padding: "16px 20px", 
           display: "flex",
           flexDirection: "column",
           boxSizing: "border-box",
@@ -220,7 +264,7 @@ const SessionIntro = () => {
             </div>
           </div>
 
-          {/* Info Box (Padding dan margin ditekan) */}
+          {/* Info Box */}
           <div style={{ background: "rgba(62, 216, 200, 0.08)", padding: "10px", borderRadius: "10px", border: "1px solid rgba(62, 216, 200, 0.20)", marginTop: "14px", display: "flex", gap: "8px", alignItems: "flex-start" }}>
             <div style={{ color: "#3ED8C8", marginTop: "1px", fontSize: "13px" }}>ⓘ</div>
             <div style={{ color: "#3A6870", fontSize: "11px", fontFamily: "Space Grotesk", lineHeight: "1.4" }}>
@@ -228,7 +272,7 @@ const SessionIntro = () => {
             </div>
           </div>
 
-          {/* Action Buttons (Padding Y ditekan jadi 12px) */}
+          {/* Action Buttons */}
           <div style={{ marginTop: "14px", display: "flex", flexDirection: "column", gap: "10px" }}>
             <button
               onClick={() => navigate('/camera')}
