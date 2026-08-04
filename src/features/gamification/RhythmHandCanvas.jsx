@@ -25,12 +25,13 @@ function RenderFrameLimiter({ fps = 30 }) {
   return null;
 }
 
-export function RhythmHandCanvas() {
+export function RhythmHandCanvas({ visible = true }) {
+  if (!visible) return null;
   // Live Layout Debugging State (Calibrated 1st POV Hand Alignment)
-  const [posX, setPosX] = useState(-0.5);
-  const [posY, setPosY] = useState(-8.5);
-  const [posZ, setPosZ] = useState(0);
-  const [modelScale, setModelScale] = useState(1.35);
+  const [posX, setPosX] = useState(3);
+  const [posY, setPosY] = useState(-12.5);
+  const [posZ, setPosZ] = useState(10);
+  const [modelScale, setModelScale] = useState(0.6);
   const [rotY, setRotY] = useState(0);
   const [rotX, setRotX] = useState(0);
   const [rotZ, setRotZ] = useState(153);
@@ -44,6 +45,7 @@ export function RhythmHandCanvas() {
         position: "absolute",
         top: 0,
         left: 0,
+        pointerEvents: "none",
       }}
     >
       {/* --- FLOATING DEBUGGING MODAL PANEL --- */}
@@ -54,6 +56,7 @@ export function RhythmHandCanvas() {
             bottom: "20px",
             left: "20px",
             zIndex: 9999,
+            pointerEvents: "auto",
             backgroundColor: "rgba(15, 23, 42, 0.92)",
             backdropFilter: "blur(8px)",
             border: "1px solid rgba(255, 255, 255, 0.15)",
@@ -254,6 +257,7 @@ export function RhythmHandCanvas() {
             bottom: "20px",
             left: "20px",
             zIndex: 9999,
+            pointerEvents: "auto",
             padding: "8px 14px",
             backgroundColor: "rgba(15, 23, 42, 0.9)",
             border: "1px solid rgba(255, 255, 255, 0.2)",
@@ -270,7 +274,7 @@ export function RhythmHandCanvas() {
 
       <Canvas
         shadows={false}
-        dpr={1}
+        dpr={[1, 1.5]}
         gl={{
           powerPreference: "high-performance",
           antialias: false,
@@ -288,6 +292,7 @@ export function RhythmHandCanvas() {
 
         <Suspense fallback={null}>
           <group
+            raycast={() => null}
             position={[posX, posY, posZ]}
             rotation={[
               rotX * (Math.PI / 180),

@@ -18,7 +18,7 @@ export function useKalidokitBridge() {
     let lastSolveTime = 0;
     let lastLogTime   = 0;
 
-    const THROTTLE_MS = 1000 / 30;
+    const THROTTLE_MS = 1000 / 22;
 
     const unsubscribe = useVisionStore.subscribe((state) => {
       const now = performance.now();

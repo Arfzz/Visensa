@@ -10,8 +10,12 @@ import StreakCelebrationModal from "../streak/StreakCelebrationModal";
 export const InteractivePracticeHub = () => {
   // --- STORE DATA & ACTIONS ---
   const currentStreak = useStreakStore((state) => state.currentStreak);
-  const todayActiveSeconds = useStreakStore((state) => state.todayActiveSeconds);
-  const dailyTargetSeconds = useStreakStore((state) => state.dailyTargetSeconds);
+  const todayActiveSeconds = useStreakStore(
+    (state) => state.todayActiveSeconds,
+  );
+  const dailyTargetSeconds = useStreakStore(
+    (state) => state.dailyTargetSeconds,
+  );
 
   // --- GAME SESSION MODAL STATE ---
   const [activeGameId, setActiveGameId] = useState(null);
@@ -23,13 +27,14 @@ export const InteractivePracticeHub = () => {
       {
         id: "rhythm_piano_tiles",
         title: "Rhythm Piano Tiles",
-        description: "Interactive 1-minute warm-up exercise for 4-finger rhythm and reflexes.",
+        description:
+          "Interactive 1-minute warm-up exercise for 4-finger rhythm and reflexes.",
         tags: ["4-Finger Flexion", "Reflex Modality"],
         durationLabel: "1 Min",
         targetSeconds: 60,
       },
     ],
-    []
+    [],
   );
 
   // --- START GAME SESSION ---
@@ -45,8 +50,15 @@ export const InteractivePracticeHub = () => {
   }, []);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "24px", width: "100%", boxSizing: "border-box" }}>
-      
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: "24px",
+        width: "100%",
+        boxSizing: "border-box",
+      }}
+    >
       {/* ========================================== */}
       {/* ZONA 1: CLINICAL HEADER & STREAK STATUS    */}
       {/* ========================================== */}
@@ -64,7 +76,14 @@ export const InteractivePracticeHub = () => {
         }}
       >
         <div>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "4px" }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              marginBottom: "4px",
+            }}
+          >
             <div
               style={{
                 width: "36px",
@@ -78,12 +97,26 @@ export const InteractivePracticeHub = () => {
             >
               <Activity size={20} color="#0099A6" strokeWidth={2.5} />
             </div>
-            <div style={{ color: "#0C2830", fontSize: "32px", fontWeight: "800", fontFamily: "Space Grotesk, sans-serif" }}>
+            <div
+              style={{
+                color: "#0C2830",
+                fontSize: "32px",
+                fontWeight: "800",
+                fontFamily: "Space Grotesk, sans-serif",
+              }}
+            >
               Interactive Practice
             </div>
           </div>
-          <div style={{ color: "#7AAAB4", fontSize: "15px", fontFamily: "Space Grotesk, sans-serif" }}>
-            Train reaction time, rhythm, and 4-finger coordination through interactive practice sessions.
+          <div
+            style={{
+              color: "#7AAAB4",
+              fontSize: "15px",
+              fontFamily: "Space Grotesk, sans-serif",
+            }}
+          >
+            Train reaction time, rhythm, and 4-finger coordination through
+            interactive practice sessions.
           </div>
         </div>
 
@@ -112,7 +145,14 @@ export const InteractivePracticeHub = () => {
       {/* ========================================== */}
       {/* ZONA 2: PROGRESS & STAT CARDS              */}
       {/* ========================================== */}
-      <div style={{ display: "flex", gap: "20px", flexWrap: "wrap", flexShrink: 0 }}>
+      <div
+        style={{
+          display: "flex",
+          gap: "20px",
+          flexWrap: "wrap",
+          flexShrink: 0,
+        }}
+      >
         <SevenDayTrackerCard />
         <PersonalBestCard />
       </div>
@@ -120,8 +160,22 @@ export const InteractivePracticeHub = () => {
       {/* ========================================== */}
       {/* ZONA 3: MINIGAMES LIST SECTION             */}
       {/* ========================================== */}
-      <div style={{ display: "flex", flexDirection: "column", gap: "16px", flexShrink: 0 }}>
-        <div style={{ color: "#0C2830", fontSize: "20px", fontWeight: "700", fontFamily: "Space Grotesk, sans-serif" }}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "16px",
+          flexShrink: 0,
+        }}
+      >
+        <div
+          style={{
+            color: "#0C2830",
+            fontSize: "20px",
+            fontWeight: "700",
+            fontFamily: "Space Grotesk, sans-serif",
+          }}
+        >
           Interactive Practice Modalities
         </div>
 
@@ -170,8 +224,8 @@ export const InteractivePracticeHub = () => {
               borderRadius: "24px",
               border: "1.5px solid #0099A6",
               width: "100%",
-              maxWidth: "680px",
-              maxHeight: "92vh",
+              maxWidth: "900px",
+              maxHeight: "94vh",
               overflowY: "auto",
               padding: "24px",
               boxShadow: "0 20px 60px rgba(0,0,0,0.5)",
@@ -184,26 +238,56 @@ export const InteractivePracticeHub = () => {
             }}
           >
             {/* MODAL HEADER */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1.5px solid rgba(255,255,255,0.1)", paddingBottom: "12px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                <div style={{ width: "36px", height: "36px", borderRadius: "10px", background: "#0099A6", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                borderBottom: "1.5px solid rgba(255,255,255,0.1)",
+                paddingBottom: "12px",
+              }}
+            >
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "10px" }}
+              >
+                <div
+                  style={{
+                    width: "36px",
+                    height: "36px",
+                    borderRadius: "10px",
+                    background: "#0099A6",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
                   <Activity size={20} color="white" />
                 </div>
                 <div>
-                  <div style={{ fontSize: "20px", fontWeight: "700" }}>Rhythm Piano Tiles</div>
-                  <div style={{ color: "#7AAAB4", fontSize: "13px" }}>4-Finger Reflex Warm-Up (Live Tracked)</div>
+                  <div style={{ fontSize: "20px", fontWeight: "700" }}>
+                    Rhythm Piano Tiles
+                  </div>
+                  <div style={{ color: "#7AAAB4", fontSize: "13px" }}>
+                    4-Finger Reflex Warm-Up (Live Tracked)
+                  </div>
                 </div>
               </div>
               <button
                 onClick={handleCloseSession}
-                style={{ background: "transparent", border: "none", color: "#7AAAB4", cursor: "pointer", padding: "4px" }}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  color: "#7AAAB4",
+                  cursor: "pointer",
+                  padding: "4px",
+                }}
               >
                 <X size={24} />
               </button>
             </div>
 
             {/* REAL PIANO TILES GAME ENGINE */}
-            <div style={{ width: "100%", minHeight: "520px" }}>
+            <div style={{ width: "100%", minHeight: "660px" }}>
               <PianoTilesGame
                 bgmUrl="/musics/fairytale.mp3"
                 enableHandTracking={true}
@@ -216,7 +300,6 @@ export const InteractivePracticeHub = () => {
 
       {/* DEFERRED STREAK CELEBRATION MODAL (ONLY VISIBLE OUTSIDE ACTIVE GAMEPLAY) */}
       {!isSessionActive && <StreakCelebrationModal />}
-
     </div>
   );
 };

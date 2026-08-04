@@ -79,13 +79,18 @@ export function Model(props) {
 
   useEffect(() => {
     clone.traverse((child) => {
-      if (child.isMesh && child.material) {
-        const mats = Array.isArray(child.material)
-          ? child.material
-          : [child.material];
-        for (let i = 0; i < mats.length; i++) {
-          mats[i].side = THREE.DoubleSide;
-          mats[i].needsUpdate = true;
+      child.raycast = () => null;
+      if (child.isMesh) {
+        child.castShadow = false;
+        child.receiveShadow = false;
+        if (child.material) {
+          const mats = Array.isArray(child.material)
+            ? child.material
+            : [child.material];
+          for (let i = 0; i < mats.length; i++) {
+            mats[i].side = THREE.DoubleSide;
+            mats[i].needsUpdate = true;
+          }
         }
       }
     });
@@ -400,6 +405,7 @@ export function Model(props) {
       ref={group}
       object={clone}
       rotation={[-(Math.PI / 2), 0, 0]}
+      raycast={() => null}
       {...props}
     />
   );

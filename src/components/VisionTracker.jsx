@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { setupMediaPipe } from "../services/mediapipe/VisionSetup";
 import { useVisionStore } from "../store/zustand/VisionStore";
 
-export default function VisionTracker({ showCanvas = true, enablePose = false }) {
+export default function VisionTracker({ showCanvas = true, enablePose = false, numHands = 2 }) {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const requestRef = useRef(null);
@@ -16,13 +16,13 @@ export default function VisionTracker({ showCanvas = true, enablePose = false })
 
   // 1. Load Model
   useEffect(() => {
-    setupMediaPipe()
+    setupMediaPipe({ numHands })
       .then((ai) => {
         setLandmarker(ai);
         useVisionStore.getState().setModelReady(true);
       })
       .catch((err) => console.error("Gagal load model:", err));
-  }, []);
+  }, [numHands]);
 
   // 2. Auto-Start Kamera Pas Komponen Dipanggil
   useEffect(() => {
@@ -78,10 +78,10 @@ export default function VisionTracker({ showCanvas = true, enablePose = false })
     offscreenCanvas.height = 240;
     const offscreenCtx = offscreenCanvas.getContext("2d", { alpha: false });
 
-    // --- 30 FPS CAMERA THROTTLING CONFIGURATION ---
+    // --- 22 FPS CAMERA THROTTLING CONFIGURATION (SLASHES GPU TENSOR OVERHEAD) ---
     let lastHandDetectTime = 0;
-    const HAND_FPS = 30;
-    const HAND_THROTTLE_MS = 1000 / HAND_FPS; // ~33.33ms
+    const HAND_FPS = 22;
+    const HAND_THROTTLE_MS = 1000 / HAND_FPS; // ~45.4ms
 
     let lastPoseDetectTime = 0;
     const POSE_FPS = 12;

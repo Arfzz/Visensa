@@ -267,11 +267,12 @@ export function usePianoTilesGame(bgmUrl = '/musics/fairytale.mp3') {
     // Move tiles down with zero memory allocations
     const speedPerMs = 100 / FALL_DURATION_MS;
     const pool = tilePoolRef.current;
+    const safeElapsed = Math.min(elapsed, 100);
 
     for (let i = 0; i < TILE_POOL_SIZE; i++) {
       const tile = pool[i];
       if (tile.active && tile.status === 'active') {
-        tile.y += speedPerMs * elapsed;
+        tile.y += speedPerMs * safeElapsed;
 
         if (tile.y > HIT_WINDOW_MAX) {
           tile.status = 'missed';
