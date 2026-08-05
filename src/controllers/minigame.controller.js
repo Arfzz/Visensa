@@ -29,6 +29,38 @@ const storeLog = async (req, res) => {
   }
 };
 
+const getLogs = async (req, res) => {
+  try {
+    // Tangkap userId dari URL (misal: /api/v1/minigame/logs/uuid-si-user)
+    const { userId } = req.params;
+
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: "User ID wajib disertakan di URL."
+      });
+    }
+
+    // Panggil service
+    const logs = await minigameService.getMinigameLogs(userId);
+
+    return res.status(200).json({
+      success: true,
+      message: "Berhasil mengambil history minigame",
+      data: logs
+    });
+
+  } catch (error) {
+    console.error("[Minigame Controller] Error getting logs:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: error.message
+    });
+  }
+};
+
 module.exports = {
-  storeLog
+  storeLog,
+  getLogs
 };

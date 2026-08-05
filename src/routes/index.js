@@ -18,7 +18,7 @@ router.get('/', (req, res) => {
       patients:  '/api/v1/patients',
       sessions:  '/api/v1/sessions',
       dashboard: '/api/v1/dashboard',
-      minigame:  '/api/v1/minigame-logs',
+      minigame:  '/api/v1/minigame',
     },
     docs: '/api/v1/docs',
   });

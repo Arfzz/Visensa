@@ -32,6 +32,39 @@ const saveMinigameLog = async (userId, logData) => {
   return data;
 };
 
+const getMinigameLogs = async (userId) => {
+  // 1. Cari ID pasiennya
+  const { data: patientData, error: patientError } = await supabase
+    .from('patient')
+    .select('id')
+    .eq('user_id', userId)
+    .single();
+
+  if (patientError || !patientData) {
+    throw new Error("Data pasien tidak ditemukan untuk user ini.");
+  }
+
+  // 2. Tarik log minigame SEKALIGUS join ke tabel minigame buat ngambil 'title'
+  const { data, error } = await supabase
+    .from('minigame_logs')
+    .select(`
+      *,
+      minigame (
+        title
+      )
+    `)
+    .eq('patient_id', patientData.id)
+    .order('played_at', { ascending: false });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  // data udah otomatis berisi semua log beserta title gamenya
+  return data;
+};
+
 module.exports = {
-  saveMinigameLog
+  saveMinigameLog,
+  getMinigameLogs
 };
