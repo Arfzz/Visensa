@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { LayoutDashboard, Clock, Gamepad2, Settings, Flame } from "lucide-react";
+import { LayoutDashboard, Clock, Gamepad2, Settings, Flame, Clock1, Clock10Icon } from "lucide-react";
 import visensaLogo from "../../assets/visensa-logo.png";
 import { useStreakStore } from "../../features/gamification/streak/useStreakStore";
 
@@ -13,6 +13,7 @@ export const PatientSidebar = ({ activeMenu, onSelectMenu }) => {
       { id: "Dashboard", label: "Dashboard", icon: LayoutDashboard },
       { id: "Sessions", label: "Sessions", icon: Clock },
       { id: "Interactive Practice", label: "Interactive Practice", icon: Gamepad2, hasBadge: true },
+      { id: "Game History", label: "Practice History", icon: Clock10Icon },
       { id: "Settings", label: "Settings", icon: Settings },
     ],
     []
