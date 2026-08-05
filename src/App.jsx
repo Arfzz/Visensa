@@ -43,6 +43,7 @@ import PatientDashboard from './pages/patient-dashboard/PatientDashboard';
 import LoginDoctor from './pages/login/LoginDoctor';
 import RegisterDoctor from './pages/register/RegisterDoctor';
 import Dashboard from "./pages/admin-dashboard/Dashboard";
+import AdminOverview from "./pages/admin-dashboard/AdminOverview";
 
 // Import Hooks
 import { useLenis } from "./hooks/useLenis";
@@ -186,6 +187,9 @@ function App() {
 
         {/* Jalur ke Halaman Dashboard Admin */}
         <Route path="/admin-dashboard" element={<Dashboard />} />
+        
+        {/* Jalur ke Halaman Utama Overview Admin */}
+        <Route path="/dashboard" element={<AdminOverview />} />
 
         {/* Jalur ke Halaman Dashboard Pasien (Baru Ditambahkan) */}
         <Route path="/patient-dashboard" element={<PatientDashboard />} />
