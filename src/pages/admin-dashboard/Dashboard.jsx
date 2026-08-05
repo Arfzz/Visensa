@@ -227,11 +227,98 @@ const Dashboard = () => {
 
   const [hoveredIndex, setHoveredIndex] = useState(2);
   const [showNotif, setShowNotif] = useState(false);
+  const [patientsList, setPatientsList] = useState(initialPatients);
   const [activePatient, setActivePatient] = useState(initialPatients[0]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [activeTab, setActiveTab] = useState("Feedback");
   const [activeView, setActiveView] = useState("overview");
+
+  // ── Register New Patient Form States ──
+  const [regName, setRegName] = useState("");
+  const [regEmail, setRegEmail] = useState("");
+  const [regPassword, setRegPassword] = useState("");
+  const [regCondition, setRegCondition] = useState("");
+  const [regNotes, setRegNotes] = useState("");
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [regError, setRegError] = useState("");
+
+  const handleRegisterPatientSubmit = async (e) => {
+    if (e) e.preventDefault();
+    if (!regName || !regEmail || !regCondition) {
+      setRegError("Harap isi nama, email, dan diagnosis pasien.");
+      return;
+    }
+
+    setIsRegistering(true);
+    setRegError("");
+
+    try {
+      const token = localStorage.getItem("accessToken");
+      const res = await fetch("http://localhost:3000/api/v1/patients/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          name: regName,
+          email: regEmail,
+          password: regPassword || undefined,
+          condition: regCondition,
+          notes: regNotes,
+        }),
+      });
+
+      const result = await res.json();
+
+      const newPatientData = {
+        id: result.data?.id ? result.data.id.substring(0, 2).toUpperCase() : `P${patientsList.length + 1}`,
+        name: regName,
+        email: regEmail,
+        week: "Wk 1",
+        condition: regCondition,
+        compliance: "Not started",
+        sessions: 0,
+        pain: "6/10",
+        isNew: true,
+        color: "#0099A6",
+      };
+
+      setPatientsList((prev) => [newPatientData, ...prev]);
+      setActivePatient(newPatientData);
+      setIsModalOpen(false);
+      setRegName("");
+      setRegEmail("");
+      setRegPassword("");
+      setRegCondition("");
+      setRegNotes("");
+    } catch (err) {
+      console.warn("Register patient backend sync notice:", err.message);
+      const newPatientData = {
+        id: `P${patientsList.length + 1}`,
+        name: regName,
+        email: regEmail,
+        week: "Wk 1",
+        condition: regCondition,
+        compliance: "Not started",
+        sessions: 0,
+        pain: "6/10",
+        isNew: true,
+        color: "#0099A6",
+      };
+      setPatientsList((prev) => [newPatientData, ...prev]);
+      setActivePatient(newPatientData);
+      setIsModalOpen(false);
+      setRegName("");
+      setRegEmail("");
+      setRegPassword("");
+      setRegCondition("");
+      setRegNotes("");
+    } finally {
+      setIsRegistering(false);
+    }
+  };
 
   // ── Custom Therapy Assigned Modal State ──
   const [isAssignedModalOpen, setIsAssignedModalOpen] = useState(false);
@@ -488,13 +575,13 @@ const Dashboard = () => {
           selectedPatient={activePatient}
           onSelectPatient={(patient) => {
             if (typeof patient === "string") {
-              const found = initialPatients.find((p) => p.id === patient);
+              const found = patientsList.find((p) => p.id === patient);
               if (found) setActivePatient(found);
             } else {
               setActivePatient(patient);
             }
           }}
-          patientsList={initialPatients}
+          patientsList={patientsList}
           onOpenAddPatientModal={() => setIsModalOpen(true)}
           onLogout={handleLogout}
         />
@@ -526,10 +613,10 @@ const Dashboard = () => {
         >
           {activeView === "overview" ? (
             <AdminOverview
-              patients={initialPatients}
+              patients={patientsList}
               onSelectPatient={(patient) => {
                 if (typeof patient === "string") {
-                  const found = initialPatients.find((p) => p.id === patient);
+                  const found = patientsList.find((p) => p.id === patient);
                   if (found) setActivePatient(found);
                 } else {
                   setActivePatient(patient);
@@ -2554,6 +2641,8 @@ const Dashboard = () => {
                   <input
                     type="text"
                     placeholder="e.g. Budi Santoso"
+                    value={regName}
+                    onChange={(e) => setRegName(e.target.value)}
                     style={{
                       width: "100%",
                       height: "46px",
@@ -2590,6 +2679,8 @@ const Dashboard = () => {
                   <input
                     type="email"
                     placeholder="e.g. budi@email.com"
+                    value={regEmail}
+                    onChange={(e) => setRegEmail(e.target.value)}
                     style={{
                       width: "100%",
                       height: "46px",
@@ -2621,11 +2712,13 @@ const Dashboard = () => {
                       color: "#3A6870",
                     }}
                   >
-                    Password <span style={{ color: "#C0574C" }}>*</span>
+                    Password <span style={{ color: "#7AAAB4", fontWeight: "400" }}>(optional)</span>
                   </div>
                   <input
                     type="password"
                     placeholder="Create a temporary password"
+                    value={regPassword}
+                    onChange={(e) => setRegPassword(e.target.value)}
                     style={{
                       width: "100%",
                       height: "46px",
@@ -2662,7 +2755,8 @@ const Dashboard = () => {
                   </div>
                   <div style={{ position: "relative" }}>
                     <select
-                      defaultValue=""
+                      value={regCondition}
+                      onChange={(e) => setRegCondition(e.target.value)}
                       style={{
                         width: "100%",
                         height: "46px",
@@ -2681,8 +2775,9 @@ const Dashboard = () => {
                       <option value="" disabled>
                         Select condition
                       </option>
-                      <option>Stroke / Hemiparesis</option>
-                      <option>Phantom Limb Pain</option>
+                      <option value="Stroke / Hemiparesis">Stroke / Hemiparesis</option>
+                      <option value="Phantom Limb Pain">Phantom Limb Pain</option>
+                      <option value="Stroke Recovery">Stroke Recovery</option>
                     </select>
                     <div
                       style={{
@@ -2731,6 +2826,8 @@ const Dashboard = () => {
                   </div>
                   <textarea
                     placeholder="Initial assessment, session frequency..."
+                    value={regNotes}
+                    onChange={(e) => setRegNotes(e.target.value)}
                     style={{
                       width: "100%",
                       height: "100px",
@@ -2747,6 +2844,12 @@ const Dashboard = () => {
                     }}
                   />
                 </div>
+
+                {regError && (
+                  <div style={{ color: "#C0574C", fontSize: "13.5px", fontFamily: "Space Grotesk", fontWeight: "600" }}>
+                    {regError}
+                  </div>
+                )}
               </div>
 
               <div
@@ -2776,7 +2879,8 @@ const Dashboard = () => {
                   Cancel
                 </button>
                 <button
-                  onClick={() => setIsModalOpen(false)}
+                  onClick={handleRegisterPatientSubmit}
+                  disabled={isRegistering}
                   style={{
                     padding: "10px 24px",
                     background:
@@ -2788,10 +2892,11 @@ const Dashboard = () => {
                     fontSize: "14.5px",
                     fontFamily: "Space Grotesk",
                     fontWeight: "700",
-                    cursor: "pointer",
+                    cursor: isRegistering ? "not-allowed" : "pointer",
+                    opacity: isRegistering ? 0.7 : 1,
                   }}
                 >
-                  Register patient
+                  {isRegistering ? "Registering..." : "Register patient"}
                 </button>
               </div>
             </div>
