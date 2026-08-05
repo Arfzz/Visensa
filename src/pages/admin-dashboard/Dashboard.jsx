@@ -1,7 +1,31 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import visensaLogo from "../../assets/visensa-logo.png";
-import { generateSchedulePreview, getTomorrowDateString } from "../../utils/scheduleCalculator";
+import {
+  generateSchedulePreview,
+  getTomorrowDateString,
+} from "../../utils/scheduleCalculator";
+import { useProgramScheduleStore } from "../../store/useProgramScheduleStore";
+import TherapyAssignedModal from "./TherapyAssignedModal";
+import AdminSidebar from "./AdminSidebar";
+import AdminOverview from "./AdminOverview";
+import {
+  AlertTriangle,
+  CheckCircle2,
+  TrendingUp,
+  Info,
+  Moon,
+  Plus,
+  RefreshCw,
+  UserPlus,
+  Sparkles,
+  PlusCircle,
+  Save,
+  Zap,
+  ShieldCheck,
+  X,
+  RotateCcw,
+} from "lucide-react";
 
 // ==========================================
 // 1. DATA MOCK (DUMMY DATA)
@@ -133,7 +157,7 @@ const feedbackLogs = [
 const notificationsData = [
   {
     id: 1,
-    icon: "⚠️",
+    icon: AlertTriangle,
     title: "Margaret Lim — low compliance",
     desc: "No session in 4 days. Compliance dropped to 55%. Consider reaching out.",
     time: "2h ago",
@@ -143,7 +167,7 @@ const notificationsData = [
   },
   {
     id: 2,
-    icon: "✅",
+    icon: CheckCircle2,
     title: "Diana Santoso — first session complete",
     desc: "Diana completed her first therapy session today (8:05 min, 8/8 exercises).",
     time: "3h ago",
@@ -153,7 +177,7 @@ const notificationsData = [
   },
   {
     id: 3,
-    icon: "📈",
+    icon: TrendingUp,
     title: "Ahmad Kusuma — remarkable progress",
     desc: "5 consecutive Excellent sessions. Pain reduced from 7 → 3 over 7 weeks.",
     time: "Today",
@@ -163,7 +187,7 @@ const notificationsData = [
   },
   {
     id: 4,
-    icon: "ⓘ",
+    icon: Info,
     title: "Robert Johnson — weekly report ready",
     desc: "Week 4 summary is available. Average pain relief: −1.4 pts/session.",
     time: "Yesterday",
@@ -190,14 +214,32 @@ const formatYearMonthDay = (dateObj) => {
 const Dashboard = () => {
   const navigate = useNavigate();
 
+  // ── Program & Schedule Store Integration ──
+  const {
+    activeProgram,
+    weeklySchedule,
+    extendProgram,
+    reassignProgram,
+    assignInitialProgram,
+    checkScheduleValidity,
+    setMockStatus,
+  } = useProgramScheduleStore();
+
   const [hoveredIndex, setHoveredIndex] = useState(2);
   const [showNotif, setShowNotif] = useState(false);
   const [activePatient, setActivePatient] = useState(initialPatients[0]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [activeTab, setActiveTab] = useState("Feedback");
+  const [activeView, setActiveView] = useState("overview");
+
+  // ── Custom Therapy Assigned Modal State ──
+  const [isAssignedModalOpen, setIsAssignedModalOpen] = useState(false);
+  const [assignedModalData, setAssignedModalData] = useState(null);
+
   const mainContentRef = useRef(null);
   const sidebarListRef = useRef(null);
+  const modalScrollRef = useRef(null);
 
   useEffect(() => {
     const prevHtmlOverflow = document.documentElement.style.overflow;
@@ -240,13 +282,13 @@ const Dashboard = () => {
     return generateSchedulePreview({
       startDate: planStartDate,
       frequencyPerWeek: planFreq,
-      programDurationWeeks: planDuration
+      programDurationWeeks: planDuration,
     });
   }, [planStartDate, planFreq, planDuration]);
 
   const scheduleMap = useMemo(() => {
     const map = new Map();
-    programSchedule.forEach(item => {
+    programSchedule.forEach((item) => {
       map.set(item.date, item.status);
     });
     return map;
@@ -313,8 +355,75 @@ const Dashboard = () => {
     return cells;
   }, [previewDate, scheduleMap]);
 
+  // ── Helper to open Custom Therapy Assigned Modal ──
+  const openSuccessModal = (program, durationWeeks, freq, rest) => {
+    const totalSessions = durationWeeks * freq;
+    setAssignedModalData({
+      patientName: activePatient?.name || "Robert Johnson",
+      frequencyPerWeek: freq,
+      restIntervalDays: rest,
+      programDurationWeeks: durationWeeks,
+      startDate: `Tomorrow (${program.startDate})`,
+      endDate: program.endDate,
+      totalSessions,
+    });
+    setIsAssignedModalOpen(true);
+  };
+
+  const handleExtendProgramAction = () => {
+    const res = extendProgram(planDuration);
+    if (res.success) {
+      openSuccessModal(res.program, planDuration, planFreq, planInterval);
+    }
+  };
+
+  const handleReassignProgramAction = () => {
+    const res = reassignProgram({
+      programDurationWeeks: planDuration,
+      frequencyPerWeek: planFreq,
+      restIntervalDays: planInterval,
+    });
+    if (res.success) {
+      openSuccessModal(res.program, planDuration, planFreq, planInterval);
+    }
+  };
+
+  const handleAssignInitialProgramAction = () => {
+    const res = assignInitialProgram({
+      patientId: activePatient ? activePatient.id : "pat_new",
+      programDurationWeeks: planDuration,
+      frequencyPerWeek: planFreq,
+      restIntervalDays: planInterval,
+    });
+    if (res.success) {
+      if (activePatient) activePatient.isNew = false;
+      openSuccessModal(res.program, planDuration, planFreq, planInterval);
+    }
+  };
+
+  const handleQuickExtendSameProtocol = () => {
+    const freq = weeklySchedule ? weeklySchedule.frequencyPerWeek : 3;
+    const rest = weeklySchedule ? weeklySchedule.restIntervalDays : 1;
+    const duration = 4;
+    const res = extendProgram(duration);
+    if (res.success) {
+      openSuccessModal(res.program, duration, freq, rest);
+    }
+  };
+
+  const handleResetForm = () => {
+    setPlanFreq(3);
+    setPlanInterval(1);
+    setPlanDuration(4);
+    setPlanStartDate(getTomorrowDateString());
+  };
+
   const handleSavePlan = () => {
-    alert("Therapy plan saved successfully!");
+    if (activePatient?.isNew) {
+      handleAssignInitialProgramAction();
+    } else {
+      handleReassignProgramAction();
+    }
   };
 
   const handleLogout = () => {
@@ -371,466 +480,24 @@ const Dashboard = () => {
         {/* ============================== */}
         {/* SIDEBAR (KIRI - FIXED)         */}
         {/* ============================== */}
-        <div
-          style={{
-            width: isSidebarOpen ? "280px" : "96px",
-            minWidth: isSidebarOpen ? "280px" : "96px",
-            height: "calc(100vh - 48px)",
-            background: "#151E2C",
-            borderRadius: "20px",
-            boxShadow: "0px 10px 40px rgba(226, 236, 249, 0.25)",
-            display: "flex",
-            flexDirection: "column",
-            zIndex: 10,
-            overflow: "hidden",
-            flexShrink: 0,
-            position: "relative",
-            transition: "all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)",
-            boxSizing: "border-box",
+        <AdminSidebar
+          isSidebarOpen={isSidebarOpen}
+          setIsSidebarOpen={setIsSidebarOpen}
+          activeView={activeView}
+          setActiveView={setActiveView}
+          selectedPatient={activePatient}
+          onSelectPatient={(patient) => {
+            if (typeof patient === "string") {
+              const found = initialPatients.find((p) => p.id === patient);
+              if (found) setActivePatient(found);
+            } else {
+              setActivePatient(patient);
+            }
           }}
-        >
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              width: "100%",
-              height: "100%",
-              overflow: "hidden",
-              borderRadius: "20px",
-            }}
-          >
-            <div
-              style={{
-                padding: isSidebarOpen ? "30px 24px 20px" : "30px 0 20px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: isSidebarOpen ? "space-between" : "center",
-                flexShrink: 0,
-                transition: "all 0.3s",
-              }}
-            >
-              <div
-                onClick={() => !isSidebarOpen && setIsSidebarOpen(true)}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "10px",
-                  cursor: isSidebarOpen ? "default" : "pointer",
-                }}
-                title={!isSidebarOpen ? "Expand sidebar" : undefined}
-              >
-                <img
-                  src={visensaLogo}
-                  alt="VISENSA Logo"
-                  style={{ width: "28px", height: "auto", flexShrink: 0 }}
-                />
-                <div
-                  style={{
-                    color: "#F0FAFB",
-                    fontSize: "22px",
-                    fontWeight: "800",
-                    letterSpacing: "1px",
-                    whiteSpace: "nowrap",
-                    opacity: isSidebarOpen ? 1 : 0,
-                    width: isSidebarOpen ? "100px" : "0px",
-                    overflow: "hidden",
-                    transition: "all 0.3s",
-                  }}
-                >
-                  VISENSA
-                </div>
-              </div>
-
-              <div
-                onClick={() => setIsSidebarOpen(false)}
-                style={{
-                  cursor: "pointer",
-                  color: "#7AAAB4",
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  opacity: isSidebarOpen ? 1 : 0,
-                  width: isSidebarOpen ? "24px" : "0px",
-                  overflow: "hidden",
-                  transition: "all 0.3s",
-                }}
-                title="Collapse sidebar"
-              >
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                  <line x1="9" y1="3" x2="9" y2="21"></line>
-                </svg>
-              </div>
-            </div>
-
-            <div
-              style={{
-                height: "1px",
-                background: "rgba(255, 255, 255, 0.10)",
-                margin: isSidebarOpen ? "0 24px" : "0 16px",
-                flexShrink: 0,
-              }}
-            />
-
-            <div
-              className="hide-scroll"
-              ref={sidebarListRef}
-              onWheel={(e) => {
-                if (sidebarListRef.current) {
-                  sidebarListRef.current.scrollTop += e.deltaY;
-                }
-              }}
-              style={{
-                flex: 1,
-                minHeight: 0,
-                padding: isSidebarOpen ? "20px 16px" : "20px 0",
-                overflowY: "auto",
-                overscrollBehavior: "contain",
-                boxSizing: "border-box",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: isSidebarOpen ? "space-between" : "center",
-                  alignItems: "center",
-                  marginBottom: "20px",
-                  gap: "8px",
-                }}
-              >
-                <div
-                  onClick={() => !isSidebarOpen && setIsSidebarOpen(true)}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "8px",
-                    cursor: isSidebarOpen ? "default" : "pointer",
-                    width: isSidebarOpen ? "auto" : "40px",
-                  }}
-                >
-                  {isSidebarOpen ? (
-                    <>
-                      <div
-                        style={{
-                          color: "#7AAAB4",
-                          fontSize: "11px",
-                          fontFamily: "Space Mono",
-                          letterSpacing: "1.2px",
-                        }}
-                      >
-                        PATIENTS (5)
-                      </div>
-                      <div
-                        style={{
-                          background: "rgba(212, 168, 67, 0.12)",
-                          border: "1px solid rgba(212, 168, 67, 0.25)",
-                          borderRadius: "20px",
-                          padding: "2px 6px",
-                          color: "#D4A843",
-                          fontSize: "10px",
-                          fontFamily: "Space Mono",
-                          fontWeight: "700",
-                        }}
-                      >
-                        1!
-                      </div>
-                    </>
-                  ) : (
-                    <svg
-                      width="20"
-                      height="20"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="#7AAAB4"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                      <circle cx="9" cy="7" r="4"></circle>
-                      <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                      <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                    </svg>
-                  )}
-                </div>
-
-                <div
-                  onClick={() => setIsModalOpen(true)}
-                  style={{
-                    width: "28px",
-                    height: "28px",
-                    flexShrink: 0,
-                    background: "rgba(96.85, 242.61, 255, 0.08)",
-                    borderRadius: "8px",
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    cursor: "pointer",
-                    transition: "all 0.2s",
-                  }}
-                  title="Add Patient"
-                >
-                  <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="white"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="8.5" cy="7" r="4"></circle>
-                    <line x1="20" y1="8" x2="20" y2="14"></line>
-                    <line x1="23" y1="11" x2="17" y2="11"></line>
-                  </svg>
-                </div>
-              </div>
-
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "10px",
-                }}
-              >
-                {initialPatients.map((patient) => {
-                  const isSelected = activePatient.id === patient.id;
-                  return (
-                    <div
-                      key={patient.id}
-                      onClick={() => {
-                        setActivePatient(patient);
-                        if (!isSidebarOpen) setIsSidebarOpen(true);
-                      }}
-                      title={!isSidebarOpen ? patient.name : undefined}
-                      style={{
-                        padding: isSidebarOpen ? "12px 16px" : "0",
-                        width: isSidebarOpen ? "100%" : "44px",
-                        height: isSidebarOpen ? "auto" : "44px",
-                        margin: isSidebarOpen ? "0" : "0 auto",
-                        background: isSelected ? "#F0FAFB" : "transparent",
-                        borderRadius: "12px",
-                        border: isSelected
-                          ? "1px solid #C4E8EC"
-                          : "1px solid transparent",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: isSidebarOpen ? "flex-start" : "center",
-                        gap: isSidebarOpen ? "12px" : "0",
-                        cursor: "pointer",
-                        transition: "all 0.2s",
-                        boxSizing: "border-box",
-                      }}
-                    >
-                      <div
-                        style={{
-                          width: "36px",
-                          height: "36px",
-                          flexShrink: 0,
-                          background: isSelected
-                            ? "linear-gradient(135deg, #0099A6 0%, #007580 100%)"
-                            : "#1A2536",
-                          borderRadius: "50%",
-                          display: "flex",
-                          justifyContent: "center",
-                          alignItems: "center",
-                        }}
-                      >
-                        <span
-                          style={{
-                            color: isSelected ? "white" : "#7AAAB4",
-                            fontSize: "13px",
-                            fontWeight: "700",
-                          }}
-                        >
-                          {patient.id}
-                        </span>
-                      </div>
-                      <div
-                        style={{
-                          opacity: isSidebarOpen ? 1 : 0,
-                          width: isSidebarOpen ? "100%" : "0px",
-                          overflow: "hidden",
-                          whiteSpace: "nowrap",
-                          transition: "all 0.2s",
-                        }}
-                      >
-                        <div
-                          style={{
-                            color: isSelected ? "#151E2C" : "#F0FAFB",
-                            fontSize: "14.5px",
-                            fontWeight: isSelected ? "700" : "500",
-                            marginBottom: "2px",
-                          }}
-                        >
-                          {patient.name}
-                        </div>
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "6px",
-                          }}
-                        >
-                          <div
-                            style={{
-                              width: "8px",
-                              height: "8px",
-                              flexShrink: 0,
-                              background: patient.color,
-                              borderRadius: "50%",
-                              boxShadow:
-                                patient.id === "ML"
-                                  ? "0 0 0 3px rgba(212,168,67,0.2)"
-                                  : "none",
-                            }}
-                          />
-                          <div
-                            style={{
-                              color: "#7AAAB4",
-                              fontSize: "11px",
-                              fontFamily: "Space Mono",
-                            }}
-                          >
-                            {patient.week}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Footer Sidebar (Diperbaiki rata tengahnya) */}
-            <div
-              style={{
-                padding: isSidebarOpen ? "20px 16px 24px" : "20px 0 24px",
-                borderTop: "1px solid rgba(255,255,255,0.05)",
-                flexShrink: 0,
-                boxSizing: "border-box",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: isSidebarOpen ? "flex-start" : "center",
-                  gap: "12px",
-                  marginBottom: "12px",
-                  background: isSidebarOpen ? "#F0FAFB" : "transparent",
-                  padding: isSidebarOpen ? "10px 12px" : "0",
-                  width: isSidebarOpen ? "100%" : "44px",
-                  height: isSidebarOpen ? "auto" : "44px",
-                  borderRadius: "16px",
-                  boxSizing: "border-box",
-                  transition: "all 0.2s",
-                }}
-              >
-                <div
-                  style={{
-                    width: "36px",
-                    height: "36px",
-                    flexShrink: 0,
-                    background:
-                      "linear-gradient(135deg, #0099A6 0%, #007580 100%)",
-                    borderRadius: "50%",
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    margin: isSidebarOpen ? "0" : "0 auto",
-                  }}
-                >
-                  <span
-                    style={{
-                      color: "white",
-                      fontSize: "13px",
-                      fontWeight: "700",
-                    }}
-                  >
-                    SK
-                  </span>
-                </div>
-                <div
-                  style={{
-                    opacity: isSidebarOpen ? 1 : 0,
-                    width: isSidebarOpen ? "auto" : "0px",
-                    overflow: "hidden",
-                    whiteSpace: "nowrap",
-                    transition: "all 0.2s",
-                  }}
-                >
-                  <div
-                    style={{
-                      color: "#0C2830",
-                      fontSize: "14px",
-                      fontWeight: "700",
-                    }}
-                  >
-                    Dr. Sarah K.
-                  </div>
-                  <div style={{ color: "#7AAAB4", fontSize: "11.5px" }}>
-                    Occupational Therapist
-                  </div>
-                </div>
-              </div>
-              <button
-                onClick={handleLogout}
-                title={!isSidebarOpen ? "Sign out" : undefined}
-                style={{
-                  width: isSidebarOpen ? "100%" : "44px",
-                  height: isSidebarOpen ? "auto" : "44px",
-                  margin: "0 auto",
-                  padding: isSidebarOpen ? "10px" : "0",
-                  background: "#FFE9E9",
-                  border: "1px solid rgba(192, 86, 76, 0.5)",
-                  borderRadius: "12px",
-                  color: "#C0574C",
-                  fontSize: "14px",
-                  fontWeight: "600",
-                  cursor: "pointer",
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  gap: "8px",
-                  boxSizing: "border-box",
-                  transition: "all 0.2s",
-                }}
-              >
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                  <polyline points="16 17 21 12 16 7"></polyline>
-                  <line x1="21" y1="12" x2="9" y2="12"></line>
-                </svg>
-                {isSidebarOpen && "Sign out"}
-              </button>
-            </div>
-          </div>
-        </div>
+          patientsList={initialPatients}
+          onOpenAddPatientModal={() => setIsModalOpen(true)}
+          onLogout={handleLogout}
+        />
 
         {/* ============================== */}
         {/* MAIN CONTENT (KANAN - NATURAL SCROLL) */}
@@ -857,11 +524,27 @@ const Dashboard = () => {
             boxSizing: "border-box",
           }}
         >
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "flex-start",
+          {activeView === "overview" ? (
+            <AdminOverview
+              patients={initialPatients}
+              onSelectPatient={(patient) => {
+                if (typeof patient === "string") {
+                  const found = initialPatients.find((p) => p.id === patient);
+                  if (found) setActivePatient(found);
+                } else {
+                  setActivePatient(patient);
+                }
+                setActiveView("patient");
+              }}
+              onAddPatient={() => setIsModalOpen(true)}
+            />
+          ) : (
+            <>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "flex-start",
               marginBottom: "35px",
               marginTop: "4px",
               flexWrap: "wrap",
@@ -1054,10 +737,15 @@ const Dashboard = () => {
                             display: "flex",
                             justifyContent: "center",
                             alignItems: "center",
-                            fontSize: "18px",
                           }}
                         >
-                          {notif.icon}
+                          {notif.icon && (
+                            <notif.icon
+                              size={18}
+                              color={notif.color}
+                              strokeWidth={2.2}
+                            />
+                          )}
                         </div>
                         <div style={{ flex: 1 }}>
                           <div
@@ -1894,6 +1582,166 @@ const Dashboard = () => {
             <div
               style={{ display: "flex", flexDirection: "column", gap: "24px" }}
             >
+              {/* NEW PATIENT / UNASSIGNED INFO BANNER */}
+              {activePatient?.isNew && (
+                <div
+                  style={{
+                    background:
+                      "linear-gradient(135deg, #0C2830 0%, #004D53 100%)",
+                    borderRadius: "18px",
+                    padding: "20px 24px",
+                    color: "white",
+                    border: "1.5px solid #0099A6",
+                    boxShadow: "0 6px 20px rgba(0, 153, 166, 0.15)",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    gap: "16px",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "14px",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: "42px",
+                        height: "42px",
+                        borderRadius: "12px",
+                        background: "rgba(0, 153, 166, 0.2)",
+                        border: "1px solid #0099A6",
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        flexShrink: 0,
+                      }}
+                    >
+                      <UserPlus size={22} color="#3ED8C8" />
+                    </div>
+                    <div>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "8px",
+                          marginBottom: "4px",
+                        }}
+                      >
+                        <span style={{ fontSize: "17px", fontWeight: "700" }}>
+                          {activePatient.name} — New Patient
+                        </span>
+                        <span
+                          style={{
+                            background: "rgba(62, 216, 200, 0.2)",
+                            color: "#3ED8C8",
+                            padding: "2px 8px",
+                            borderRadius: "12px",
+                            fontSize: "11px",
+                            fontFamily: "Space Mono",
+                            fontWeight: "700",
+                          }}
+                        >
+                          Needs Initial Program
+                        </span>
+                      </div>
+                      <div style={{ fontSize: "13.5px", color: "#A2C3CA" }}>
+                        Patient was registered today and has no active therapy
+                        schedule. Configure parameters below and click{" "}
+                        <strong>+ Assign Initial Program</strong> to start on
+                        D+1.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* SMART SHORTCUT CARD FOR COMPLETED PROGRAM RENEWAL */}
+              {activeProgram?.status === "Completed / Review Required" && !activePatient?.isNew && (
+                <div
+                  style={{
+                    background: "rgba(62, 216, 200, 0.08)",
+                    border: "1.5px solid #3ED8C8",
+                    borderRadius: "18px",
+                    padding: "20px 24px",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    gap: "16px",
+                    boxShadow: "0 4px 14px rgba(0, 153, 166, 0.08)",
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+                    <div
+                      style={{
+                        width: "44px",
+                        height: "44px",
+                        borderRadius: "12px",
+                        background: "rgba(0, 153, 166, 0.12)",
+                        border: "1px solid #3ED8C8",
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        flexShrink: 0,
+                      }}
+                    >
+                      <CheckCircle2 size={24} color="#0099A6" strokeWidth={2.2} />
+                    </div>
+                    <div>
+                      <div
+                        style={{
+                          color: "#0099A6",
+                          fontSize: "12px",
+                          fontFamily: "Space Mono, monospace",
+                          fontWeight: "700",
+                          letterSpacing: "1px",
+                          textTransform: "uppercase",
+                          marginBottom: "3px",
+                        }}
+                      >
+                        PHASE COMPLETED — OPTIMAL PROGRESS
+                      </div>
+                      <div
+                        style={{
+                          color: "#0C2830",
+                          fontSize: "15px",
+                          fontFamily: "Space Grotesk, sans-serif",
+                          fontWeight: "700",
+                        }}
+                      >
+                        12/12 Sessions Finished • Latest Pain Level: 4/10 (↓4.5 pts improvement)
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={handleQuickExtendSameProtocol}
+                    style={{
+                      padding: "12px 20px",
+                      background: "linear-gradient(135deg, #0099A6 0%, #007580 100%)",
+                      boxShadow: "0 4px 14px rgba(0, 153, 166, 0.25)",
+                      borderRadius: "12px",
+                      border: "none",
+                      color: "white",
+                      fontSize: "14px",
+                      fontFamily: "Space Grotesk, sans-serif",
+                      fontWeight: "700",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      whiteSpace: "nowrap",
+                      flexShrink: 0,
+                    }}
+                  >
+                    <Zap size={17} color="white" fill="white" />
+                    <span>Quick Extend Same Protocol (4 Weeks)</span>
+                  </button>
+                </div>
+              )}
+
               {/* Card 1: Schedule Configuration (4 Compact Inputs + Integrated Calendar Preview) */}
               <div
                 style={{
@@ -2415,7 +2263,12 @@ const Dashboard = () => {
                                     boxSizing: "border-box",
                                   }}
                                 >
-                                  <span>🟢</span> Exercise Day
+                                  <CheckCircle2
+                                    size={11}
+                                    color="#0099A6"
+                                    strokeWidth={2.5}
+                                  />{" "}
+                                  Exercise Day
                                 </div>
                               )}
                               {isRest && (
@@ -2437,7 +2290,12 @@ const Dashboard = () => {
                                     boxSizing: "border-box",
                                   }}
                                 >
-                                  <span>💤</span> Rest Day
+                                  <Moon
+                                    size={11}
+                                    color="#7AAAB4"
+                                    strokeWidth={2}
+                                  />{" "}
+                                  Rest Day
                                 </div>
                               )}
                             </div>
@@ -2480,39 +2338,60 @@ const Dashboard = () => {
                 </div>
               </div>
 
-              {/* Save Button */}
+              {/* Save & Evaluation Action Buttons */}
               <div
                 style={{
                   display: "flex",
                   justifyContent: "flex-end",
-                  marginTop: "4px",
+                  gap: "12px",
+                  marginTop: "20px",
+                  flexWrap: "wrap",
+                  alignItems: "center",
                 }}
               >
+                <button
+                  onClick={handleResetForm}
+                  style={{
+                    padding: "14px 24px",
+                    background: "transparent",
+                    border: "1.5px solid #CBD5E1",
+                    borderRadius: "14px",
+                    color: "#64748B",
+                    fontSize: "15px",
+                    fontFamily: "Space Grotesk, sans-serif",
+                    fontWeight: "600",
+                    cursor: "pointer",
+                    transition: "all 0.2s",
+                  }}
+                >
+                  Cancel
+                </button>
+
                 <button
                   onClick={handleSavePlan}
                   style={{
                     padding: "14px 32px",
-                    background:
-                      "linear-gradient(135deg, #0099A6 0%, #007580 100%)",
-                    boxShadow: "0px 4px 15px rgba(0, 153, 166, 0.25)",
+                    background: "linear-gradient(135deg, #0099A6 0%, #007580 100%)",
+                    boxShadow: "0px 4px 18px rgba(0, 153, 166, 0.3)",
                     border: "none",
                     borderRadius: "14px",
                     color: "white",
-                    fontSize: "16px",
-                    fontFamily: "Space Grotesk",
+                    fontSize: "15px",
+                    fontFamily: "Space Grotesk, sans-serif",
                     fontWeight: "700",
                     cursor: "pointer",
-                    transition: "transform 0.2s",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
                   }}
-                  onMouseEnter={(e) =>
-                    (e.target.style.transform = "scale(1.02)")
-                  }
-                  onMouseLeave={(e) => (e.target.style.transform = "scale(1)")}
                 >
-                  Save Therapy Plan
+                  <Save size={18} color="white" strokeWidth={2.5} />
+                  <span>Save & Assign Protocol</span>
                 </button>
               </div>
             </div>
+          )}
+            </>
           )}
         </div>
 
@@ -2521,6 +2400,11 @@ const Dashboard = () => {
         {/* ============================== */}
         {isModalOpen && (
           <div
+            onWheel={(e) => {
+              if (modalScrollRef.current) {
+                modalScrollRef.current.scrollTop += e.deltaY;
+              }
+            }}
             style={{
               position: "fixed",
               top: 0,
@@ -2536,11 +2420,20 @@ const Dashboard = () => {
             }}
           >
             <div
+              ref={modalScrollRef}
+              className="hide-scroll"
+              onWheel={(e) => {
+                e.stopPropagation();
+                if (modalScrollRef.current) {
+                  modalScrollRef.current.scrollTop += e.deltaY;
+                }
+              }}
               style={{
                 width: "100%",
                 maxWidth: "540px",
-                maxHeight: "90vh",
+                maxHeight: "85vh",
                 overflowY: "auto",
+                overscrollBehavior: "contain",
                 background: "white",
                 borderRadius: "24px",
                 boxShadow: "0px 20px 60px rgba(12, 40, 48, 0.15)",
@@ -2904,6 +2797,12 @@ const Dashboard = () => {
             </div>
           </div>
         )}
+        {/* CUSTOM CLINICAL SUCCESS POP-UP MODAL */}
+        <TherapyAssignedModal
+          isOpen={isAssignedModalOpen}
+          onClose={() => setIsAssignedModalOpen(false)}
+          assignedData={assignedModalData}
+        />
       </div>
     </>
   );

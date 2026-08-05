@@ -5,6 +5,7 @@ import avatarHands from "../../assets/avatar-hands.png";
 import PatientSidebar from "./PatientSidebar";
 import InteractivePracticeHub from "../../features/gamification/interactive-practice/InteractivePracticeHub";
 import InteractivePracticeDashboardCTA from "../../features/gamification/interactive-practice/InteractivePracticeDashboardCTA";
+import { useProgramScheduleStore } from "../../store/useProgramScheduleStore";
 
 const API_BASE = 'http://localhost:3000/api/v1';
 
@@ -186,6 +187,10 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
   const [sessionLogs, setSessionLogs] = useState([]);      
   const [schedule, setSchedule] = useState(null);          
   const [sessionLoading, setSessionLoading] = useState(true);
+
+  // ── Program & Weekly Schedule Store ──
+  const { activeProgram, weeklySchedule, setMockStatus } = useProgramScheduleStore();
+  const isCompletedReview = activeProgram?.status === "Completed / Review Required";
 
   // ── Helper: derive status label and color from pain_level ──
   const getStatusFromPain = (painLevel) => {
@@ -425,8 +430,50 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
                     Ready for your next therapy session?
                   </div>
                 </div>
-                <BellIcon showNotif={showNotif} setShowNotif={setShowNotif} />
+                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                  <button
+                    onClick={() => setMockStatus(isCompletedReview ? "Active" : "Completed / Review Required")}
+                    style={{
+                      padding: "6px 12px",
+                      borderRadius: "12px",
+                      border: "1px dashed #0099A6",
+                      background: "rgba(0, 153, 166, 0.08)",
+                      color: "#0099A6",
+                      fontSize: "12px",
+                      fontFamily: "Space Mono",
+                      fontWeight: "700",
+                      cursor: "pointer",
+                    }}
+                    title="Simulate Program State Transition"
+                  >
+                    ⚙️ State: {activeProgram?.status || "Active"}
+                  </button>
+                  <BellIcon showNotif={showNotif} setShowNotif={setShowNotif} />
+                </div>
               </div>
+
+              {/* MILESTONE COMPLETED / REVIEW REQUIRED BANNER */}
+              {isCompletedReview && (
+                <div style={{ background: "linear-gradient(135deg, #0C2830 0%, #1A3B47 100%)", borderRadius: "20px", padding: "24px", color: "white", border: "2px solid #3ED8C8", boxShadow: "0 8px 24px rgba(12, 40, 48, 0.15)", position: "relative", overflow: "hidden" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "16px", zIndex: 2, position: "relative" }}>
+                    <div>
+                      <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "rgba(62, 216, 200, 0.15)", border: "1px solid #3ED8C8", color: "#3ED8C8", padding: "4px 12px", borderRadius: "20px", fontSize: "12px", fontFamily: "Space Mono", fontWeight: "700", marginBottom: "12px" }}>
+                        <span>🏆</span> MILESTONE COMPLETED — PROGRAM FINISHED
+                      </div>
+                      <div style={{ fontSize: "22px", fontWeight: "700", marginBottom: "6px" }}>Program Phase Completed!</div>
+                      <div style={{ fontSize: "14px", color: "#A2C3CA", maxWidth: "600px", lineHeight: "1.5" }}>
+                        You have completed all scheduled therapy sessions for this multi-week program. Your progress has been submitted to Dr. Sarah for evaluation. Mandatory medical exercises are currently paused.
+                      </div>
+                    </div>
+                    <div style={{ background: "rgba(255, 255, 255, 0.08)", padding: "12px 18px", borderRadius: "16px", border: "1px solid rgba(255, 255, 255, 0.15)", textAlign: "center", flexShrink: 0 }}>
+                      <div style={{ fontSize: "12px", color: "#3ED8C8", fontFamily: "Space Mono", textTransform: "uppercase" }}>Streak Status</div>
+                      <div style={{ fontSize: "18px", fontWeight: "800", marginTop: "4px", color: "#C2EB30", display: "flex", alignItems: "center", gap: "6px" }}>
+                        <span>❄️</span> Protected
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* INTERAKTIF PRACTICE SECONDARY CTA BANNER */}
               <InteractivePracticeDashboardCTA onNavigate={() => setActiveMenu("Interactive Practice")} />
@@ -560,10 +607,18 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
 
             <div className="right-panel hide-scroll" style={{ width: "380px", minWidth: "360px", height: "calc(100vh - 48px)", flex: "0 0 auto", background: "linear-gradient(160deg, #EBF5F7 0%, #F0F4F8 40%, #EEF5ED 100%)", borderRadius: "20px", border: "1.5px solid #C4CFEC", padding: "24px", display: "flex", flexDirection: "column", position: "relative", overflowY: "auto", boxSizing: "border-box" }}>
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0 }}>
-                <button onClick={() => navigate('/intro')} style={{ width: "100%", padding: "16px", background: "linear-gradient(135deg, #C2EB30 0%, #9AC404 100%)", border: "none", borderRadius: "16px", color: "white", fontSize: "16px", fontFamily: "Space Grotesk", fontWeight: "700", cursor: "pointer", boxShadow: "0 6px 20px rgba(154, 196, 4, 0.3)", display: "flex", justifyContent: "center", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="white" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> Start today's session
-                </button>
-                <div style={{ color: "#7AAAB4", fontSize: "13px", fontFamily: "Space Mono" }}>8 exercises · ~12 min · Left hand</div>
+                {isCompletedReview ? (
+                  <button disabled style={{ width: "100%", padding: "16px", background: "rgba(122, 170, 180, 0.25)", border: "1.5px solid #7AAAB4", borderRadius: "16px", color: "#4A5568", fontSize: "15px", fontFamily: "Space Grotesk", fontWeight: "700", cursor: "not-allowed", display: "flex", justifyContent: "center", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
+                    <span>🔒</span> Program Completed (Pending Review)
+                  </button>
+                ) : (
+                  <button onClick={() => navigate('/intro')} style={{ width: "100%", padding: "16px", background: "linear-gradient(135deg, #C2EB30 0%, #9AC404 100%)", border: "none", borderRadius: "16px", color: "white", fontSize: "16px", fontFamily: "Space Grotesk", fontWeight: "700", cursor: "pointer", boxShadow: "0 6px 20px rgba(154, 196, 4, 0.3)", display: "flex", justifyContent: "center", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="white" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> Start today's session
+                  </button>
+                )}
+                <div style={{ color: "#7AAAB4", fontSize: "13px", fontFamily: "Space Mono" }}>
+                  {isCompletedReview ? "Mandatory exercises paused · Play Minigames" : "8 exercises · ~12 min · Left hand"}
+                </div>
               </div>
 
               <div style={{ flex: 1, position: "relative", minHeight: "300px", display: "flex", justifyContent: "center", alignItems: "center", marginTop: "20px", marginBottom: "20px" }}>

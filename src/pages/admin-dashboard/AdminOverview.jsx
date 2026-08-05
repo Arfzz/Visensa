@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 
-const mockPatients = [
-  { id: "RJ", name: "Robert Johnson", condition: "Phantom Limb Pain", totalExercises: 24, lastPainScore: 4, previousPainScore: 5, compliance: "87%", status: "Excellent", lastActive: "Today" },
-  { id: "ML", name: "Margaret Lim", condition: "Stroke Recovery", totalExercises: 12, lastPainScore: 7, previousPainScore: 7, compliance: "55%", status: "Warning", lastActive: "4 days ago" },
-  { id: "AK", name: "Ahmad Kusuma", condition: "Phantom Limb Pain", totalExercises: 56, lastPainScore: 3, previousPainScore: 4, compliance: "98%", status: "Excellent", lastActive: "Today" },
-  { id: "DS", name: "Diana Santoso", condition: "Stroke Recovery", totalExercises: 8, lastPainScore: 8, previousPainScore: 9, compliance: "100%", status: "Good", lastActive: "Yesterday" },
-  { id: "KM", name: "Kenji Morales", condition: "Stroke / Hemiparesis", totalExercises: 0, lastPainScore: 6, previousPainScore: 6, compliance: "New", status: "New", lastActive: "Just joined" },
+const mockPatientsData = [
+  { id: "RJ", name: "Robert Johnson", condition: "Phantom Limb Pain", totalExercises: 24, lastPainScore: 4, previousPainScore: 5, compliance: "87%", status: "Excellent", lastActive: "Today", week: "Wk 4", isNew: false, color: "#0099A6" },
+  { id: "ML", name: "Margaret Lim", condition: "Stroke Recovery", totalExercises: 12, lastPainScore: 7, previousPainScore: 7, compliance: "55%", status: "Warning", lastActive: "4 days ago", week: "Wk 2", isNew: false, color: "#D4A843" },
+  { id: "AK", name: "Ahmad Kusuma", condition: "Phantom Limb Pain", totalExercises: 56, lastPainScore: 3, previousPainScore: 4, compliance: "98%", status: "Excellent", lastActive: "Today", week: "Wk 7", isNew: false, color: "#4BA882" },
+  { id: "DS", name: "Diana Santoso", condition: "Stroke Recovery", totalExercises: 8, lastPainScore: 8, previousPainScore: 9, compliance: "100%", status: "Good", lastActive: "Yesterday", week: "Wk 1", isNew: false, color: "#0099A6" },
+  { id: "KM", name: "Kenji Morales", condition: "Stroke / Hemiparesis", totalExercises: 0, lastPainScore: 6, previousPainScore: 6, compliance: "New", status: "New", lastActive: "Just joined", week: "Wk 4", isNew: true, color: "#0099A6" },
 ];
 
 const getStatusColor = (status) => {
@@ -19,20 +18,25 @@ const getStatusColor = (status) => {
   }
 };
 
-const AdminOverview = () => {
-  const navigate = useNavigate();
+const AdminOverview = ({ onSelectPatient, onAddPatient, patients = mockPatientsData }) => {
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredPatients = mockPatients.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()));
+  const filteredPatients = patients.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()));
+
+  const handlePatientClick = (patient) => {
+    if (onSelectPatient) {
+      onSelectPatient(patient);
+    }
+  };
 
   return (
-    <div style={{ padding: "40px", height: "100%", overflowY: "auto", background: "#FAFAFA", boxSizing: "border-box" }}>
+    <div style={{ width: "100%", boxSizing: "border-box" }}>
       
       {/* Header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "40px" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "32px", marginTop: "4px", flexWrap: "wrap", gap: "16px" }}>
         <div>
-          <div style={{ color: "#1A2332", fontSize: "36px", fontFamily: "Space Grotesk", fontWeight: "700", marginBottom: "8px" }}>Clinic Overview</div>
-          <div style={{ color: "#7AAAB4", fontSize: "16px", fontFamily: "Space Grotesk", fontWeight: "500" }}>Manage your patients and monitor their progress.</div>
+          <div style={{ color: "#0C2830", fontSize: "32px", fontFamily: "Space Grotesk, sans-serif", fontWeight: "800", marginBottom: "6px" }}>Clinic Overview</div>
+          <div style={{ color: "#7AAAB4", fontSize: "15px", fontFamily: "Space Grotesk, sans-serif", fontWeight: "500" }}>Manage your patients and monitor their progress.</div>
         </div>
         
         <div style={{ position: "relative" }}>
@@ -57,7 +61,7 @@ const AdminOverview = () => {
             <div style={{ color: "#7AAAB4", fontSize: "14px", fontFamily: "Space Mono", fontWeight: "600", textTransform: "uppercase", letterSpacing: "1px" }}>Total Patients</div>
           </div>
           <div style={{ display: "flex", alignItems: "baseline", gap: "12px" }}>
-            <span style={{ color: "#0C2830", fontSize: "40px", fontFamily: "Space Grotesk", fontWeight: "700" }}>{mockPatients.length}</span>
+            <span style={{ color: "#0C2830", fontSize: "40px", fontFamily: "Space Grotesk", fontWeight: "700" }}>{patients.length}</span>
             <span style={{ color: "#4BA882", fontSize: "14px", fontWeight: "600" }}>+2 this month</span>
           </div>
         </div>
@@ -93,7 +97,12 @@ const AdminOverview = () => {
       <div style={{ background: "white", borderRadius: "24px", border: "1px solid #E2E8F0", boxShadow: "0 4px 20px rgba(0,0,0,0.02)", overflow: "hidden" }}>
         <div style={{ padding: "24px 30px", borderBottom: "1px solid #E2E8F0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div style={{ color: "#0C2830", fontSize: "18px", fontFamily: "Space Grotesk", fontWeight: "700" }}>Patient List</div>
-          <button style={{ padding: "10px 20px", background: "#0099A6", color: "white", border: "none", borderRadius: "10px", fontSize: "14px", fontFamily: "Space Grotesk", fontWeight: "600", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px", transition: "background 0.2s" }} onMouseEnter={(e) => e.target.style.background = "#008a95"} onMouseLeave={(e) => e.target.style.background = "#0099A6"}>
+          <button 
+            onClick={onAddPatient}
+            style={{ padding: "10px 20px", background: "#0099A6", color: "white", border: "none", borderRadius: "10px", fontSize: "14px", fontFamily: "Space Grotesk", fontWeight: "600", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px", transition: "background 0.2s" }} 
+            onMouseEnter={(e) => e.target.style.background = "#008a95"} 
+            onMouseLeave={(e) => e.target.style.background = "#0099A6"}
+          >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
             Add Patient
           </button>
@@ -113,12 +122,20 @@ const AdminOverview = () => {
             </thead>
             <tbody>
               {filteredPatients.map((patient, index) => {
-                const statusTheme = getStatusColor(patient.status);
-                const painTrend = patient.lastPainScore < patient.previousPainScore ? "↓" : patient.lastPainScore > patient.previousPainScore ? "↑" : "—";
-                const painTrendColor = patient.lastPainScore < patient.previousPainScore ? "#4BA882" : patient.lastPainScore > patient.previousPainScore ? "#C0574C" : "#7AAAB4";
+                const statusTheme = getStatusColor(patient.status || (patient.isNew ? "New" : "Good"));
+                const lastPain = patient.lastPainScore || (patient.pain ? parseInt(patient.pain) : 4);
+                const prevPain = patient.previousPainScore || lastPain + 1;
+                const painTrend = lastPain < prevPain ? "↓" : lastPain > prevPain ? "↑" : "—";
+                const painTrendColor = lastPain < prevPain ? "#4BA882" : lastPain > prevPain ? "#C0574C" : "#7AAAB4";
 
                 return (
-                  <tr key={patient.id} style={{ borderBottom: index !== filteredPatients.length - 1 ? "1px solid #E2E8F0" : "none", transition: "background 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.background = "#F8FAFC"} onMouseLeave={(e) => e.currentTarget.style.background = "white"}>
+                  <tr 
+                    key={patient.id} 
+                    onClick={() => handlePatientClick(patient)}
+                    style={{ borderBottom: index !== filteredPatients.length - 1 ? "1px solid #E2E8F0" : "none", cursor: "pointer", transition: "background 0.2s" }} 
+                    onMouseEnter={(e) => e.currentTarget.style.background = "#F8FAFC"} 
+                    onMouseLeave={(e) => e.currentTarget.style.background = "white"}
+                  >
                     <td style={{ padding: "20px 30px" }}>
                       <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
                         <div style={{ width: "42px", height: "42px", borderRadius: "12px", background: "rgba(0, 153, 166, 0.1)", color: "#0099A6", display: "flex", justifyContent: "center", alignItems: "center", fontSize: "14px", fontFamily: "Space Grotesk", fontWeight: "700", flexShrink: 0 }}>
@@ -126,7 +143,7 @@ const AdminOverview = () => {
                         </div>
                         <div>
                           <div style={{ color: "#0C2830", fontSize: "16px", fontFamily: "Space Grotesk", fontWeight: "700", marginBottom: "4px" }}>{patient.name}</div>
-                          <div style={{ color: "#7AAAB4", fontSize: "13px", fontFamily: "Space Grotesk" }}>{patient.lastActive}</div>
+                          <div style={{ color: "#7AAAB4", fontSize: "13px", fontFamily: "Space Grotesk" }}>{patient.lastActive || "Recently active"}</div>
                         </div>
                       </div>
                     </td>
@@ -134,14 +151,14 @@ const AdminOverview = () => {
                       {patient.condition}
                     </td>
                     <td style={{ padding: "20px 30px" }}>
-                      <div style={{ color: "#0C2830", fontSize: "16px", fontFamily: "Space Mono", fontWeight: "600", marginBottom: "4px" }}>{patient.totalExercises}</div>
+                      <div style={{ color: "#0C2830", fontSize: "16px", fontFamily: "Space Mono", fontWeight: "600", marginBottom: "4px" }}>{patient.totalExercises ?? patient.sessions ?? 0}</div>
                       <div style={{ color: "#7AAAB4", fontSize: "13px", fontFamily: "Space Mono" }}>{patient.compliance} comp.</div>
                     </td>
                     <td style={{ padding: "20px 30px" }}>
                       <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                        <span style={{ color: "#D4A843", fontSize: "20px", fontFamily: "Space Mono", fontWeight: "700" }}>{patient.lastPainScore}</span>
+                        <span style={{ color: "#D4A843", fontSize: "20px", fontFamily: "Space Mono", fontWeight: "700" }}>{lastPain}</span>
                         <span style={{ color: "#7AAAB4", fontSize: "14px", fontFamily: "Space Mono" }}>/10</span>
-                        {patient.totalExercises > 0 && (
+                        {(patient.totalExercises > 0 || patient.sessions > 0) && (
                           <span style={{ color: painTrendColor, fontSize: "14px", fontFamily: "Space Mono", fontWeight: "600", marginLeft: "4px" }}>
                             {painTrend}
                           </span>
@@ -150,12 +167,15 @@ const AdminOverview = () => {
                     </td>
                     <td style={{ padding: "20px 30px" }}>
                       <div style={{ display: "inline-flex", padding: "6px 12px", background: statusTheme.bg, color: statusTheme.text, border: `1px solid ${statusTheme.border}`, borderRadius: "100px", fontSize: "13px", fontFamily: "Space Mono", fontWeight: "700" }}>
-                        {patient.status}
+                        {patient.status || (patient.isNew ? "New" : "Active")}
                       </div>
                     </td>
                     <td style={{ padding: "20px 30px" }}>
                       <button 
-                        onClick={() => navigate('/admin-dashboard')}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handlePatientClick(patient);
+                        }}
                         style={{ padding: "8px 16px", background: "white", border: "1px solid #C4E8EC", color: "#0099A6", borderRadius: "8px", fontSize: "14px", fontFamily: "Space Grotesk", fontWeight: "600", cursor: "pointer", transition: "all 0.2s" }}
                         onMouseEnter={(e) => { e.target.style.background = "#0099A6"; e.target.style.color = "white"; }}
                         onMouseLeave={(e) => { e.target.style.background = "white"; e.target.style.color = "#0099A6"; }}
