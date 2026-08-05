@@ -45,6 +45,7 @@ import LoginDoctor from "./pages/login/LoginDoctor";
 import RegisterDoctor from "./pages/register/RegisterDoctor";
 import Dashboard from "./pages/admin-dashboard/Dashboard";
 import PianoTilesSandbox from "./features/gamification/PianoTilesSandbox";
+import AdminOverview from "./pages/admin-dashboard/AdminOverview";
 
 // Import Hooks
 import ProtectedRoute from "./utils/ProtectedRoute";
@@ -204,6 +205,10 @@ function App() {
         <Route path="/piano-tiles" element={<PianoTilesSandbox />} />
         <Route path="/game-test" element={<PianoTilesSandbox />} />
 
+        {/* Jalur ke Sandbox Streak Mini-Games */}
+        <Route path="/streak-test" element={<StreakSandbox />} />
+        <Route path="/streak-sandbox" element={<StreakSandbox />} />
+
         {/* Jalur ke 3D Hand Tracking View */}
         <Route path="/tracking-3d" element={<Tracking3DView />} />
 
@@ -221,26 +226,15 @@ function App() {
           <Route path="/session-complete" element={<SessionComplete />} />
           <Route path="/tracking-3d" element={<Tracking3DView />} />
           <Route path="/patient-dashboard" element={<PatientDashboard />} />
+          <Route path="/interactive-practice" element={<PatientDashboard initialTab="Interactive Practice" />} />
         </Route>
 
-        {/* Jalur ke Halaman Dashboard Admin */}
-        <Route path="/admin-dashboard" element={<Dashboard />} />
-
-        {/* Jalur ke Halaman Dashboard Pasien (Baru Ditambahkan) */}
-        <Route path="/patient-dashboard" element={<PatientDashboard />} />
-        <Route
-          path="/interactive-practice"
-          element={<PatientDashboard initialTab="Interactive Practice" />}
-        />
-
-        {/* Jalur ke Sandbox Streak Mini-Games */}
-        <Route path="/streak-test" element={<StreakSandbox />} />
-        <Route path="/streak-sandbox" element={<StreakSandbox />} />
         {/* ========================================== */}
         {/* PROTECTED ROUTES KHUSUS DOKTER             */}
         {/* ========================================== */}
         <Route element={<ProtectedRoute allowedRoles={["doctor"]} />}>
           <Route path="/admin-dashboard" element={<Dashboard />} />
+          <Route path="/dashboard" element={<AdminOverview />} />
         </Route>
       </Routes>
     </Router>
