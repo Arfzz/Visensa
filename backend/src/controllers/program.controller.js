@@ -31,9 +31,11 @@ const programController = {
       const rest_interval_days = body.rest_interval_days || body.restIntervalDays || 1;
       const start_date = body.start_date || body.startDate;
 
+      const doctor_id = req.user?.profile?.id || req.user?.doctor_id || req.user?.id;
+
       const data = await programService.createProgram({
         patient_id,
-        doctor_id: req.user?.doctor_id || req.user?.id,
+        doctor_id,
         program_duration_weeks,
         frequency_per_week,
         rest_interval_days,

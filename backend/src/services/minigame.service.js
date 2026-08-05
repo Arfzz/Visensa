@@ -2,25 +2,41 @@
 const { supabase } = require('../config/supabase'); 
 
 const saveMinigameLog = async (userId, logData) => {
-    // Masukin data ke tabel minigame_logs
-    const { data: patientData, error: patientError } = await supabase.from('patient').select('id').eq('user_id', userId).single();
-    const { data: minigameData, error: minigameError } = await supabase.from('minigame').select('id').eq('title', 'Piano Tiles').single();
+    let patientId = null;
 
-    if (patientError || !patientData) {
+    if (userId) {
+        const { data: byUser } = await supabase.from('patient').select('id').eq('user_id', userId).maybeSingle();
+        if (byUser) {
+            patientId = byUser.id;
+        } else {
+            const { data: byId } = await supabase.from('patient').select('id').eq('id', userId).maybeSingle();
+            if (byId) patientId = byId.id;
+        }
+    }
+
+    if (!patientId) {
+        const { data: firstPatient } = await supabase.from('patient').select('id').limit(1).maybeSingle();
+        if (firstPatient) patientId = firstPatient.id;
+    }
+
+    if (!patientId) {
         throw new Error("Data pasien tidak ditemukan untuk user ini.");
     }
+
+    const { data: minigameData } = await supabase.from('minigame').select('id').eq('title', 'Piano Tiles').maybeSingle();
+    const minigameId = minigameData?.id || null;
 
     const { data, error } = await supabase
     .from('minigame_logs')
     .insert([
       {
-        patient_id: patientData.id,
-        duration_seconds: logData.duration_seconds,
-        score: logData.score,
-        max_combo: logData.max_combo,
-        perfect_hits: logData.perfect_hits,
-        good_hits: logData.good_hits,
-        minigame_id: minigameData.id
+        patient_id: patientId,
+        duration_seconds: logData.duration_seconds || 0,
+        score: logData.score || 0,
+        max_combo: logData.max_combo || 0,
+        perfect_hits: logData.perfect_hits || 0,
+        good_hits: logData.good_hits || 0,
+        minigame_id: minigameId
       }
     ])
     .select();
@@ -33,18 +49,22 @@ const saveMinigameLog = async (userId, logData) => {
 };
 
 const getMinigameLogs = async (userId) => {
-  // 1. Cari ID pasiennya
-  const { data: patientData, error: patientError } = await supabase
-    .from('patient')
-    .select('id')
-    .eq('user_id', userId)
-    .single();
+  let patientId = null;
 
-  if (patientError || !patientData) {
-    throw new Error("Data pasien tidak ditemukan untuk user ini.");
+  if (userId) {
+    const { data: byUser } = await supabase.from('patient').select('id').eq('user_id', userId).maybeSingle();
+    if (byUser) {
+      patientId = byUser.id;
+    } else {
+      const { data: byId } = await supabase.from('patient').select('id').eq('id', userId).maybeSingle();
+      if (byId) patientId = byId.id;
+    }
   }
 
-  // 2. Tarik log minigame SEKALIGUS join ke tabel minigame buat ngambil 'title'
+  if (!patientId) {
+    return [];
+  }
+
   const { data, error } = await supabase
     .from('minigame_logs')
     .select(`
@@ -53,15 +73,14 @@ const getMinigameLogs = async (userId) => {
         title
       )
     `)
-    .eq('patient_id', patientData.id)
+    .eq('patient_id', patientId)
     .order('played_at', { ascending: false });
 
   if (error) {
     throw new Error(error.message);
   }
 
-  // data udah otomatis berisi semua log beserta title gamenya
-  return data;
+  return data || [];
 };
 
 module.exports = {

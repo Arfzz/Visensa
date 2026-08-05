@@ -13,8 +13,8 @@ router.use(authenticate);
 // GET /api/v1/programs/patient/:patientId — Doctor/Patient: get active program & weekly schedules
 router.get('/patient/:patientId', programController.getActiveProgram);
 
-// POST /api/v1/programs — Doctor: create/assign new program
-router.post('/', authorize(ROLES.DOCTOR), validate(createProgramSchema), programController.createProgram);
+// POST /api/v1/programs — Doctor/Patient: create/assign new program
+router.post('/', authorize(ROLES.DOCTOR, ROLES.PATIENT), validate(createProgramSchema), programController.createProgram);
 
 // POST /api/v1/programs/:programId/extend — Doctor: quick extend program
 router.post('/:programId/extend', authorize(ROLES.DOCTOR), validate(extendProgramSchema), programController.extendProgram);
