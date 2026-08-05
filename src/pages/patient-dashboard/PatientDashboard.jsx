@@ -181,6 +181,9 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
   const [openDropdown, setOpenDropdown] = useState(null);
   const [isEditingEmail, setIsEditingEmail] = useState(false);
   const [activeBarIndex, setActiveBarIndex] = useState(null);
+  const [selectedMinigame, setSelectedMinigame] = useState(null);
+  const [minigameHistory, setMinigameHistory] = useState([]); // Awalnya kosong
+  const [minigameLoading, setMinigameLoading] = useState(true);
 
   // ── Dynamic session data ──
   const [sessionLogs, setSessionLogs] = useState([]);      
@@ -254,7 +257,66 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
       desc:        `${durationMin} min session`,
     };
   };
+  const renderMinigameDetails = (game) => {
+    if (!game) return null;
 
+    let stats = [];
+
+    // 1. Kalo gamenya Piano Tiles
+    if (game.title === "Piano Tiles") {
+      stats = [
+        // Baris 1: Full width (span 2)
+        { label: "Duration", value: `${game.duration_seconds} seconds`, span: 2 },
+        // Baris 2: Half width (span 1 masing-masing)
+        { label: "Final Score", value: game.score, span: 1, highlight: true },
+        { label: "Max Combo", value: game.max_combo, span: 1 },
+        // Baris 3: Half width (span 1 masing-masing)
+        { label: "Perfect Hits", value: game.perfect_hits, span: 1, color: "#4BA882" },
+        { label: "Good Hits", value: game.good_hits, span: 1, color: "#3ED8C8" },
+      ];
+    } 
+    // 2. CONTOH Kalo besok nambah game baru
+    else if (game.title === "Ninja Slicer") {
+      stats = [
+        { label: "Duration", value: `${game.duration_seconds}s`, span: 2 },
+        { label: "Total Score", value: game.score, span: 1, highlight: true },
+        { label: "Fruits Cut", value: game.fruits_cut, span: 1 },
+        { label: "Bombs Hit", value: game.bombs_hit, span: 2, color: "#C0574C" },
+      ];
+    }
+    // 3. Fallback standard
+    else {
+      stats = [
+        { label: "Duration", value: `${game.duration_seconds}s`, span: 2 },
+        { label: "Score", value: game.score, span: 2, highlight: true },
+      ];
+    }
+
+    return (
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginTop: "24px" }}>
+        {stats.map((s, i) => (
+          <div key={i} style={{ 
+            background: s.highlight ? "rgba(0, 153, 166, 0.05)" : "#F8FAFC", 
+            padding: "16px", 
+            borderRadius: "16px", 
+            border: s.highlight ? "1.5px solid rgba(0, 153, 166, 0.2)" : "1px solid #E2E8F0",
+            // DI SINI KUNCINYA: Lebar kolom ngikutin properti 'span' dari array di atas
+            gridColumn: `span ${s.span || 1}`, 
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center"
+          }}>
+            <div style={{ color: "#7AAAB4", fontSize: "12px", fontFamily: "Space Mono", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "6px" }}>
+              {s.label}
+            </div>
+            <div style={{ color: s.color || (s.highlight ? "#0099A6" : "#0C2830"), fontSize: s.highlight ? "28px" : "22px", fontFamily: "Space Mono", fontWeight: "700" }}>
+              {s.value}
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
   // ── Fetch exercise logs & schedule from backend ──
   const selectedPlanData = calendarGrid.find(day => day.date === selectedPlanDate && day.isCurrentMonth);
 
@@ -282,6 +344,56 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
         setSessionLoading(false);
       }
     };
+
+     const fetchMinigameHistory = async () => {
+      try {
+        setMinigameLoading(true);
+        const userStr = localStorage.getItem("user");
+        if (!userStr) return;
+        
+        const userId = JSON.parse(userStr).id;
+
+        // Tarik data dari backend
+        const res = await fetch(`${API_BASE}/minigame/logs/${userId}`);
+        
+        if (res.ok) {
+          const json = await res.json();
+          
+          // Format data dari DB biar cocok sama UI yang udah kita bikin
+          const formattedData = (json.data || []).map((log) => {
+            const rawDate = log.played_at;
+            
+            // 2. Ganti spasi di antara tanggal dan jam jadi huruf 'T'
+            // Biar berubah jadi: 2026-08-05T05:50:16.404722+00
+            const safeDateStr = rawDate ? rawDate.replace(' ', 'T') : new Date().toISOString();
+            
+            // 3. Sekarang JavaScript pasti bisa baca!
+            const dateObj = new Date(safeDateStr);
+            const formattedDate = dateObj.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+
+            return {
+              id: log.id,
+              title: log.minigame.title,
+              score: log.score,
+              date: formattedDate,
+              duration_seconds: log.duration_seconds,
+              max_combo: log.max_combo,
+              perfect_hits: log.perfect_hits,
+              good_hits: log.good_hits,
+              icon: "🎹"
+            };
+          });
+
+          setMinigameHistory(formattedData);
+        }
+      } catch (error) {
+        console.error("Gagal menarik history minigame:", error);
+      } finally {
+        setMinigameLoading(false);
+      }
+    };
+
+    fetchMinigameHistory();
     fetchSessionData();
   }, []);
 
@@ -787,7 +899,59 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
             <InteractivePracticeHub />
           </div>
         )}
+{/* --- GAME HISTORY ACTIVE --- */}
+        {activeMenu === "Game History" && (
+          <div className="main-content" style={{ display: "flex", flex: 1, gap: "24px", height: "calc(100vh - 48px)" }}>
+            <div className="hide-scroll" style={{ flex: 1, display: "flex", flexDirection: "column", gap: "24px", overflowY: "auto", paddingRight: "10px", paddingBottom: "100px", minWidth: 0 }}>
+              
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0 }}>
+                <div>
+                  <div style={{ color: "#1A2332", fontSize: "32px", fontFamily: "Space Grotesk", fontWeight: "700", marginBottom: "2px" }}>
+                    Practice History
+                  </div>
+                  <div style={{ color: "#9AABB8", fontSize: "14px", fontFamily: "Space Grotesk", fontWeight: "500" }}>
+                    Track your high scores and gameplay statistics.
+                  </div>
+                </div>
+                <BellIcon showNotif={showNotif} setShowNotif={setShowNotif} />
+              </div>
 
+              <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                {minigameHistory.length === 0 ? (
+                  <div style={{ padding: "40px", color: "#7AAAB4", fontSize: "15px", fontFamily: "Space Mono", textAlign: "center" }}>No game records yet. Go play some minigames!</div>
+                ) : (
+                  minigameHistory.map((game) => (
+                    <div 
+                      key={game.id} 
+                      onClick={() => setSelectedMinigame(game)} 
+                      style={{ background: "white", borderRadius: "20px", border: "1.5px solid #C4E8EC", padding: "20px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer", boxShadow: "0 2px 10px rgba(0,0,0,0.02)", transition: "transform 0.15s ease", flexShrink: 0 }}
+                      onMouseEnter={(e) => e.currentTarget.style.transform = "translateY(-2px)"}
+                      onMouseLeave={(e) => e.currentTarget.style.transform = "translateY(0)"}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+                        <div style={{ width: "56px", height: "56px", background: "rgba(0, 153, 166, 0.1)", borderRadius: "14px", display: "flex", justifyContent: "center", alignItems: "center", fontSize: "28px" }}>
+                          {game.icon || "🎮"}
+                        </div>
+                        <div>
+                          <div style={{ color: "#0C2830", fontSize: "18px", fontFamily: "Space Grotesk", fontWeight: "700", marginBottom: "4px" }}>{game.title}</div>
+                          <div style={{ color: "#7AAAB4", fontSize: "14px", fontFamily: "Space Mono" }}>Played on {game.date}</div>
+                        </div>
+                      </div>
+                      
+                      <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
+                        <div style={{ textAlign: "right" }}>
+                          <div style={{ color: "#7AAAB4", fontSize: "12px", fontFamily: "Space Mono", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "4px" }}>Score</div>
+                          <div style={{ color: "#0099A6", fontSize: "22px", fontFamily: "Space Mono", fontWeight: "700" }}>{game.score}</div>
+                        </div>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7AAAB4" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+        )}
         {/* --- SETTINGS ACTIVE (SUDAH DIPERBAIKI 100% ANTI CRASH) --- */}
         {activeMenu === "Settings" && (
           <div className="main-content" style={{ display: "flex", flex: 1, gap: "24px", height: "calc(100vh - 48px)" }}>
@@ -917,12 +1081,39 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
                     </div>
                   </div>
                 </div>
-
               </div>
             </div>
           </div>
         )}
+        {selectedMinigame && (
+          <div style={{ position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh", background: "rgba(12, 40, 48, 0.6)", backdropFilter: "blur(4px)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 9999 }}>
+            <div style={{ background: "white", width: "420px", borderRadius: "24px", padding: "32px", boxShadow: "0 20px 40px rgba(0,0,0,0.2)", position: "relative" }}>
+              
+              {/* Tombol Close */}
+              <div 
+                onClick={() => setSelectedMinigame(null)} 
+                style={{ position: "absolute", top: "24px", right: "24px", width: "32px", height: "32px", background: "#F4F7F9", borderRadius: "50%", display: "flex", justifyContent: "center", alignItems: "center", cursor: "pointer", color: "#7AAAB4" }}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              </div>
 
+              {/* Header Modal */}
+              <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "8px" }}>
+                <div style={{ width: "48px", height: "48px", background: "rgba(0, 153, 166, 0.1)", borderRadius: "12px", display: "flex", justifyContent: "center", alignItems: "center", fontSize: "24px" }}>
+                  {selectedMinigame.icon || "🎮"}
+                </div>
+                <div>
+                  <div style={{ color: "#0C2830", fontSize: "22px", fontFamily: "Space Grotesk", fontWeight: "700" }}>{selectedMinigame.title}</div>
+                  <div style={{ color: "#7AAAB4", fontSize: "14px", fontFamily: "Space Mono" }}>{selectedMinigame.date}</div>
+                </div>
+              </div>
+
+              {/* Render dinamis stat gamenya dari helper function */}
+              {renderMinigameDetails(selectedMinigame)}
+
+            </div>
+          </div>
+        )}
       </div>
     </>
   );
