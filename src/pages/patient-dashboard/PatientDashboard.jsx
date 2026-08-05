@@ -5,6 +5,7 @@ import avatarHands from "../../assets/avatar-hands.png";
 import PatientSidebar from "./PatientSidebar";
 import InteractivePracticeHub from "../../features/gamification/interactive-practice/InteractivePracticeHub";
 import InteractivePracticeDashboardCTA from "../../features/gamification/interactive-practice/InteractivePracticeDashboardCTA";
+import { useStreakStore } from "../../features/gamification/streak/useStreakStore";
 
 const API_BASE = 'http://localhost:3000/api/v1';
 
@@ -72,8 +73,8 @@ const calendarGrid = [
   ...Array.from({ length: 31 }, (_, i) => {
     const d = i + 1;
     let status = "rest", isTherapy = false;
-    if ([1, 3, 6, 8].includes(d)) { status = "completed"; isTherapy = true; } 
-    else if (d === 9) { status = "today"; isTherapy = true; } 
+    if ([1, 3, 6, 8].includes(d)) { status = "completed"; isTherapy = true; }
+    else if (d === 9) { status = "today"; isTherapy = true; }
     else if ([11, 13, 15, 17, 20, 22, 24, 27, 29, 31].includes(d)) { status = "upcoming"; isTherapy = true; }
     return { date: d, isCurrentMonth: true, status, isTherapy };
   }),
@@ -186,23 +187,23 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
   const [minigameLoading, setMinigameLoading] = useState(true);
 
   // ── Dynamic session data ──
-  const [sessionLogs, setSessionLogs] = useState([]);      
-  const [schedule, setSchedule] = useState(null);          
+  const [sessionLogs, setSessionLogs] = useState([]);
+  const [schedule, setSchedule] = useState(null);
   const [sessionLoading, setSessionLoading] = useState(true);
 
   // ── Helper: derive status label and color from pain_level ──
   const getStatusFromPain = (painLevel) => {
     if (painLevel === null || painLevel === undefined) return { status: 'Completed', statusColor: '#0099A6', statusBg: 'rgba(0, 153, 166, 0.10)' };
     if (painLevel <= 3) return { status: 'Excellent', statusColor: '#4BA882', statusBg: 'rgba(75, 168, 130, 0.10)' };
-    if (painLevel <= 5) return { status: 'Good',      statusColor: '#3ED8C8', statusBg: 'rgba(62, 216, 200, 0.10)' };
-    if (painLevel <= 7) return { status: 'Fair',      statusColor: '#D4A843', statusBg: 'rgba(212, 168, 67, 0.10)' };
-    return               { status: 'Poor',      statusColor: '#C0574C', statusBg: 'rgba(192, 87, 76, 0.10)' };
+    if (painLevel <= 5) return { status: 'Good', statusColor: '#3ED8C8', statusBg: 'rgba(62, 216, 200, 0.10)' };
+    if (painLevel <= 7) return { status: 'Fair', statusColor: '#D4A843', statusBg: 'rgba(212, 168, 67, 0.10)' };
+    return { status: 'Poor', statusColor: '#C0574C', statusBg: 'rgba(192, 87, 76, 0.10)' };
   };
 
   // ── Helper: format a raw exercise_log record into the UI shape ──
   const formatLog = (log, index, allLogs) => {
     const d = new Date(log.created_at);
-    const day   = d.getDate().toString();
+    const day = d.getDate().toString();
     const month = d.toLocaleString('default', { month: 'short' });
     const today = new Date();
     const isToday = d.toDateString() === today.toDateString();
@@ -212,8 +213,8 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
     const title = isToday
       ? `Today, ${day} ${month} ${year}`
       : isYesterday
-      ? `Yesterday, ${day} ${month} ${year}`
-      : `${dayName}, ${day} ${month} ${year}`;
+        ? `Yesterday, ${day} ${month} ${year}`
+        : `${dayName}, ${day} ${month} ${year}`;
 
     const durationMin = log.duration_seconds ? Math.round(log.duration_seconds / 60) : 0;
     const newPain = log.pain_level ?? null;
@@ -224,7 +225,7 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
 
     let painDiff = "no change";
     let diffColor = "#7AAAB4";
-    
+
     if (oldPain !== null && newPain !== null) {
       const diff = newPain - oldPain;
       if (diff > 0) {
@@ -237,7 +238,8 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
     }
 
     return {
-      id:          log.id,
+      rawDate: log.created_at,
+      id: log.id,
       day,
       month,
       title,
@@ -245,16 +247,16 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
       status,
       statusColor,
       statusBg,
-      exercises:   log.session_number ? `Session #${log.session_number}` : 'Session',
-      time:        `${durationMin} min`,
-      accuracy:    '97% accuracy',
-      oldPain:     oldPain ?? '—',
-      newPain:     newPain ?? '—',
+      exercises: log.session_number ? `Session #${log.session_number}` : 'Session',
+      time: `${durationMin} min`,
+      accuracy: '97% accuracy',
+      oldPain: oldPain ?? '—',
+      newPain: newPain ?? '—',
       painDiff,
       diffColor,
-      boxBg:       isToday ? 'rgba(0, 153, 166, 0.08)' : '#F0FAFB',
-      date:        `${day} ${month}`,
-      desc:        `${durationMin} min session`,
+      boxBg: isToday ? 'rgba(0, 153, 166, 0.08)' : '#F0FAFB',
+      date: `${day} ${month}`,
+      desc: `${durationMin} min session`,
     };
   };
   const renderMinigameDetails = (game) => {
@@ -274,7 +276,7 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
         { label: "Perfect Hits", value: game.perfect_hits, span: 1, color: "#4BA882" },
         { label: "Good Hits", value: game.good_hits, span: 1, color: "#3ED8C8" },
       ];
-    } 
+    }
     // 2. CONTOH Kalo besok nambah game baru
     else if (game.title === "Ninja Slicer") {
       stats = [
@@ -295,13 +297,13 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
     return (
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginTop: "24px" }}>
         {stats.map((s, i) => (
-          <div key={i} style={{ 
-            background: s.highlight ? "rgba(0, 153, 166, 0.05)" : "#F8FAFC", 
-            padding: "16px", 
-            borderRadius: "16px", 
+          <div key={i} style={{
+            background: s.highlight ? "rgba(0, 153, 166, 0.05)" : "#F8FAFC",
+            padding: "16px",
+            borderRadius: "16px",
             border: s.highlight ? "1.5px solid rgba(0, 153, 166, 0.2)" : "1px solid #E2E8F0",
             // DI SINI KUNCINYA: Lebar kolom ngikutin properti 'span' dari array di atas
-            gridColumn: `span ${s.span || 1}`, 
+            gridColumn: `span ${s.span || 1}`,
             display: "flex",
             flexDirection: "column",
             justifyContent: "center"
@@ -336,7 +338,17 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
         const scheduleRes = await fetch(`${API_BASE}/sessions/stats/me`, { headers });
         if (scheduleRes.ok) {
           const scheduleJson = await scheduleRes.json();
-          setSchedule(scheduleJson.data ?? null);
+          const stats = scheduleJson.data ?? null;
+          setSchedule(stats);
+
+          if (stats?.gamification) {
+            useStreakStore.setState({
+              currentStreak: stats.gamification.current_streak,
+              longestStreak: stats.gamification.highest_streak,
+              streakFreezeAvailable: stats.gamification.freeze_available,
+              lastCompletedDate: stats.gamification.last_completed_date
+            });
+          }
         }
       } catch (e) {
         console.error('Failed to fetch session data:', e);
@@ -345,28 +357,28 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
       }
     };
 
-     const fetchMinigameHistory = async () => {
+    const fetchMinigameHistory = async () => {
       try {
         setMinigameLoading(true);
         const userStr = localStorage.getItem("user");
         if (!userStr) return;
-        
+
         const userId = JSON.parse(userStr).id;
 
         // Tarik data dari backend
         const res = await fetch(`${API_BASE}/minigame/logs/${userId}`);
-        
+
         if (res.ok) {
           const json = await res.json();
-          
+
           // Format data dari DB biar cocok sama UI yang udah kita bikin
           const formattedData = (json.data || []).map((log) => {
             const rawDate = log.played_at;
-            
+
             // 2. Ganti spasi di antara tanggal dan jam jadi huruf 'T'
             // Biar berubah jadi: 2026-08-05T05:50:16.404722+00
             const safeDateStr = rawDate ? rawDate.replace(' ', 'T') : new Date().toISOString();
-            
+
             // 3. Sekarang JavaScript pasti bisa baca!
             const dateObj = new Date(safeDateStr);
             const formattedDate = dateObj.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -410,7 +422,7 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
   const [fullName, setFullName] = useState(user?.name || "");
   const [email, setEmail] = useState(user?.email || "");
   const [password, setPassword] = useState("");
-  
+
   // Logika pengecekan perubahan yang 100% aman
   const hasChanges = Boolean((user && fullName !== user?.name) || (user && email !== user?.email) || password !== "");
 
@@ -425,9 +437,9 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
     localStorage.removeItem("refreshToken");
     navigate("/");
   };
-  
+
   // Derive recent (last 3) and all sessions from dynamic state
-  const recentSessionsDynamic  = sessionLogs.slice(0, 3);
+  const recentSessionsDynamic = sessionLogs.slice(0, 3);
   const filteredSessionsDynamic = activeFilter === 'All sessions'
     ? sessionLogs
     : sessionLogs.filter(s => s.status === activeFilter);
@@ -435,22 +447,26 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
   // ── Derived dynamic stats for Dashboard cards ──
   const currentPainRaw = sessionLogs.length > 0 ? sessionLogs[0].newPain : null;
   const currentPain = currentPainRaw !== null && currentPainRaw !== '—' ? currentPainRaw : 0;
-  
+
   const startPainRaw = sessionLogs.length > 0 ? sessionLogs[sessionLogs.length - 1].newPain : null;
   const startPain = startPainRaw !== null && startPainRaw !== '—' ? startPainRaw : currentPain;
-  
+
   const painImprovement = startPain - currentPain;
-  
+
   const totalSessionsDone = sessionLogs.length;
-  
+
   const currentMonthStr = new Date().toLocaleString('default', { month: 'short' });
   const sessionsThisMonth = sessionLogs.filter(s => s.month === currentMonthStr).length;
 
+  const completedExercises = schedule?.gamification?.completed_exercises ?? totalSessionsDone;
+  const currentStreak = schedule?.gamification?.current_streak ?? 0;
+  const highestStreak = schedule?.gamification?.highest_streak ?? 0;
+
   const dynamicTopStats = [
-    { label: "RECOVERY", val: "Week 4", sub: "of programme", color: "#0C2830" },
-    { label: "SESSIONS", val: totalSessionsDone.toString(), sub: "total done", color: "#0C2830" },
-    { label: "PAIN", val: sessionLogs.length > 0 ? `${currentPain} / 10` : '—', sub: "current level", color: "#0C2830" },
-    { label: "STREAK", val: "4 wks", sub: "consecutive", color: "#0C2830" },
+    { label: "RECOVERY", val: `Week ${Math.ceil(completedExercises / 3) || 1}`, sub: "of programme", color: "#0C2830" },
+    { label: "SESSIONS", val: completedExercises.toString(), sub: "total done", color: "#0C2830" },
+    { label: "PAIN", val: sessionLogs.length > 0 ? `${currentPain} / 10` : '—', sub: sessionLogs.length > 0 ? `from ${startPain}` : "current level", color: "#0C2830" },
+    { label: "STREAK", val: `${currentStreak} days`, sub: `best: ${highestStreak}d`, color: "#0C2830" },
   ];
 
   const chartPointsBase = sessionLogs.slice(0, 5).reverse();
@@ -463,10 +479,10 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
   });
 
   const polylinePoints = dynamicChartPoints.map(pt => `${pt.x},${pt.y}`).join(" ");
-  const polygonPoints = dynamicChartPoints.length > 0 
+  const polygonPoints = dynamicChartPoints.length > 0
     ? `50,160 ${polylinePoints} ${dynamicChartPoints[dynamicChartPoints.length - 1].x},160`
     : "50,160 50,160";
-  
+
   const painTrendPercentage = startPain > 0 ? Math.round((painImprovement / startPain) * 100) : 0;
   const painTrendString = painImprovement > 0 ? `↘ −${painTrendPercentage}%` : painImprovement < 0 ? `↗ +${Math.abs(painTrendPercentage)}%` : `0%`;
   const painTrendColor = painImprovement > 0 ? "#4BA882" : painImprovement < 0 ? "#C0574C" : "#7AAAB4";
@@ -505,28 +521,28 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
       </style>
 
       <div style={{ width: "100vw", height: "100vh", display: "flex", background: "#F4F7F9", fontFamily: "Space Grotesk, sans-serif", padding: "24px", boxSizing: "border-box", gap: "24px", position: "relative" }}>
-        
+
         {/* ============================== */}
         {/* 1. SIDEBAR (DIAM/FIXED)        */}
         {/* ============================== */}
         <PatientSidebar
-        activeMenu={activeMenu}
-        onSelectMenu={(menu) => {
-          setActiveMenu(menu);
-          setSelectedSession(null); 
-          setOpenDropdown(null);
-          setIsEditingEmail(false);
-        }}
-      />
+          activeMenu={activeMenu}
+          onSelectMenu={(menu) => {
+            setActiveMenu(menu);
+            setSelectedSession(null);
+            setOpenDropdown(null);
+            setIsEditingEmail(false);
+          }}
+        />
 
         {/* ============================== */}
         {/* 2. AREA TENGAH DINAMIS         */}
         {/* ============================== */}
-        
+
         {/* --- DASHBOARD ACTIVE --- */}
         {activeMenu === "Dashboard" && (
           <div className="main-content" style={{ display: "flex", flex: 1, gap: "24px", height: "calc(100vh - 48px)" }}>
-            
+
             <div className="hide-scroll" style={{ flex: 1, display: "flex", flexDirection: "column", gap: "20px", overflowY: "auto", paddingRight: "10px", paddingBottom: "100px", minWidth: 0 }} onWheel={(e) => { if (mainContentRef.current) mainContentRef.current.scrollTop += e.deltaY; }} ref={mainContentRef}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0 }}>
                 <div>
@@ -564,7 +580,7 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
                     {painImprovement > 0 ? `↓ from ${startPain} at start` : painImprovement < 0 ? `↑ from ${startPain} at start` : `Same as start (${startPain})`}
                   </div>
                   <div style={{ display: "flex", gap: "6px", height: "45px", alignItems: "flex-end", marginTop: "20px" }}>
-                    {[0.4, 0.5, 0.6, 0.7, 0.8, 1].map((o, i) => <div key={i} style={{ flex: 1, background: "rgba(255,255,255,0.25)", height: `${40 + i*12}%`, borderRadius: "4px", opacity: o }} />)}
+                    {[0.4, 0.5, 0.6, 0.7, 0.8, 1].map((o, i) => <div key={i} style={{ flex: 1, background: "rgba(255,255,255,0.25)", height: `${40 + i * 12}%`, borderRadius: "4px", opacity: o }} />)}
                   </div>
                 </div>
                 <div style={{ flex: 1, background: "linear-gradient(135deg, #3ED8C8 0%, #28C0AE 100%)", borderRadius: "24px", padding: "24px", color: "white", display: "flex", flexDirection: "column" }}>
@@ -575,18 +591,18 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
                   </div>
                   <div style={{ fontSize: "14px", opacity: 0.8, marginBottom: "auto" }}>Goal: 8/month</div>
                   <div style={{ display: "flex", gap: "6px", height: "45px", alignItems: "flex-end", marginTop: "20px" }}>
-                    {[0.5, 0.6, 0.7, 0.8, 0.9, 1].map((o, i) => <div key={i} style={{ flex: 1, background: "rgba(255,255,255,0.25)", height: `${50 + i*10}%`, borderRadius: "4px", opacity: o }} />)}
+                    {[0.5, 0.6, 0.7, 0.8, 0.9, 1].map((o, i) => <div key={i} style={{ flex: 1, background: "rgba(255,255,255,0.25)", height: `${50 + i * 10}%`, borderRadius: "4px", opacity: o }} />)}
                   </div>
                 </div>
               </div>
 
               <div style={{ background: "white", padding: "20px 24px", borderRadius: "18px", border: "1px solid #E2E8F0", display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0, boxShadow: "0 2px 8px rgba(0,0,0,0.02)" }}>
-                 {currentWeek.map((d, i) => (
-                   <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
-                      <div style={{ color: '#7AAAB4', fontSize: '13px', fontWeight: '600', fontFamily: "Space Mono" }}>{d.day}</div>
-                      <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: d.status === 'today' ? '#0099A6' : d.status === 'completed' ? '#E6F4F1' : 'transparent', color: d.status === 'today' ? 'white' : d.status === 'completed' ? '#4BA882' : '#1A2332', display: 'flex', justifyContent: 'center', alignItems: 'center', fontWeight: '700', border: d.status === 'upcoming' ? '1.5px dashed #C4E8EC' : 'none', fontFamily: "Space Grotesk" }}>{d.date}</div>
-                   </div>
-                 ))}
+                {currentWeek.map((d, i) => (
+                  <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                    <div style={{ color: '#7AAAB4', fontSize: '13px', fontWeight: '600', fontFamily: "Space Mono" }}>{d.day}</div>
+                    <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: d.status === 'today' ? '#0099A6' : d.status === 'completed' ? '#E6F4F1' : 'transparent', color: d.status === 'today' ? 'white' : d.status === 'completed' ? '#4BA882' : '#1A2332', display: 'flex', justifyContent: 'center', alignItems: 'center', fontWeight: '700', border: d.status === 'upcoming' ? '1.5px dashed #C4E8EC' : 'none', fontFamily: "Space Grotesk" }}>{d.date}</div>
+                  </div>
+                ))}
               </div>
 
               <div style={{ background: "white", borderRadius: "20px", border: "1.5px solid #C4E8EC", padding: "28px", boxShadow: "0 2px 10px rgba(0,0,0,0.02)", flexShrink: 0, position: "relative" }}>
@@ -597,7 +613,7 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
                   </div>
                   <div style={{ background: painTrendBg, border: `1.5px solid ${painTrendColor}33`, color: painTrendColor, padding: "6px 14px", borderRadius: "20px", fontSize: "15px", fontWeight: "600", display: "flex", alignItems: "center" }}>{painTrendString}</div>
                 </div>
-                
+
                 <div style={{ position: "relative", height: "160px", width: "100%", borderBottom: "1.5px solid #E2E8F0", marginBottom: "15px" }}>
                   {hoveredPainPoint && (
                     <div style={{ position: "absolute", left: `${(hoveredPainPoint.x / 960) * 100}%`, top: `${hoveredPainPoint.y - 80}px`, transform: "translateX(-50%)", background: "white", padding: "10px 18px", borderRadius: "16px", border: "1.5px solid #C4E8EC", zIndex: 10, pointerEvents: "none", boxShadow: "0 10px 30px rgba(0,153,166,0.15)", display: "flex", flexDirection: "column", alignItems: "center", gap: "2px" }}>
@@ -605,8 +621,8 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
                         {hoveredPainPoint.date}
                       </div>
                       <div style={{ display: "flex", alignItems: "baseline", gap: "2px" }}>
-                         <span style={{ color: "#0099A6", fontSize: "26px", fontFamily: "Space Mono", fontWeight: "700" }}>{hoveredPainPoint.pain}</span>
-                         <span style={{ color: "#7AAAB4", fontSize: "14px", fontFamily: "Space Mono" }}>/10</span>
+                        <span style={{ color: "#0099A6", fontSize: "26px", fontFamily: "Space Mono", fontWeight: "700" }}>{hoveredPainPoint.pain}</span>
+                        <span style={{ color: "#7AAAB4", fontSize: "14px", fontFamily: "Space Mono" }}>/10</span>
                       </div>
                     </div>
                   )}
@@ -621,7 +637,7 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
                     <polygon points={polygonPoints} fill="url(#painGradient)" />
                     <line x1="50" y1="40" x2="900" y2="40" stroke="#F1F5F9" strokeWidth="1.5" strokeDasharray="4 4" />
                     <line x1="50" y1="90" x2="900" y2="90" stroke="#F1F5F9" strokeWidth="1.5" strokeDasharray="4 4" />
-                    
+
                     {hoveredPainPoint && (
                       <line x1={hoveredPainPoint.x} y1="0" x2={hoveredPainPoint.x} y2="160" stroke="#C4E8EC" strokeWidth="2" />
                     )}
@@ -631,11 +647,11 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
                     ) : dynamicChartPoints.length === 1 ? (
                       <circle cx={dynamicChartPoints[0].x} cy={dynamicChartPoints[0].y} r="5" fill="#0099A6" />
                     ) : null}
-                    
+
                     {dynamicChartPoints.map((pt, i) => (
-                      <circle 
-                        key={i} cx={pt.x} cy={pt.y} r={hoveredPainPoint?.date === pt.date ? "9" : "6"} 
-                        fill="#0099A6" stroke={hoveredPainPoint?.date === pt.date ? "#0099A6" : "white"} strokeWidth="3" 
+                      <circle
+                        key={i} cx={pt.x} cy={pt.y} r={hoveredPainPoint?.date === pt.date ? "9" : "6"}
+                        fill="#0099A6" stroke={hoveredPainPoint?.date === pt.date ? "#0099A6" : "white"} strokeWidth="3"
                         style={{ cursor: "pointer", transition: "all 0.15s ease" }}
                         onMouseEnter={() => setHoveredPainPoint(pt)}
                         onMouseLeave={() => setHoveredPainPoint(null)}
@@ -679,34 +695,40 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
               </div>
 
               <div style={{ flex: 1, position: "relative", minHeight: "300px", display: "flex", justifyContent: "center", alignItems: "center", marginTop: "20px", marginBottom: "20px" }}>
-                 <div style={{ width: "240px", height: "240px", background: "radial-gradient(circle, rgba(59,184,176,0.15) 0%, rgba(255,255,255,0) 70%)", position: "absolute", zIndex: 1 }} />
-                 <img className="animate-float-img" src={avatarHands} alt="Hands" style={{ width: "180px", position: "absolute", zIndex: 2, filter: "invert(52%) sepia(87%) saturate(1832%) hue-rotate(141deg) brightness(95%) contrast(101%)", opacity: 0.6 }} />
-                 
-                 <div className="animate-float-1" style={{ position: "absolute", top: "0%", right: "5%", background: "white", padding: "16px", borderRadius: "18px", boxShadow: "0 8px 24px rgba(59,184,176,0.15)", border: "1.5px solid rgba(59,184,176,0.2)", zIndex: 3 }}>
-                    <div style={{ color: "#7AAAB4", fontSize: "11px", fontFamily: "Space Mono", marginBottom: "8px", letterSpacing: "1px" }}>JOINT ACCURACY</div>
-                    <div style={{ display: "flex", alignItems: "baseline", gap: "2px", marginBottom: "6px" }}>
-                       <span style={{ color: "#3ED8C8", fontSize: "30px", fontFamily: "Space Mono", fontWeight: "700" }}>97</span><span style={{ color: "#7AAAB4", fontSize: "14px", fontFamily: "Space Mono" }}>%</span>
-                    </div>
-                    <div style={{ display: "flex", gap: "4px" }}>{[0.5, 0.6, 0.7, 0.8, 1].map((o, i) => <div key={i} style={{ width: "14px", height: "8px", background: "#3ED8C8", borderRadius: "2px", opacity: o }} />)}</div>
-                 </div>
-                 
-                 <div className="animate-float-2" style={{ position: "absolute", top: "40%", left: "0%", background: "white", padding: "16px", borderRadius: "18px", boxShadow: "0 8px 24px rgba(200,112,74,0.12)", border: "1.5px solid rgba(200,112,74,0.2)", zIndex: 3 }}>
-                    <div style={{ color: "#7AAAB4", fontSize: "11px", fontFamily: "Space Mono", marginBottom: "8px", letterSpacing: "1px" }}>PAIN LEVEL</div>
-                    <div style={{ display: "flex", alignItems: "baseline", gap: "2px", marginBottom: "4px" }}><span style={{ color: "#0099A6", fontSize: "30px", fontFamily: "Space Mono", fontWeight: "700" }}>4</span><span style={{ color: "#7AAAB4", fontSize: "14px", fontFamily: "Space Mono" }}>/10</span></div>
-                    <div style={{ color: "#4BA882", fontSize: "13px", fontWeight: "600" }}>↓ from 8.5</div>
-                 </div>
-                 
-                 <div className="animate-float-3" style={{ position: "absolute", bottom: "10%", right: "5%", background: "white", padding: "16px", borderRadius: "18px", boxShadow: "0 8px 24px rgba(75,168,130,0.1)", border: "1.5px solid rgba(75,168,130,0.2)", zIndex: 3 }}>
-                    <div style={{ color: "#7AAAB4", fontSize: "11px", fontFamily: "Space Mono", marginBottom: "8px", letterSpacing: "1px" }}>RECOVERY</div>
-                    <div style={{ color: "#4BA882", fontSize: "24px", fontFamily: "Space Mono", fontWeight: "700", marginBottom: "4px" }}>Week 4</div>
-                    <div style={{ color: "#7AAAB4", fontSize: "13px" }}>21 sessions done</div>
-                 </div>
+                <div style={{ width: "240px", height: "240px", background: "radial-gradient(circle, rgba(59,184,176,0.15) 0%, rgba(255,255,255,0) 70%)", position: "absolute", zIndex: 1 }} />
+                <img className="animate-float-img" src={avatarHands} alt="Hands" style={{ width: "180px", position: "absolute", zIndex: 2, filter: "invert(52%) sepia(87%) saturate(1832%) hue-rotate(141deg) brightness(95%) contrast(101%)", opacity: 0.6 }} />
+
+                <div className="animate-float-1" style={{ position: "absolute", top: "0%", right: "5%", background: "white", padding: "16px", borderRadius: "18px", boxShadow: "0 8px 24px rgba(59,184,176,0.15)", border: "1.5px solid rgba(59,184,176,0.2)", zIndex: 3 }}>
+                  <div style={{ color: "#7AAAB4", fontSize: "11px", fontFamily: "Space Mono", marginBottom: "8px", letterSpacing: "1px" }}>JOINT ACCURACY</div>
+                  <div style={{ display: "flex", alignItems: "baseline", gap: "2px", marginBottom: "6px" }}>
+                    <span style={{ color: "#3ED8C8", fontSize: "30px", fontFamily: "Space Mono", fontWeight: "700" }}>97</span><span style={{ color: "#7AAAB4", fontSize: "14px", fontFamily: "Space Mono" }}>%</span>
+                  </div>
+                  <div style={{ display: "flex", gap: "4px" }}>{[0.5, 0.6, 0.7, 0.8, 1].map((o, i) => <div key={i} style={{ width: "14px", height: "8px", background: "#3ED8C8", borderRadius: "2px", opacity: o }} />)}</div>
+                </div>
+
+                <div className="animate-float-2" style={{ position: "absolute", top: "40%", left: "0%", background: "white", padding: "16px", borderRadius: "18px", boxShadow: "0 8px 24px rgba(200,112,74,0.12)", border: "1.5px solid rgba(200,112,74,0.2)", zIndex: 3 }}>
+                  <div style={{ color: "#7AAAB4", fontSize: "11px", fontFamily: "Space Mono", marginBottom: "8px", letterSpacing: "1px" }}>PAIN LEVEL</div>
+                  <div style={{ display: "flex", alignItems: "baseline", gap: "2px", marginBottom: "4px" }}><span style={{ color: "#0099A6", fontSize: "30px", fontFamily: "Space Mono", fontWeight: "700" }}>{currentPain}</span><span style={{ color: "#7AAAB4", fontSize: "14px", fontFamily: "Space Mono" }}>/10</span></div>
+                  <div style={{ color: painImprovement > 0 ? "#4BA882" : painImprovement < 0 ? "#C0574C" : "#7AAAB4", fontSize: "13px", fontWeight: "600" }}>{painImprovement > 0 ? '↓' : painImprovement < 0 ? '↑' : '='} from {startPain}</div>
+                </div>
+
+                <div className="animate-float-3" style={{ position: "absolute", bottom: "10%", right: "5%", background: "white", padding: "16px", borderRadius: "18px", boxShadow: "0 8px 24px rgba(75,168,130,0.1)", border: "1.5px solid rgba(75,168,130,0.2)", zIndex: 3 }}>
+                  <div style={{ color: "#7AAAB4", fontSize: "11px", fontFamily: "Space Mono", marginBottom: "8px", letterSpacing: "1px" }}>RECOVERY</div>
+                  <div style={{ color: "#4BA882", fontSize: "24px", fontFamily: "Space Mono", fontWeight: "700", marginBottom: "4px" }}>Week {Math.ceil(completedExercises / 3) || 1}</div>
+                  <div style={{ color: "#7AAAB4", fontSize: "13px" }}>{completedExercises} sessions done</div>
+                </div>
               </div>
 
               <div style={{ marginTop: "auto", background: "white", padding: "20px", borderRadius: "18px", border: "1.5px solid #C4E8EC", boxShadow: "0 4px 12px rgba(0,0,0,0.04)" }}>
                 <div style={{ color: "#7AAAB4", fontSize: "12px", fontFamily: "Space Mono", letterSpacing: "1px", marginBottom: "8px", textTransform: "uppercase" }}>NEXT REVIEW</div>
                 <div style={{ color: "#0C2830", fontSize: "16px", fontWeight: "700", marginBottom: "4px" }}>July 15, 2026</div>
-                <div style={{ color: "#7AAAB4", fontSize: "13px" }}>Dr. Sarah K. — Occupational Therapy</div>
+                <div style={{ color: "#7AAAB4", fontSize: "13px" }}>
+                  {schedule?.gamification?.doctor_name 
+                    ? (schedule.gamification.doctor_name.toLowerCase().startsWith('dr.') || schedule.gamification.doctor_name.toLowerCase().startsWith('dr '))
+                      ? schedule.gamification.doctor_name
+                      : `Dr. ${schedule.gamification.doctor_name}`
+                    : "Belum ada dokter"}
+                </div>
               </div>
             </div>
           </div>
@@ -783,8 +805,8 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
                         return (
                           <div key={i} onMouseEnter={() => setActiveBarIndex(i)} onMouseLeave={() => setActiveBarIndex(null)} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px", width: "42px", cursor: "pointer", height: "100%", justifyContent: "flex-end" }}>
                             <div style={{ position: "relative", width: "100%", height: `${bar.val}%`, display: "flex", justifyContent: "center" }}>
-                               <span style={{ position: "absolute", top: "-22px", fontSize: "11px", fontFamily: "Space Mono", fontWeight: "700", color: bar.color, opacity: isSelected ? 1 : 0, transition: "opacity 0.2s", whiteSpace: "nowrap" }}>{bar.val}%</span>
-                               <div style={{ width: "100%", height: "100%", background: bar.color, borderRadius: "6px 6px 0 0", opacity: isSelected ? 1 : 0.85, transform: isSelected ? "scaleY(1.02)" : "scaleY(1)", transformOrigin: "bottom", transition: "all 0.2s ease" }} />
+                              <span style={{ position: "absolute", top: "-22px", fontSize: "11px", fontFamily: "Space Mono", fontWeight: "700", color: bar.color, opacity: isSelected ? 1 : 0, transition: "opacity 0.2s", whiteSpace: "nowrap" }}>{bar.val}%</span>
+                              <div style={{ width: "100%", height: "100%", background: bar.color, borderRadius: "6px 6px 0 0", opacity: isSelected ? 1 : 0.85, transform: isSelected ? "scaleY(1.02)" : "scaleY(1)", transformOrigin: "bottom", transition: "all 0.2s ease" }} />
                             </div>
                             <div style={{ color: isSelected ? "#0C2830" : "#7AAAB4", fontSize: "12px", fontFamily: "Space Mono", fontWeight: isSelected ? "700" : "400", transition: "all 0.2s" }}>{bar.label}</div>
                           </div>
@@ -801,7 +823,7 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
         {/* --- MY PLAN ACTIVE --- */}
         {activeMenu === "My Plan" && (
           <div className="main-content" style={{ display: "flex", flex: 1, gap: "24px", height: "calc(100vh - 48px)" }}>
-            
+
             <div className="hide-scroll" style={{ flex: "1 1 550px", display: "flex", flexDirection: "column", gap: "24px", overflowY: "auto", paddingRight: "10px", paddingBottom: "100px", minWidth: 0 }} onWheel={(e) => { if (mainContentRef.current) mainContentRef.current.scrollTop += e.deltaY; }} ref={mainContentRef}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexShrink: 0 }}>
                 <div>
@@ -852,7 +874,7 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
                     <div style={{ width: "32px", height: "32px", border: "1px solid #E2E8F0", borderRadius: "8px", display: "flex", justifyContent: "center", alignItems: "center", cursor: "pointer", color: "#7AAAB4" }}>&gt;</div>
                   </div>
                 </div>
-                
+
                 <div style={{ background: "#E2E8F0", border: "1px solid #E2E8F0", borderRadius: "16px", overflow: "hidden" }}>
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", background: "white", borderBottom: "1px solid #E2E8F0" }}>
                     {daysOfWeek.map((day, i) => (
@@ -868,12 +890,12 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
                       const isUpcoming = day.status === "upcoming";
                       const isSelected = selectedPlanDate === day.date && day.isCurrentMonth;
                       let pillContent = null;
-                      if (isCompleted) { 
-                        pillContent = <div style={{ background: "rgba(75, 168, 130, 0.15)", color: "#4BA882", padding: "4px 6px", borderRadius: "6px", fontSize: "10px", fontFamily: "Space Grotesk", fontWeight: "700", display: "flex", alignItems: "center", gap: "4px", width: "100%", boxSizing: "border-box" }}><span>✓</span> Completed</div>; 
-                      } else if (isToday) { 
-                        pillContent = <div style={{ background: "#C8704A", color: "white", padding: "4px 6px", borderRadius: "6px", fontSize: "10px", fontFamily: "Space Grotesk", fontWeight: "700", display: "flex", alignItems: "center", gap: "4px", width: "100%", boxSizing: "border-box" }}><span>⭐</span> Today</div>; 
-                      } else if (isUpcoming) { 
-                        pillContent = <div style={{ background: "rgba(0, 153, 166, 0.1)", color: "#0099A6", padding: "4px 6px", borderRadius: "6px", fontSize: "10px", fontFamily: "Space Grotesk", fontWeight: "700", display: "flex", alignItems: "center", gap: "4px", width: "100%", boxSizing: "border-box" }}><span>⏰</span> Therapy</div>; 
+                      if (isCompleted) {
+                        pillContent = <div style={{ background: "rgba(75, 168, 130, 0.15)", color: "#4BA882", padding: "4px 6px", borderRadius: "6px", fontSize: "10px", fontFamily: "Space Grotesk", fontWeight: "700", display: "flex", alignItems: "center", gap: "4px", width: "100%", boxSizing: "border-box" }}><span>✓</span> Completed</div>;
+                      } else if (isToday) {
+                        pillContent = <div style={{ background: "#C8704A", color: "white", padding: "4px 6px", borderRadius: "6px", fontSize: "10px", fontFamily: "Space Grotesk", fontWeight: "700", display: "flex", alignItems: "center", gap: "4px", width: "100%", boxSizing: "border-box" }}><span>⭐</span> Today</div>;
+                      } else if (isUpcoming) {
+                        pillContent = <div style={{ background: "rgba(0, 153, 166, 0.1)", color: "#0099A6", padding: "4px 6px", borderRadius: "6px", fontSize: "10px", fontFamily: "Space Grotesk", fontWeight: "700", display: "flex", alignItems: "center", gap: "4px", width: "100%", boxSizing: "border-box" }}><span>⏰</span> Therapy</div>;
                       }
 
                       return (
@@ -887,7 +909,7 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
                 </div>
               </div>
             </div>
-            
+
             <FunctionalRightPanel navigate={navigate} selectedPlanData={selectedPlanData} selectedPlanDate={selectedPlanDate} />
           </div>
         )}
@@ -899,11 +921,11 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
             <InteractivePracticeHub />
           </div>
         )}
-{/* --- GAME HISTORY ACTIVE --- */}
+        {/* --- GAME HISTORY ACTIVE --- */}
         {activeMenu === "Game History" && (
           <div className="main-content" style={{ display: "flex", flex: 1, gap: "24px", height: "calc(100vh - 48px)" }}>
             <div className="hide-scroll" style={{ flex: 1, display: "flex", flexDirection: "column", gap: "24px", overflowY: "auto", paddingRight: "10px", paddingBottom: "100px", minWidth: 0 }}>
-              
+
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0 }}>
                 <div>
                   <div style={{ color: "#1A2332", fontSize: "32px", fontFamily: "Space Grotesk", fontWeight: "700", marginBottom: "2px" }}>
@@ -921,9 +943,9 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
                   <div style={{ padding: "40px", color: "#7AAAB4", fontSize: "15px", fontFamily: "Space Mono", textAlign: "center" }}>No game records yet. Go play some minigames!</div>
                 ) : (
                   minigameHistory.map((game) => (
-                    <div 
-                      key={game.id} 
-                      onClick={() => setSelectedMinigame(game)} 
+                    <div
+                      key={game.id}
+                      onClick={() => setSelectedMinigame(game)}
                       style={{ background: "white", borderRadius: "20px", border: "1.5px solid #C4E8EC", padding: "20px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer", boxShadow: "0 2px 10px rgba(0,0,0,0.02)", transition: "transform 0.15s ease", flexShrink: 0 }}
                       onMouseEnter={(e) => e.currentTarget.style.transform = "translateY(-2px)"}
                       onMouseLeave={(e) => e.currentTarget.style.transform = "translateY(0)"}
@@ -937,7 +959,7 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
                           <div style={{ color: "#7AAAB4", fontSize: "14px", fontFamily: "Space Mono" }}>Played on {game.date}</div>
                         </div>
                       </div>
-                      
+
                       <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
                         <div style={{ textAlign: "right" }}>
                           <div style={{ color: "#7AAAB4", fontSize: "12px", fontFamily: "Space Mono", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "4px" }}>Score</div>
@@ -955,9 +977,9 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
         {/* --- SETTINGS ACTIVE (SUDAH DIPERBAIKI 100% ANTI CRASH) --- */}
         {activeMenu === "Settings" && (
           <div className="main-content" style={{ display: "flex", flex: 1, gap: "24px", height: "calc(100vh - 48px)" }}>
-            
+
             <div className="hide-scroll" style={{ flex: 1, display: "flex", flexDirection: "column", gap: "20px", overflowY: "auto", paddingRight: "10px", paddingBottom: "100px", minWidth: 0 }} onWheel={(e) => { if (mainContentRef.current) mainContentRef.current.scrollTop += e.deltaY; }} ref={mainContentRef}>
-              
+
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0 }}>
                 <div>
                   <div style={{ color: "#1A2332", fontSize: "32px", fontFamily: "Space Grotesk", fontWeight: "700", marginBottom: "2px" }}>
@@ -971,60 +993,60 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
               </div>
 
               <div style={{ display: "flex", gap: "20px", alignItems: "flex-start", flexShrink: 0, flexWrap: "wrap" }}>
-                
+
                 {/* SETTINGS CARD 1: YOUR PROFILE */}
                 <div style={{ flex: "1 1 500px", display: "flex", flexDirection: "column", gap: "20px" }}>
                   <div style={{ background: "white", borderRadius: "18px", border: "1px solid #E2E8F0", overflow: "visible", boxShadow: "0 2px 8px rgba(0,0,0,0.02)" }}>
-                    
+
                     <div style={{ padding: "18px 24px", borderBottom: "1px solid #E2E8F0" }}>
                       <div style={{ color: "#0C2830", fontSize: "16px", fontFamily: "Space Grotesk", fontWeight: "700" }}>
                         Your profile
                       </div>
                     </div>
-                    
+
                     <div style={{ padding: "24px", display: "flex", flexDirection: "column", gap: "16px" }}>
-                      
+
                       <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
                         <label style={{ color: "#7AAAB4", fontSize: "13px", fontFamily: "Space Mono", textTransform: "uppercase", letterSpacing: "1px" }}>
                           Full name
                         </label>
-                        <input 
-                          type="text" 
-                          value={fullName} 
-                          onChange={(e) => setFullName(e.target.value)} 
-                          style={{ padding: "12px 18px", border: "1.5px solid #C4E8EC", borderRadius: "10px", fontSize: "16px", fontFamily: "Space Grotesk", color: "#0C2830", outline: "none", width: "100%", boxSizing: "border-box" }} 
+                        <input
+                          type="text"
+                          value={fullName}
+                          onChange={(e) => setFullName(e.target.value)}
+                          style={{ padding: "12px 18px", border: "1.5px solid #C4E8EC", borderRadius: "10px", fontSize: "16px", fontFamily: "Space Grotesk", color: "#0C2830", outline: "none", width: "100%", boxSizing: "border-box" }}
                         />
                       </div>
-                      
+
                       <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
                         <label style={{ color: "#7AAAB4", fontSize: "13px", fontFamily: "Space Mono", textTransform: "uppercase", letterSpacing: "1px" }}>
                           Email address
                         </label>
-                        <input 
-                          type="email" 
-                          value={email} 
-                          onChange={(e) => setEmail(e.target.value)} 
-                          style={{ padding: "12px 18px", border: "1.5px solid #C4E8EC", borderRadius: "10px", fontSize: "16px", fontFamily: "Space Grotesk", color: "#0C2830", outline: "none", width: "100%", boxSizing: "border-box" }} 
+                        <input
+                          type="email"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          style={{ padding: "12px 18px", border: "1.5px solid #C4E8EC", borderRadius: "10px", fontSize: "16px", fontFamily: "Space Grotesk", color: "#0C2830", outline: "none", width: "100%", boxSizing: "border-box" }}
                         />
                       </div>
-                      
+
                       <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
                         <label style={{ color: "#7AAAB4", fontSize: "13px", fontFamily: "Space Mono", textTransform: "uppercase", letterSpacing: "1px" }}>
                           Change password
                         </label>
-                        <input 
-                          type="password" 
-                          value={password} 
-                          onChange={(e) => setPassword(e.target.value)} 
-                          placeholder="Enter new password" 
-                          style={{ padding: "12px 18px", border: "1.5px solid #C4E8EC", borderRadius: "10px", fontSize: "16px", fontFamily: "Space Grotesk", color: "#0C2830", outline: "none", width: "100%", boxSizing: "border-box" }} 
+                        <input
+                          type="password"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          placeholder="Enter new password"
+                          style={{ padding: "12px 18px", border: "1.5px solid #C4E8EC", borderRadius: "10px", fontSize: "16px", fontFamily: "Space Grotesk", color: "#0C2830", outline: "none", width: "100%", boxSizing: "border-box" }}
                         />
                       </div>
-                      
+
                       <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "8px" }}>
-                        <button 
-                          onClick={handleSaveChanges} 
-                          disabled={!hasChanges} 
+                        <button
+                          onClick={handleSaveChanges}
+                          disabled={!hasChanges}
                           style={{ padding: "10px 20px", background: hasChanges ? "#0099A6" : "#C4E8EC", color: "white", border: "none", borderRadius: "10px", fontSize: "15px", fontFamily: "Space Grotesk", fontWeight: "600", cursor: hasChanges ? "pointer" : "not-allowed", transition: "background 0.3s" }}
                         >
                           Save changes
@@ -1038,15 +1060,15 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
                 {/* SETTINGS CARD 2: ACCOUNT ROLE */}
                 <div style={{ flex: "1 1 300px", display: "flex", flexDirection: "column", gap: "20px" }}>
                   <div style={{ background: "white", borderRadius: "18px", border: "1px solid #E2E8F0", overflow: "hidden", boxShadow: "0 2px 8px rgba(0,0,0,0.02)" }}>
-                    
+
                     <div style={{ padding: "18px 24px", borderBottom: "1px solid #E2E8F0" }}>
                       <div style={{ color: "#0C2830", fontSize: "16px", fontFamily: "Space Grotesk", fontWeight: "700" }}>
                         Account
                       </div>
                     </div>
-                    
+
                     <div style={{ padding: "24px", display: "flex", flexDirection: "column", gap: "20px" }}>
-                      
+
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #F0FAFB", paddingBottom: "14px" }}>
                         <div>
                           <div style={{ color: "#0C2830", fontSize: "15px", fontFamily: "Space Grotesk", fontWeight: "600", marginBottom: "2px" }}>
@@ -1057,7 +1079,7 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
                           </div>
                         </div>
                       </div>
-                      
+
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                         <div>
                           <div style={{ color: "#0C2830", fontSize: "15px", fontFamily: "Space Grotesk", fontWeight: "600", marginBottom: "2px" }}>
@@ -1068,11 +1090,11 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
                           </div>
                         </div>
                       </div>
-                      
-                      <button 
-                        onClick={handleLogout} 
-                        style={{ width: "100%", padding: "12px", background: "#FFE9E9", border: "1.5px solid #FFCECE", borderRadius: "100px", color: "#C0574C", fontSize: "15px", fontFamily: "Space Grotesk", fontWeight: "600", cursor: "pointer", transition: "background 0.2s" }} 
-                        onMouseEnter={(e) => e.target.style.background = "#FFD6D6"} 
+
+                      <button
+                        onClick={handleLogout}
+                        style={{ width: "100%", padding: "12px", background: "#FFE9E9", border: "1.5px solid #FFCECE", borderRadius: "100px", color: "#C0574C", fontSize: "15px", fontFamily: "Space Grotesk", fontWeight: "600", cursor: "pointer", transition: "background 0.2s" }}
+                        onMouseEnter={(e) => e.target.style.background = "#FFD6D6"}
                         onMouseLeave={(e) => e.target.style.background = "#FFE9E9"}
                       >
                         Sign out of VISENSA
@@ -1088,10 +1110,10 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
         {selectedMinigame && (
           <div style={{ position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh", background: "rgba(12, 40, 48, 0.6)", backdropFilter: "blur(4px)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 9999 }}>
             <div style={{ background: "white", width: "420px", borderRadius: "24px", padding: "32px", boxShadow: "0 20px 40px rgba(0,0,0,0.2)", position: "relative" }}>
-              
+
               {/* Tombol Close */}
-              <div 
-                onClick={() => setSelectedMinigame(null)} 
+              <div
+                onClick={() => setSelectedMinigame(null)}
                 style={{ position: "absolute", top: "24px", right: "24px", width: "32px", height: "32px", background: "#F4F7F9", borderRadius: "50%", display: "flex", justifyContent: "center", alignItems: "center", cursor: "pointer", color: "#7AAAB4" }}
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>

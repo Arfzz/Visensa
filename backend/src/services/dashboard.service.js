@@ -7,7 +7,7 @@ const { supabase } = require('../config/supabase');
  * Schema used:
  *   doctor            — id, user_id, name
  *   patient           — id, user_id, doctor_id, name, condition, notes
- *   patient_schedules — id, patient_id, exercise_id, is_active, interval_days
+ *   patient_programs — id, patient_id, exercise_id, is_active, interval_days
  *   exercise_logs     — id, schedule_id, duration_seconds, max_angle, pain_level, created_at
  *   minigame_logs     — id, patient_id, score, duration_seconds, max_combo, played_at
  *   gamification_stats— patient_id, completed_exercises, total_scheduled_exercises,
@@ -51,7 +51,7 @@ const dashboardService = {
     if (doctorPatientIds.length > 0) {
       // Get all schedules for these patients
       const { data: activeSchedules } = await supabase
-        .from('patient_schedules')
+        .from('patient_programs')
         .select('id, patient_id')
         .in('patient_id', doctorPatientIds);
 
@@ -94,7 +94,7 @@ const dashboardService = {
 
     if (doctorPatientIds.length > 0) {
       const { data: monthSchedules } = await supabase
-        .from('patient_schedules')
+        .from('patient_programs')
         .select('id')
         .in('patient_id', doctorPatientIds);
 
@@ -125,7 +125,7 @@ const dashboardService = {
     let recentExerciseLogs = [];
     if (doctorPatientIds.length > 0) {
       const { data: schedules } = await supabase
-        .from('patient_schedules')
+        .from('patient_programs')
         .select('id, patient_id, patient:patient_id(id, name)')
         .in('patient_id', doctorPatientIds);
 
@@ -197,8 +197,8 @@ const dashboardService = {
 
     // Schedules for this patient (to join exercise_logs)
     const { data: schedules } = await supabase
-      .from('patient_schedules')
-      .select('id, exercise_id, interval_days, is_active, next_reminder_at')
+      .from('patient_programs')
+      .select('id, status, start_date, end_date')
       .eq('patient_id', patientId);
 
     const scheduleIds = (schedules ?? []).map((s) => s.id);

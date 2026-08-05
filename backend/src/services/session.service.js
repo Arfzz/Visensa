@@ -5,9 +5,9 @@ const { supabase } = require('../config/supabase');
  * SessionService — Business logic for exercise & minigame sessions.
  *
  * Schema:
- *   patient_schedules: id, created_at, patient_id, interval_days, next_reminder_at,
+ *   patient_programs: id, created_at, patient_id, interval_days, next_reminder_at,
  *                      is_active, target_sessions, completed_sessions, status
- *   exercise_logs:     id, schedule_id (→ patient_schedules), duration_seconds,
+ *   exercise_logs:     id, program_id (→ patient_programs), duration_seconds,
  *                      session_number, pain_level, created_at
  *   minigame_logs:     id, patient_id (→ patient), minigame_id (→ minigame),
  *                      score, duration_seconds, max_combo, played_at
@@ -25,19 +25,19 @@ const sessionService = {
    * Log a completed exercise session.
    * Requires an active patient_schedule.
    *
-   * @param {string} scheduleId    — patient_schedules.id (uuid)
+   * @param {string} scheduleId    — patient_programs.id (uuid)
    * @param {object} data          — { durationSeconds, sessionNumber, painLevel }
    */
   async logExercise(scheduleId, data) {
-    // Validate schedule exists
+    // Validate program exists
     const { data: schedule, error: sErr } = await supabase
-      .from('patient_schedules')
-      .select('id, patient_id, is_active')
+      .from('patient_programs')
+      .select('id, patient_id, status')
       .eq('id', scheduleId)
       .single();
 
     if (sErr || !schedule) throw new AppError('Jadwal latihan tidak ditemukan.', 404);
-    if (!schedule.is_active) throw new AppError('Jadwal latihan sudah tidak aktif.', 400);
+    if (schedule.status !== 'active') throw new AppError('Jadwal latihan sudah tidak aktif.', 400);
 
     // Insert exercise log
     const { data: log, error } = await supabase
@@ -69,24 +69,43 @@ const sessionService = {
    * @param {object} data        — { durationSeconds, painLevel, sessionNumber? }
    */
   async logExerciseDirect(patientId, data) {
-    // 1. Always create a new schedule to bypass the accidental UNIQUE constraint on schedule_id in exercise_logs
-    const { data: newSchedule, error: nsError } = await supabase
-      .from('patient_schedules')
+    // 1. Fetch patient's doctor_id to create a valid patient_programs row
+    const { data: patient } = await supabase
+      .from('patient')
+      .select('doctor_id')
+      .eq('id', patientId)
+      .single();
+
+    let doctorId = patient?.doctor_id;
+
+    // Fallback: If no doctor assigned, find any doctor to prevent not-null constraint error
+    if (!doctorId) {
+      const { data: fallbackDoctor } = await supabase.from('doctor').select('id').limit(1).single();
+      if (fallbackDoctor) {
+        doctorId = fallbackDoctor.id;
+        // Optionally update patient's doctor
+        await supabase.from('patient').update({ doctor_id: doctorId }).eq('id', patientId);
+      }
+    }
+
+    if (!doctorId) throw new AppError('Tidak ada dokter di sistem untuk di-assign ke program ini.', 400);
+
+    // 2. Always create a new program to bypass the accidental UNIQUE constraint on program_id in exercise_logs
+    const { data: newProgram, error: nsError } = await supabase
+      .from('patient_programs')
       .insert([{
         patient_id: patientId,
-        interval_days: 0,
-        is_active: false, // False so it doesn't clutter active schedules
-        target_sessions: 1,
-        completed_sessions: 1,
-        status: 'completed'
+        doctor_id: doctorId,
+        status: 'completed', // Replaces is_active: false
+        start_date: new Date().toISOString()
       }])
       .select('id')
       .single();
 
     if (nsError) throw new AppError('Gagal membuat jadwal latihan: ' + nsError.message, 500);
-    const schedule = newSchedule;
+    const schedule = newProgram;
 
-    // 2. Derive running session number for this schedule
+    // 3. Derive running session number for this program
     const { count: totalLogs } = await supabase
       .from('exercise_logs')
       .select('id', { count: 'exact', head: true })
@@ -94,7 +113,7 @@ const sessionService = {
 
     const sessionNumber = (totalLogs ?? 0) + 1;
 
-    // 3. Insert the log
+    // 4. Insert the log
     const { data: log, error } = await supabase
       .from('exercise_logs')
       .insert([{
@@ -117,7 +136,7 @@ const sessionService = {
   },
 
   /**
-   * Get exercise history for the logged-in patient (via patient_schedules join).
+   * Get exercise history for the logged-in patient (via patient_programs join).
    *
    * @param {string} patientId  — patient.id (table PK, NOT user_id)
    */
@@ -125,14 +144,20 @@ const sessionService = {
     const from = (page - 1) * limit;
     const to   = from + limit - 1;
 
-    // exercise_logs → patient_schedules → filter by patient_id
+    // Step 1: Get all program IDs for this patient
+    const { data: programs } = await supabase
+      .from('patient_programs')
+      .select('id')
+      .eq('patient_id', patientId);
+
+    const programIds = (programs ?? []).map(p => p.id);
+    if (programIds.length === 0) return { data: [], total: 0 };
+
+    // Step 2: Get exercise logs for those programs
     const { data, error, count } = await supabase
       .from('exercise_logs')
-      .select(
-        'id, duration_seconds, session_number, pain_level, created_at, schedule:schedule_id!inner(id, patient_id)',
-        { count: 'exact' }
-      )
-      .eq('schedule.patient_id', patientId)
+      .select('id, duration_seconds, session_number, pain_level, created_at, schedule_id', { count: 'exact' })
+      .in('schedule_id', programIds)
       .order('created_at', { ascending: false })
       .range(from, to);
 
@@ -147,17 +172,24 @@ const sessionService = {
     const from = (page - 1) * limit;
     const to   = from + limit - 1;
 
+    let programIds = null;
+    if (patientId) {
+      const { data: programs } = await supabase
+        .from('patient_programs')
+        .select('id')
+        .eq('patient_id', patientId);
+      programIds = (programs ?? []).map(p => p.id);
+      if (programIds.length === 0) return { data: [], total: 0 };
+    }
+
     let query = supabase
       .from('exercise_logs')
-      .select(
-        'id, duration_seconds, session_number, pain_level, created_at, schedule:schedule_id!inner(id, patient_id, patient:patient_id(id, name))',
-        { count: 'exact' }
-      )
+      .select('id, duration_seconds, session_number, pain_level, created_at, schedule_id', { count: 'exact' })
       .order('created_at', { ascending: false })
       .range(from, to);
 
-    if (patientId) {
-      query = query.eq('schedule.patient_id', patientId);
+    if (programIds) {
+      query = query.in('schedule_id', programIds);
     }
 
     const { data, error, count } = await query;
@@ -171,7 +203,7 @@ const sessionService = {
   async getExerciseLogById(logId) {
     const { data, error } = await supabase
       .from('exercise_logs')
-      .select('id, duration_seconds, session_number, pain_level, created_at, schedule:schedule_id(id, patient_id)')
+      .select('id, duration_seconds, session_number, pain_level, created_at, schedule_id')
       .eq('id', logId)
       .single();
 
@@ -240,39 +272,134 @@ const sessionService = {
    * @param {string} patientId — patient.id (table PK)
    */
   async getPatientStats(patientId) {
-    // Aggregated stats from gamification_stats table
+    // 1. Get gamification stats (for total score, etc)
     const { data: stats } = await supabase
       .from('gamification_stats')
-      .select('total_scheduled_exercises, completed_exercises, total_minigame_score, current_streak, highest_streak, updated_at')
+      .select('total_scheduled_exercises, completed_exercises, total_minigame_score')
       .eq('patient_id', patientId)
-      .single();
+      .maybeSingle();
 
-    // Last 7 minigame sessions for score trend
-    const { data: trend } = await supabase
+    // 2. Fetch doctor name
+    const { data: patientData } = await supabase
+      .from('patient')
+      .select('doctor:doctor_id(name)')
+      .eq('id', patientId)
+      .maybeSingle();
+    const doctorName = patientData?.doctor?.name || null;
+
+    // 3. Compute Streak dynamically from minigame_logs and exercise_logs
+    const { data: minigames } = await supabase
       .from('minigame_logs')
-      .select('score, max_combo, duration_seconds, played_at')
+      .select('played_at, score, max_combo, duration_seconds')
       .eq('patient_id', patientId)
-      .order('played_at', { ascending: false })
-      .limit(7);
+      .order('played_at', { ascending: false });
 
-    // Last 7 exercise logs for exercise trend (via patient_schedules)
-    const { data: exerciseTrend } = await supabase
-      .from('exercise_logs')
-      .select('duration_seconds, max_angle, pain_level, created_at, schedule:schedule_id(patient_id)')
-      .eq('schedule.patient_id', patientId)
-      .order('created_at', { ascending: false })
-      .limit(7);
+    // Last 7 minigame sessions for score trend (from the fetched minigames)
+    const trend = (minigames || []).slice(0, 7);
+
+    // Get exercise logs
+    const { data: programs } = await supabase
+      .from('patient_programs')
+      .select('id')
+      .eq('patient_id', patientId);
+    
+    let allExerciseLogs = [];
+    if (programs && programs.length > 0) {
+      const pIds = programs.map(p => p.id);
+      const { data: logs } = await supabase
+        .from('exercise_logs')
+        .select('created_at, duration_seconds, pain_level')
+        .in('schedule_id', pIds)
+        .order('created_at', { ascending: false });
+      allExerciseLogs = logs || [];
+    }
+
+    const exerciseTrend = allExerciseLogs.slice(0, 7).reverse();
+
+    // Compute Streak Logic
+    const allDates = new Set();
+    // Include minigames with duration >= 60s
+    (minigames || []).filter(m => m.duration_seconds >= 60 && m.played_at).forEach(m => allDates.add(m.played_at.split('T')[0]));
+    // Include exercises with duration >= 60s
+    (allExerciseLogs || []).filter(e => e.duration_seconds >= 60 && e.created_at).forEach(e => allDates.add(e.created_at.split('T')[0]));
+
+    const sortedDates = Array.from(allDates).sort();
+
+    let currentStreak = 0;
+    let highestStreak = 0;
+    let freezeAvailable = true;
+    let lastFreezeUseDate = null;
+    let lastDate = null;
+
+    for (const dStr of sortedDates) {
+      const dateObj = new Date(dStr + 'T00:00:00'); // local midnight assumption
+
+      if (!lastDate) {
+        currentStreak = 1;
+        highestStreak = 1;
+        lastDate = dateObj;
+        continue;
+      }
+
+      // Check if freeze shield is reset (7 days since last use)
+      if (!freezeAvailable && lastFreezeUseDate) {
+        const daysSinceFreeze = Math.floor((dateObj - lastFreezeUseDate) / (1000 * 60 * 60 * 24));
+        if (daysSinceFreeze >= 7) {
+          freezeAvailable = true;
+          lastFreezeUseDate = null;
+        }
+      }
+
+      const diffDays = Math.round((dateObj - lastDate) / (1000 * 60 * 60 * 24));
+      
+      if (diffDays === 1) {
+        currentStreak++;
+        lastDate = dateObj;
+      } else if (diffDays === 2 && freezeAvailable) {
+        // use freeze shield for the skipped day
+        freezeAvailable = false;
+        lastFreezeUseDate = new Date(lastDate.getTime() + 86400000); // the day that was skipped
+        currentStreak++;
+        lastDate = dateObj;
+      } else if (diffDays > 1) {
+        currentStreak = 1;
+        lastDate = dateObj;
+      }
+
+      if (currentStreak > highestStreak) highestStreak = currentStreak;
+    }
+
+    // Check if streak is broken as of today
+    if (lastDate) {
+      // We use current server date, midnight
+      const today = new Date();
+      today.setHours(0,0,0,0);
+      const last = new Date(lastDate);
+      last.setHours(0,0,0,0);
+
+      const diffDays = Math.round((today - last) / (1000 * 60 * 60 * 24));
+
+      if (diffDays === 2 && freezeAvailable) {
+        // active but in danger (needs a session today to use freeze shield)
+        // streak continues, but we don't reset it
+      } else if (diffDays > 1) {
+        currentStreak = 0;
+      }
+    }
 
     return {
-      gamification: stats ?? {
-        total_scheduled_exercises: 0,
-        completed_exercises: 0,
-        total_minigame_score: 0,
-        current_streak: 0,
-        highest_streak: 0,
+      gamification: {
+        total_scheduled_exercises: stats?.total_scheduled_exercises || 0,
+        completed_exercises: stats?.completed_exercises || allExerciseLogs.length,
+        total_minigame_score: stats?.total_minigame_score || 0,
+        current_streak: currentStreak,
+        highest_streak: highestStreak,
+        doctor_name: doctorName,
+        freeze_available: freezeAvailable ? 1 : 0,
+        last_completed_date: lastDate ? lastDate.toISOString().split('T')[0] : null
       },
-      minigameTrend:  (trend ?? []).reverse(),
-      exerciseTrend:  (exerciseTrend ?? []).reverse(),
+      minigameTrend: trend.reverse(),
+      exerciseTrend,
     };
   },
 
