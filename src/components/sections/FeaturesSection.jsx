@@ -1,5 +1,6 @@
 import '../../styles/sections/FeaturesSection.css'
 import SpotlightCard from '../reactbits/SpotlightCard'
+import { Laptop } from 'lucide-react'
 
 export default function FeaturesSection() {
   return (
@@ -38,11 +39,7 @@ export default function FeaturesSection() {
           {/* Card 2 — Zero Hardware */}
           <SpotlightCard className="feature-card feature-card--white feature-card--top-right" spotlightColor="rgba(0, 184, 176, 0.09)">
             <div className="feature-card__icon-wrap">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                <rect x="3" y="4" width="18" height="12" rx="2" fill="#d1e0e8" stroke="#1d2d35" strokeWidth="1.5" />
-                <path d="M2 18h20" stroke="#1d2d35" strokeWidth="2" strokeLinecap="round" />
-                <circle cx="12" cy="10" r="2" fill="#1d2d35" />
-              </svg>
+              <Laptop size={24} color="#1d2d35" strokeWidth={1.5} />
             </div>
             <h3 className="feature-card__heading-sm">Zero hardware required</h3>
             <p className="feature-card__desc">
