@@ -6,6 +6,7 @@ export default function VisionTracker({ showCanvas = true, enablePose = false, n
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const requestRef = useRef(null);
+  const streamRef = useRef(null);
 
   const [landmarker, setLandmarker] = useState(null);
   const enablePoseRef = useRef(enablePose);
@@ -28,11 +29,22 @@ export default function VisionTracker({ showCanvas = true, enablePose = false, n
   useEffect(() => {
     if (!landmarker) return;
 
+    let isMounted = true; // <-- Flag penjaga
+
     const startCamera = async () => {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
           video: { width: 640, height: 480 },
         });
+
+        // Kalo komponen udah keburu mati pas nunggu izin kamera, langsung bunuh!
+        if (!isMounted) {
+          stream.getTracks().forEach((track) => track.stop());
+          return;
+        }
+
+        streamRef.current = stream; // <-- SIMPEN STREAM-NYA DI SINI
+
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
           videoRef.current.addEventListener("loadeddata", predictWebcam);
@@ -44,12 +56,20 @@ export default function VisionTracker({ showCanvas = true, enablePose = false, n
 
     startCamera();
 
-    // Matiin kamera otomatis pas pindah halaman
+    // Matiin kamera otomatis pas pindah halaman atau dicopot
     return () => {
-      if (videoRef.current && videoRef.current.srcObject) {
-        videoRef.current.srcObject.getTracks().forEach((track) => track.stop());
+      isMounted = false;
+      
+      // CEKIK KAMERA DARI STREAM-REF (Anti gagal karena gak kena null dari React)
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((track) => track.stop());
+        streamRef.current = null;
+      }
+      
+      if (videoRef.current) {
         videoRef.current.srcObject = null;
       }
+
       if (requestRef.current) {
         cancelAnimationFrame(requestRef.current);
       }

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   Activity,
   Zap,
@@ -8,12 +8,15 @@ import {
   Flame,
   Pause,
   RotateCcw,
+  Flag,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { usePianoTilesGame, FINGER_LANE_MAP } from "./usePianoTilesGame";
 import { usePianoTilesHandTrigger } from "./usePianoTilesHandTrigger";
 import { useStreakPlaytimeTracker } from "./streak/useStreakPlaytimeTracker";
 import { useStreakStore } from "./streak/useStreakStore";
 import { PianoTilesCalibrationOverlay } from "./PianoTilesCalibrationOverlay";
+import { useVisionStore } from "../../store/zustand/VisionStore";
 import "./PianoTilesGame.css";
 
 // --- DUAL-INPUT FALLBACK KEYBOARD MAPPING (BACKEND/TESTING ONLY - NO UI RENDERED) ---
@@ -40,6 +43,7 @@ export const PianoTilesGame = ({
     combo,
     maxCombo,
     stats,
+    durationSeconds,
     activeLanePress,
     feedbackPopups,
     targetY,
@@ -48,6 +52,7 @@ export const PianoTilesGame = ({
     pauseGame,
     resumeGame,
     resetGame,
+    endGame, 
     handleLaneHit,
   } = usePianoTilesGame(bgmUrl);
 
@@ -68,10 +73,12 @@ export const PianoTilesGame = ({
   const laneDomRefs = useRef([]);
   const stageRef = useRef(null);
   const stageHeightRef = useRef(480);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   // --- MEDIAPIPE FLEXION TRIGGER HOOK ---
   const { activeTriggers, fingerRatios } = usePianoTilesHandTrigger({
-    enabled: enableHandTracking && gameStatus === "playing",
+    enabled: enableHandTracking && (gameStatus === "playing" || gameStatus === "idle"),
     cooldownMs,
     flexionThreshold,
     onLaneHit: handleLaneHit,
@@ -161,11 +168,61 @@ export const PianoTilesGame = ({
     }
   }, [gameStatus, stats, onFinish]);
 
+  const handleExitAndSave = async () => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    
+    const payload = {
+      user_id: user?.id,
+      duration_seconds: durationSeconds,
+      score: score,
+      max_combo: maxCombo,
+      perfect_hits: stats.perfect,
+      good_hits: stats.hit,
+    };
+
+    try {
+      setIsSaving(true);
+      console.log("Menyimpan data ke DB...", payload);
+      
+      const response = await fetch("http://localhost:3000/api/v1/minigame/logs", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        throw new Error("Gagal nyimpen data ke DB!");
+      }
+
+      console.log("Data berhasil disimpan!");
+      setShowSuccessModal(true); 
+
+    } catch (err) {
+      console.error("Waduh error bro:", err);
+      alert("Gagal menyimpan data, tapi tetap kembali ke Dashboard.");
+      if (stopCamera) stopCamera(); 
+      navigate("/patient-dashboard", { replace: true });
+    } finally {
+      setIsSaving(false); 
+    }
+  };
+
+  const handleFinalExit = () => {
+    navigate("/patient-dashboard", { replace: true });
+  };
+
   const targetGoalSecs = dailyTargetSeconds || 60;
   const currentSecs = todayActiveSeconds || 0;
   const warmUpProgress = Math.min(100, Math.round((currentSecs / targetGoalSecs) * 100));
   const remainingSecs = Math.max(0, targetGoalSecs - currentSecs);
 
+  const navigate = useNavigate();
+  const handleExitToDashboard = () => {
+    navigate("/patient-dashboard");
+  };
   return (
     <div className={`piano-cockpit-wrapper ${overlayMode ? "overlay-mode" : ""}`}>
       {/* --- COLUMN 1: LEFT PANEL (18% WIDTH) --- */}
@@ -250,25 +307,12 @@ export const PianoTilesGame = ({
             </div>
           </div>
 
-          {/* RIGHT: STREAK & ACTIONS */}
+          {/* RIGHT: STREAK (TOMBOL UDAH GUA CABUT DARI SINI) */}
           <div className="piano-header-right">
             <div className="piano-streak-pill">
               <Flame size={16} fill="#F59E0B" color="#F59E0B" />
               <span>{currentStreak} Days</span>
             </div>
-            {gameStatus === "playing" ? (
-              <button onClick={pauseGame} className="piano-action-btn">
-                <Pause size={14} />
-                <span>Pause</span>
-              </button>
-            ) : (
-              gameStatus === "paused" && (
-                <button onClick={resetGame} className="piano-action-btn piano-exit-btn">
-                  <RotateCcw size={14} />
-                  <span>Exit</span>
-                </button>
-              )
-            )}
           </div>
         </div>
 
@@ -306,7 +350,7 @@ export const PianoTilesGame = ({
             ))}
           </div>
 
-          {/* LARGE GLOWING FINGER TARGET PADS (NO KEYBOARD TEXT) */}
+          {/* LARGE GLOWING FINGER TARGET PADS */}
           <div className="piano-target-pads-grid">
             {FINGER_LANE_MAP.map((item) => {
               const isPressed = activeLanePress[item.lane] || activeTriggers[item.lane];
@@ -342,6 +386,13 @@ export const PianoTilesGame = ({
                 <button className="piano-btn-primary" onClick={resumeGame}>
                   Resume Game
                 </button>
+                <button 
+                  className="piano-btn-secondary" 
+                  style={{ backgroundColor: '#FEE2E2', color: '#EF4444', borderColor: '#FCA5A5' }} 
+                  onClick={endGame}
+                >
+                  Surrender / End Result
+                </button>
                 <button className="piano-btn-secondary" onClick={resetGame}>
                   Restart
                 </button>
@@ -355,6 +406,13 @@ export const PianoTilesGame = ({
               <div className="piano-overlay-card">
                 <h2 className="piano-overlay-title">Session Complete!</h2>
                 <div className="piano-stats-grid">
+                  
+                  {/* TAMBAHIN KARTU DURASI DI SINI */}
+                  <div className="piano-stat-card" style={{ gridColumn: 'span 2' }}>
+                    <div className="piano-stat-label">Duration</div>
+                    <div className="piano-stat-value">{durationSeconds}s</div>
+                  </div>
+
                   <div className="piano-stat-card">
                     <div className="piano-stat-label">Final Score</div>
                     <div className="piano-stat-value main">{score}</div>
@@ -372,9 +430,23 @@ export const PianoTilesGame = ({
                     <div className="piano-stat-value good">{stats.hit}</div>
                   </div>
                 </div>
-                <button className="piano-btn-primary" onClick={startGame}>
-                  Play Again
-                </button>
+                
+                <div style={{ display: 'flex', gap: '12px', width: '100%', marginTop: '16px' }}>
+                  <button 
+                    className="piano-btn-secondary" 
+                    style={{ flex: 1, backgroundColor: '#ECFDF5', color: '#059669', borderColor: '#6EE7B7', opacity: isSaving ? 0.7 : 1 }} 
+                    onClick={handleExitAndSave}
+                  >
+                    Exit & Save Result
+                  </button>
+                  <button 
+                    className="piano-btn-primary" 
+                    style={{ flex: 1 }} 
+                    onClick={startGame}
+                  >
+                    Play Again
+                  </button>
+                </div>
               </div>
             </div>
           )}
@@ -418,7 +490,93 @@ export const PianoTilesGame = ({
             </div>
           </div>
         </div>
+
+        {/* CARD 3: GAME CONTROLS (CSS INLINE UDAH DIBERSIHIN) */}
+        <div className="piano-card piano-controls-card">
+          <div className="piano-card-header">
+            <Activity size={16} color="#64748B" />
+            <span>CONTROLS</span>
+          </div>
+          
+          <div className="piano-controls-group">
+            {gameStatus === "playing" ? (
+              <>
+                <button 
+                  onClick={pauseGame} 
+                  className="piano-action-btn piano-control-btn"
+                >
+                  <Pause size={16} />
+                  <span>Pause Session</span>
+                </button>
+                <button 
+                  onClick={endGame} 
+                  className="piano-action-btn piano-control-btn surrender"
+                >
+                  <Flag size={16} />
+                  <span>Surrender</span>
+                </button>
+              </>
+            ) : gameStatus === "paused" ? (
+              <button 
+                onClick={resetGame} 
+                className="piano-action-btn piano-exit-btn piano-control-btn"
+              >
+                <RotateCcw size={16} />
+                <span>Exit Game</span>
+              </button>
+            ) : (
+              <div className="piano-controls-waiting">
+                Waiting to start...
+              </div>
+            )}
+          </div>
+        </div>
+
       </div>
+      {/* MODAL SUCCESS: MUNCUL KALO DATA BERHASIL DI-SAVE */}
+          {showSuccessModal && (
+            <div className="piano-overlay" style={{ zIndex: 100000 }}>
+              <div className="piano-overlay-card" style={{ textAlign: 'center', padding: '36px 24px', maxWidth: '360px' }}>
+                
+                {/* Ikon Checklist Hijau */}
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+                  <div style={{ 
+                    width: '64px', 
+                    height: '64px', 
+                    borderRadius: '50%', 
+                    backgroundColor: '#ECFDF5', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    border: '4px solid #D1FAE5'
+                  }}>
+                    <CheckCircle2 size={36} color="#059669" />
+                  </div>
+                </div>
+                
+                <h2 className="piano-overlay-title" style={{ marginBottom: '8px', color: '#0C2830' }}>
+                  Result Saved!
+                </h2>
+                
+                <p style={{ color: '#3A6870', fontSize: '14px', marginBottom: '28px', fontFamily: 'Space Grotesk', lineHeight: '1.5' }}>
+                  Your therapy session progress has been securely saved to your record. Great job!
+                </p>
+                
+                <button 
+                  className="piano-btn-primary" 
+                  style={{ 
+                    width: '100%', 
+                    background: 'linear-gradient(135deg, #0099A6 0%, #007580 100%)',
+                    boxShadow: '0px 4px 14px rgba(0, 153, 166, 0.25)',
+                    padding: '14px'
+                  }} 
+                  onClick={handleFinalExit}
+                >
+                  Back to Dashboard
+                </button>
+              </div>
+            </div>
+          )}
     </div>
   );
 };

@@ -62,7 +62,7 @@ export function VisensaCanvas() {
           depth: true,
           stencil: false,
         }}
-        style={{ width: "100%", height: "100%" }}
+        style={{ width: "100%", height: "100%", }}
       >
         <RenderFrameLimiter fps={30} />
         <PerspectiveCamera makeDefault position={[0, 8, 35]} fov={50} />

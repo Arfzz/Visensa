@@ -1,4 +1,5 @@
 import { useState, useCallback, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { Flame, Activity, X } from "lucide-react";
 import { useStreakStore } from "../streak/useStreakStore";
 import SevenDayTrackerCard from "./SevenDayTrackerCard";
@@ -8,6 +9,7 @@ import { PianoTilesGame } from "../PianoTilesGame";
 import StreakCelebrationModal from "../streak/StreakCelebrationModal";
 
 export const InteractivePracticeHub = () => {
+  const navigate = useNavigate()
   // --- STORE DATA & ACTIONS ---
   const currentStreak = useStreakStore((state) => state.currentStreak);
   const todayActiveSeconds = useStreakStore(
@@ -38,10 +40,11 @@ export const InteractivePracticeHub = () => {
   );
 
   // --- START GAME SESSION ---
-  const handleStartGame = useCallback((gameId) => {
-    setActiveGameId(gameId);
-    setIsSessionActive(true);
-  }, []);
+  const handleStartGame = (gameId) => {
+    if (gameId === "rhythm_piano_tiles") {
+      navigate("/piano-tiles");
+    }
+  };
 
   // --- CLOSE GAME SESSION ---
   const handleCloseSession = useCallback(() => {
@@ -284,15 +287,6 @@ export const InteractivePracticeHub = () => {
               >
                 <X size={24} />
               </button>
-            </div>
-
-            {/* REAL PIANO TILES GAME ENGINE */}
-            <div style={{ width: "100%", minHeight: "660px" }}>
-              <PianoTilesGame
-                bgmUrl="/musics/fairytale.mp3"
-                enableHandTracking={true}
-                overlayMode={true}
-              />
             </div>
           </div>
         </div>
