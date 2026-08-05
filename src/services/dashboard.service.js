@@ -135,7 +135,7 @@ const dashboardService = {
       if (scheduleIds.length > 0) {
         const { data: logs } = await supabase
           .from('exercise_logs')
-          .select('id, duration_seconds, max_angle, pain_level, created_at, schedule_id')
+          .select('id, duration_seconds, session_number, pain_level, notes, created_at, schedule_id')
           .in('schedule_id', scheduleIds)
           .order('created_at', { ascending: false })
           .limit(5);
@@ -208,7 +208,7 @@ const dashboardService = {
     if (scheduleIds.length > 0) {
       const { data } = await supabase
         .from('exercise_logs')
-        .select('id, duration_seconds, max_angle, pain_level, created_at, schedule_id')
+        .select('id, duration_seconds, session_number, pain_level, notes, created_at, schedule_id')
         .in('schedule_id', scheduleIds)
         .order('created_at', { ascending: false })
         .limit(10);
