@@ -18,24 +18,87 @@ export const PatientSidebar = ({ activeMenu, onSelectMenu }) => {
     ],
     []
   );
-
   return (
-    <div
-      style={{
-        width: "300px",
-        minWidth: "300px",
-        background: "#151E2C",
-        borderRadius: "24px",
-        display: "flex",
-        flexDirection: "column",
-        padding: "35px 25px",
-        boxSizing: "border-box",
-        zIndex: 10,
-        boxShadow: "0px 13px 80px rgba(226, 236, 249, 0.25)",
-      }}
-    >
+    <>
+      <style>
+        {`
+          .patient-sidebar {
+            width: 300px;
+            min-width: 300px;
+            background: #151E2C;
+            border-radius: 24px;
+            display: flex;
+            flex-direction: column;
+            padding: 35px 25px;
+            box-sizing: border-box;
+            z-index: 10;
+            box-shadow: 0px 13px 80px rgba(226, 236, 249, 0.25);
+          }
+          @media (max-width: 1024px) {
+            .patient-sidebar {
+              width: 260px;
+              min-width: 260px;
+              padding: 30px 15px;
+            }
+          }
+          @media (max-width: 768px) {
+            .patient-sidebar {
+              position: fixed;
+              bottom: 0;
+              left: 0;
+              width: 100vw;
+              min-width: 100vw;
+              height: 70px;
+              flex-direction: row;
+              padding: 0 10px;
+              border-radius: 24px 24px 0 0;
+              justify-content: space-around;
+              align-items: center;
+              z-index: 50;
+            }
+            .sidebar-header {
+              display: none !important;
+            }
+            .sidebar-menu-list {
+              flex-direction: row !important;
+              gap: 5px !important;
+              width: 100%;
+              justify-content: space-around;
+              margin-bottom: 0 !important;
+            }
+            .menu-item-text {
+              display: none !important;
+            }
+            .menu-item-container {
+              padding: 12px !important;
+              justify-content: center !important;
+              position: relative;
+              background: transparent !important;
+              box-shadow: none !important;
+            }
+            .menu-item-container.active {
+              background: rgba(200, 241, 53, 0.2) !important;
+            }
+            .menu-badge {
+              position: absolute;
+              top: 0;
+              right: 0;
+              padding: 2px 6px !important;
+              background: rgba(245, 158, 11, 0.9) !important;
+              border: none !important;
+            }
+            .menu-badge span {
+              color: white !important;
+            }
+            .menu-badge svg {
+              display: none !important;
+            }
+          }
+        `}
+      </style>
+      <div className="patient-sidebar">
       {/* --- SIDEBAR HEADER LOGO --- */}
-      <div style={{ display: "flex", alignItems: "center", gap: "12px", paddingLeft: "15px", marginBottom: "45px" }}>
+      <div className="sidebar-header" style={{ display: "flex", alignItems: "center", gap: "12px", paddingLeft: "15px", marginBottom: "45px" }}>
         <img src={visensaLogo} alt="VISENSA" style={{ width: "24px", height: "auto" }} />
         <div style={{ color: "#F0FAFB", fontSize: "26px", fontWeight: "800", letterSpacing: "1px", fontFamily: "Space Grotesk, sans-serif" }}>
           VISENSA
@@ -43,7 +106,7 @@ export const PatientSidebar = ({ activeMenu, onSelectMenu }) => {
       </div>
 
       {/* --- MENU NAVIGATION LIST WITH ICONS --- */}
-      <div style={{ display: "flex", flexDirection: "column", gap: "12px", flex: 1 }}>
+      <div className="sidebar-menu-list" style={{ display: "flex", flexDirection: "column", gap: "12px", flex: 1 }}>
         {menuItems.map((item) => {
           const isActive = activeMenu === item.id;
           const IconComponent = item.icon;
@@ -51,6 +114,7 @@ export const PatientSidebar = ({ activeMenu, onSelectMenu }) => {
           return (
             <div
               key={item.id}
+              className={`menu-item-container ${isActive ? "active" : ""}`}
               onClick={() => onSelectMenu(item.id)}
               style={{
                 padding: "16px 20px",
@@ -73,6 +137,7 @@ export const PatientSidebar = ({ activeMenu, onSelectMenu }) => {
                   style={{ flexShrink: 0 }}
                 />
                 <div
+                  className="menu-item-text"
                   style={{
                     color: isActive ? "#1A2332" : "#7AAAB4",
                     fontSize: "16.5px",
@@ -88,6 +153,7 @@ export const PatientSidebar = ({ activeMenu, onSelectMenu }) => {
               {/* STREAK NUMERIC BADGE FOR INTERACTIVE PRACTICE */}
               {item.hasBadge && (
                 <div
+                  className="menu-badge"
                   style={{
                     display: "flex",
                     alignItems: "center",
@@ -120,20 +186,8 @@ export const PatientSidebar = ({ activeMenu, onSelectMenu }) => {
           );
         })}
       </div>
-
-      {/* --- FOOTER RECOVERY STREAK BLOCK --- */}
-      <div style={{ background: "rgba(59, 184, 176, 0.06)", border: "1.5px solid rgba(59, 184, 176, 0.16)", borderRadius: "16px", padding: "18px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "6px" }}>
-          <Flame size={18} color="#3ED8C8" fill="rgba(62, 216, 200, 0.2)" />
-          <div style={{ color: "#3ED8C8", fontSize: "15.5px", fontWeight: "700", fontFamily: "Space Grotesk, sans-serif" }}>
-            {currentStreak}-day streak
-          </div>
-        </div>
-        <div style={{ color: "#7AAAB4", fontSize: "14px", fontFamily: "Space Grotesk, sans-serif" }}>
-          Consistent recovery progress.
-        </div>
-      </div>
     </div>
+    </>
   );
 };
 
