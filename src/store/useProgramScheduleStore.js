@@ -1,6 +1,8 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
+const API_BASE = "http://localhost:3000/api/v1";
+
 // --- DATE HELPER UTILITIES ---
 export const getTodayDateString = () => {
   const now = new Date();
@@ -20,7 +22,6 @@ export const getOffsetDateString = (offsetDays, fromDateStr = null) => {
 };
 
 // --- SCHEDULE PARAMETERS HARD-CEILING VALIDATOR ---
-// Enforces: frequencyPerWeek + ((frequencyPerWeek - 1) * restIntervalDays) <= 7
 export const validateScheduleParams = (frequencyPerWeek, restIntervalDays) => {
   const freq = Math.max(1, Math.min(7, Number(frequencyPerWeek) || 1));
   const rest = Math.max(0, Math.min(6, Number(restIntervalDays) || 0));
@@ -67,10 +68,47 @@ export const useProgramScheduleStore = create(
       activeProgram: initialProgram,
       weeklySchedule: initialSchedule,
       programHistory: [initialProgram],
+      isLoadingApi: false,
 
       // --- VALIDATOR HELPER METHOD ---
       checkScheduleValidity: (frequency, restInterval) => {
         return validateScheduleParams(frequency, restInterval);
+      },
+
+      // --- ASYNC API FETCH PROGRAM FROM BACKEND ---
+      fetchProgramFromApi: async (patientId = "pat_101") => {
+        set({ isLoadingApi: true });
+        try {
+          const token = localStorage.getItem("accessToken");
+          const res = await fetch(`${API_BASE}/programs/patient/${patientId}`, {
+            headers: {
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
+          });
+          if (res.ok) {
+            const result = await res.json();
+            if (result.data) {
+              const p = result.data;
+              const formattedProg = {
+                id: p.id,
+                patientId: p.patient_id,
+                programDurationWeeks: p.weekly_schedules ? p.weekly_schedules.length : 4,
+                startDate: p.start_date,
+                endDate: p.end_date,
+                status: p.status === "active" ? "Active" : "Completed / Review Required",
+                totalCompletedSessions: p.weekly_schedules
+                  ? p.weekly_schedules.reduce((acc, curr) => acc + (curr.completed_sessions || 0), 0)
+                  : 0,
+              };
+              set({ activeProgram: formattedProg, isLoadingApi: false });
+              return formattedProg;
+            }
+          }
+        } catch (err) {
+          console.warn("Backend API sync offline, using local store:", err.message);
+        }
+        set({ isLoadingApi: false });
+        return get().activeProgram;
       },
 
       // --- EVALUATE COMPLETION STATUS ---
@@ -147,6 +185,29 @@ export const useProgramScheduleStore = create(
           programHistory: [newProgram, ...state.programHistory],
         }));
 
+        // Fire-and-forget sync to backend API
+        (async () => {
+          try {
+            const token = localStorage.getItem("accessToken");
+            await fetch(`${API_BASE}/programs`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                ...(token ? { Authorization: `Bearer ${token}` } : {}),
+              },
+              body: JSON.stringify({
+                patient_id: patientId,
+                program_duration_weeks: Number(programDurationWeeks),
+                frequency_per_week: Number(frequencyPerWeek),
+                rest_interval_days: Number(restIntervalDays),
+                start_date: startDate,
+              }),
+            });
+          } catch (err) {
+            console.warn("Backend API sync notice:", err.message);
+          }
+        })();
+
         return { success: true, program: newProgram };
       },
 
@@ -171,12 +232,33 @@ export const useProgramScheduleStore = create(
         const freq = weeklySchedule ? weeklySchedule.frequencyPerWeek : 3;
         const rest = weeklySchedule ? weeklySchedule.restIntervalDays : 1;
 
-        return get().createProgram({
+        const res = get().createProgram({
           patientId: activeProgram ? activeProgram.patientId : "pat_101",
           programDurationWeeks: additionalWeeks,
           frequencyPerWeek: freq,
           restIntervalDays: rest,
         });
+
+        // Sync extend to backend API
+        if (activeProgram?.id) {
+          (async () => {
+            try {
+              const token = localStorage.getItem("accessToken");
+              await fetch(`${API_BASE}/programs/${activeProgram.id}/extend`, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                },
+                body: JSON.stringify({ additional_weeks: additionalWeeks }),
+              });
+            } catch (err) {
+              console.warn("Backend extend sync notice:", err.message);
+            }
+          })();
+        }
+
+        return res;
       },
 
       // --- ACTION: RE-ASSIGN PROGRAM (NEW SCHEDULE CONFIG, START D+1) ---

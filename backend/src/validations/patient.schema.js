@@ -13,4 +13,12 @@ const listPatientsSchema = z.object({
   search: z.string().max(100).optional(),
 });
 
-module.exports = { updatePatientProfileSchema, listPatientsSchema };
+const registerPatientSchema = z.object({
+  name: z.string().min(2, 'Nama pasien wajib diisi'),
+  email: z.string().email('Format email tidak valid'),
+  password: z.string().min(6).optional(),
+  condition: z.string().min(2, 'Diagnosis / kondisi medis wajib diisi'),
+  notes: z.string().optional(),
+});
+
+module.exports = { updatePatientProfileSchema, listPatientsSchema, registerPatientSchema };

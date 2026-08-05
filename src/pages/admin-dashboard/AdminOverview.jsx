@@ -20,6 +20,28 @@ const getStatusColor = (status) => {
 
 const AdminOverview = ({ onSelectPatient, onAddPatient, patients = mockPatientsData }) => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [statsData, setStatsData] = useState(null);
+
+  React.useEffect(() => {
+    (async () => {
+      try {
+        const token = localStorage.getItem("accessToken");
+        const res = await fetch("http://localhost:3000/api/v1/dashboard", {
+          headers: {
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+        });
+        if (res.ok) {
+          const result = await res.json();
+          if (result.data) {
+            setStatsData(result.data.stats);
+          }
+        }
+      } catch (err) {
+        console.warn("Therapist dashboard stats sync notice:", err.message);
+      }
+    })();
+  }, []);
 
   const filteredPatients = patients.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
@@ -61,7 +83,7 @@ const AdminOverview = ({ onSelectPatient, onAddPatient, patients = mockPatientsD
             <div style={{ color: "#7AAAB4", fontSize: "14px", fontFamily: "Space Mono", fontWeight: "600", textTransform: "uppercase", letterSpacing: "1px" }}>Total Patients</div>
           </div>
           <div style={{ display: "flex", alignItems: "baseline", gap: "12px" }}>
-            <span style={{ color: "#0C2830", fontSize: "40px", fontFamily: "Space Grotesk", fontWeight: "700" }}>{patients.length}</span>
+            <span style={{ color: "#0C2830", fontSize: "40px", fontFamily: "Space Grotesk", fontWeight: "700" }}>{statsData?.totalPatients ?? patients.length}</span>
             <span style={{ color: "#4BA882", fontSize: "14px", fontWeight: "600" }}>+2 this month</span>
           </div>
         </div>
@@ -87,7 +109,7 @@ const AdminOverview = ({ onSelectPatient, onAddPatient, patients = mockPatientsD
             <div style={{ color: "#7AAAB4", fontSize: "14px", fontFamily: "Space Mono", fontWeight: "600", textTransform: "uppercase", letterSpacing: "1px" }}>Total Sessions</div>
           </div>
           <div style={{ display: "flex", alignItems: "baseline", gap: "12px" }}>
-            <span style={{ color: "#0C2830", fontSize: "40px", fontFamily: "Space Grotesk", fontWeight: "700" }}>100</span>
+            <span style={{ color: "#0C2830", fontSize: "40px", fontFamily: "Space Grotesk", fontWeight: "700" }}>{statsData?.totalExercisesThisMonth || 100}</span>
             <span style={{ color: "#4BA882", fontSize: "14px", fontWeight: "600" }}>+12 this week</span>
           </div>
         </div>

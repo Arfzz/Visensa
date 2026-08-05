@@ -243,6 +243,91 @@ const Dashboard = () => {
   const [isRegistering, setIsRegistering] = useState(false);
   const [regError, setRegError] = useState("");
 
+  const [patientFeedbackLogs, setPatientFeedbackLogs] = useState(feedbackLogs);
+  const [therapistNoteInput, setTherapistNoteInput] = useState("");
+  const [notificationsList, setNotificationsList] = useState(notificationsData);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const token = localStorage.getItem("accessToken");
+        const res = await fetch("http://localhost:3000/api/v1/notifications", {
+          headers: {
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+        });
+        if (res.ok) {
+          const result = await res.json();
+          if (result.data) {
+            setNotificationsList(result.data);
+          }
+        }
+      } catch (err) {
+        console.warn("Notifications API sync notice:", err.message);
+      }
+    })();
+
+    // Sync patients roster from database
+    (async () => {
+      try {
+        const token = localStorage.getItem("accessToken");
+        const res = await fetch("http://localhost:3000/api/v1/patients", {
+          headers: {
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+        });
+        if (res.ok) {
+          const result = await res.json();
+          if (result.data && Array.isArray(result.data) && result.data.length > 0) {
+            const formatted = result.data.map((p, idx) => ({
+              id: p.id ? p.id.substring(0, 4).toUpperCase() : `P${idx + 1}`,
+              name: p.name,
+              email: `${p.name.toLowerCase().replace(/\s+/g, '')}@email.com`,
+              week: "Wk 2",
+              condition: p.condition || "Stroke Recovery",
+              compliance: "85%",
+              sessions: 6,
+              pain: "4/10",
+              color: "#0099A6",
+            }));
+            setPatientsList(formatted);
+          }
+        }
+      } catch (err) {
+        console.warn("Patients API sync notice:", err.message);
+      }
+    })();
+  }, []);
+
+  const handleMarkAllNotificationsRead = () => {
+    setNotificationsList((prev) =>
+      prev.map((n) => ({ ...n, unread: false }))
+    );
+  };
+
+  useEffect(() => {
+    if (activePatient?.id) {
+      (async () => {
+        try {
+          const token = localStorage.getItem("accessToken");
+          const res = await fetch(`http://localhost:3000/api/v1/patients/${activePatient.id}/feedback-logs`, {
+            headers: {
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
+          });
+          if (res.ok) {
+            const result = await res.json();
+            if (result.data) {
+              setPatientFeedbackLogs(result.data);
+            }
+          }
+        } catch (err) {
+          console.warn("Feedback logs API sync notice:", err.message);
+        }
+      })();
+    }
+  }, [activePatient?.id]);
+
   const handleRegisterPatientSubmit = async (e) => {
     if (e) e.preventDefault();
     if (!regName || !regEmail || !regCondition) {
@@ -505,11 +590,27 @@ const Dashboard = () => {
     setPlanStartDate(getTomorrowDateString());
   };
 
-  const handleSavePlan = () => {
+  const handleSavePlan = async () => {
     if (activePatient?.isNew) {
       handleAssignInitialProgramAction();
     } else {
       handleReassignProgramAction();
+    }
+
+    if (activePatient?.id && therapistNoteInput) {
+      try {
+        const token = localStorage.getItem("accessToken");
+        await fetch(`http://localhost:3000/api/v1/patients/${activePatient.id}/notes`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify({ notes: therapistNoteInput }),
+        });
+      } catch (err) {
+        console.warn("Therapist note sync notice:", err.message);
+      }
     }
   };
 
@@ -694,18 +795,20 @@ const Dashboard = () => {
                   <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
                   <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
                 </svg>
-                <div
-                  style={{
-                    width: "10px",
-                    height: "10px",
-                    background: "#F97316",
-                    borderRadius: "50%",
-                    position: "absolute",
-                    top: "10px",
-                    right: "12px",
-                    border: "2px solid white",
-                  }}
-                />
+                {notificationsList.some((n) => n.unread) && (
+                  <div
+                    style={{
+                      width: "10px",
+                      height: "10px",
+                      background: "#F97316",
+                      borderRadius: "50%",
+                      position: "absolute",
+                      top: "10px",
+                      right: "12px",
+                      border: "2px solid white",
+                    }}
+                  />
+                )}
               </div>
 
               {showNotif && (
@@ -761,7 +864,7 @@ const Dashboard = () => {
                           fontWeight: "700",
                         }}
                       >
-                        3
+                        {notificationsList.filter((n) => n.unread).length}
                       </div>
                     </div>
                     <div
@@ -772,6 +875,7 @@ const Dashboard = () => {
                       }}
                     >
                       <div
+                        onClick={handleMarkAllNotificationsRead}
                         style={{
                           color: "#0099A6",
                           fontSize: "15px",
@@ -800,7 +904,7 @@ const Dashboard = () => {
                   </div>
 
                   <div style={{ maxHeight: "450px", overflowY: "auto" }}>
-                    {notificationsData.map((notif) => (
+                    {notificationsList.map((notif) => (
                       <div
                         key={notif.id}
                         style={{
@@ -1500,7 +1604,7 @@ const Dashboard = () => {
                   </div>
                 </div>
                 <div>
-                  {feedbackLogs.map((log) => (
+                  {patientFeedbackLogs.map((log) => (
                     <div
                       key={log.id}
                       style={{

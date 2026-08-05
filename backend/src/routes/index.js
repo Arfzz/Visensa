@@ -7,6 +7,8 @@ router.use('/patients',      require('./patient.routes'));
 router.use('/sessions',      require('./session.routes'));
 router.use('/dashboard',     require('./dashboard.routes'));
 router.use('/minigame',      require('./minigame.routes'));
+router.use('/programs',      require('./program.routes'));
+router.use('/notifications', require('./notification.routes'));
 
 // API info endpoint
 router.get('/', (req, res) => {
@@ -14,11 +16,13 @@ router.get('/', (req, res) => {
     success: true,
     message: 'Visensa REST API v1',
     endpoints: {
-      auth:      '/api/v1/auth',
-      patients:  '/api/v1/patients',
-      sessions:  '/api/v1/sessions',
-      dashboard: '/api/v1/dashboard',
-      minigame:  '/api/v1/minigame',
+      auth:          '/api/v1/auth',
+      patients:      '/api/v1/patients',
+      sessions:      '/api/v1/sessions',
+      dashboard:     '/api/v1/dashboard',
+      minigame:      '/api/v1/minigame',
+      programs:      '/api/v1/programs',
+      notifications: '/api/v1/notifications',
     },
     docs: '/api/v1/docs',
   });
