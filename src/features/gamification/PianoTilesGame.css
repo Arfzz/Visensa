@@ -337,6 +337,58 @@
   background-color: #FECDD3;
 }
 
+.piano-side-panel.right-panel {
+  position: relative;
+  z-index: 99998; 
+  /* Trik jitu: biarin area kosong nembus klik, tapi daleman card tetep bisa diklik */
+  pointer-events: none; 
+}
+
+.piano-side-panel.right-panel .piano-card {
+  pointer-events: auto; /* Balikin fungsi klik buat semua kartu di kanan */
+}
+
+/* Card khusus Controls */
+.piano-controls-card {
+  margin-top: auto;
+  position: relative;
+  z-index: 99999; 
+}
+
+.piano-controls-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+/* Tombol Controls */
+.piano-control-btn {
+  width: 100%;
+  justify-content: center;
+  padding: 10px;
+  position: relative;
+  z-index: 99999;
+  cursor: pointer;
+}
+
+.piano-control-btn.surrender {
+  background-color: #FEE2E2;
+  color: #EF4444;
+  border: 1px solid #FCA5A5;
+}
+
+.piano-control-btn.surrender:hover {
+  background-color: #FECACA;
+}
+
+.piano-controls-waiting {
+  text-align: center;
+  color: #94A3B8;
+  font-size: 13px;
+  padding: 10px;
+}
+
 /* 3D Canvas Arena Container */
 .piano-arena-container {
   width: 100%;

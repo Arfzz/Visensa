@@ -17,6 +17,7 @@ const supabase = createClient(supabaseUrl, supabaseKey, {
 // Factory for auth operations (Anon) - Prevents session pollution on singleton
 const createAuthClient = () => createClient(supabaseUrl, process.env.SUPABASE_ANON_KEY, {
   auth: { persistSession: false, autoRefreshToken: false },
+  realtime: { transport: WebSocket }
 });
 
 module.exports = { supabase, createAuthClient };

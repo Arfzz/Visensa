@@ -5,7 +5,6 @@ import { LeftHandWarningModal } from "../../components/LeftHandWarningModal";
 import { PianoTilesGame } from "./PianoTilesGame";
 
 export const RhythmExerciseView = () => {
-  // Standalone finger-only tracking (wrist root statically frozen in space)
   const [cooldownMs, setCooldownMs] = useState(280);
   const [flexionThreshold, setFlexionThreshold] = useState(1.45);
   const [showTuner, setShowTuner] = useState(true);
@@ -21,24 +20,32 @@ export const RhythmExerciseView = () => {
         backgroundColor: "#f8f9fa",
       }}
     >
-      {/* ── LAYER 10 (z-10): TRANSPARENT 3D HAND CANVAS & DEBUGGER OVERLAY ── */}
-      <div style={{ position: "absolute", inset: 0, zIndex: 40, pointerEvents: "none" }}>
-        {/* Hide 3D Hand Canvas during calibration/countdown; mount only when gameStatus === 'playing' */}
-        <RhythmHandCanvas visible={gameStatus === "playing"} />
-        <LeftHandWarningModal />
-
-        {/* Headless MediaPipe Vision Detector (No Camera Feed Rendered) */}
-        <div style={{ display: "none" }}>
-          <VisionTracker showCanvas={false} enablePose={false} numHands={1} />
+      {/* ── WRAPPER TANGAN & MODAL  ── */}
+      <div style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
+        
+        {/* TANGAN 3D  */}
+        <div style={{ position: "absolute", inset: 0, zIndex: 50 }}>
+          <RhythmHandCanvas visible={gameStatus === "playing"} />
         </div>
+
+        {/* MODAL WARNING */}
+        <div style={{ position: "relative", zIndex: 99999, pointerEvents: "auto" }}>
+          <LeftHandWarningModal />
+        </div>
+
+        {/* Headless Vision Tracker */}
+        {gameStatus !== "gameover" && (
+          <div style={{ display: "none" }}>
+            <VisionTracker showCanvas={false} enablePose={false} numHands={1} />
+          </div>
+        )}
       </div>
 
-      {/* ── LAYER 20 (z-20): RHYTHM PIANO TILES GAME & START OVERLAY ── */}
+      {/* ── WRAPPER GAME UI ── */}
       <div
         style={{
           position: "absolute",
           inset: 0,
-          zIndex: 20,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
