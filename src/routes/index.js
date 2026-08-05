@@ -2,10 +2,11 @@ const express = require('express');
 const router = express.Router();
 
 // Register all resource routes here
-router.use('/auth',      require('./auth.routes'));
-router.use('/patients',  require('./patient.routes'));
-router.use('/sessions',  require('./session.routes'));
-router.use('/dashboard', require('./dashboard.routes'));
+router.use('/auth',          require('./auth.routes'));
+router.use('/patients',      require('./patient.routes'));
+router.use('/sessions',      require('./session.routes'));
+router.use('/dashboard',     require('./dashboard.routes'));
+router.use('/minigame',      require('./minigame.routes'));
 
 // API info endpoint
 router.get('/', (req, res) => {
@@ -17,6 +18,7 @@ router.get('/', (req, res) => {
       patients:  '/api/v1/patients',
       sessions:  '/api/v1/sessions',
       dashboard: '/api/v1/dashboard',
+      minigame:  '/api/v1/minigame-logs',
     },
     docs: '/api/v1/docs',
   });
