@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import visensaLogo from "../../assets/visensa-logo.png";
 import avatarHands from "../../assets/avatar-hands.png";
@@ -38,110 +38,12 @@ const currentWeek = [
   { day: "Sun", date: 12, status: "rest" },
 ];
 
-const recentSessions = [
-  {
-    id: 1,
-    date: "9 Jul",
-    status: "Excellent",
-    statusColor: "#4BA882",
-    statusBg: "rgba(75, 168, 130, 0.10)",
-    isToday: true,
-    desc: "8/8 exercises · 11:42",
-    oldPain: 5,
-    newPain: 4,
-    painDiff: "↓1 pts",
-    diffColor: "#4BA882",
-  },
-  {
-    id: 2,
-    date: "8 Jul",
-    status: "Good",
-    statusColor: "#3ED8C8",
-    statusBg: "rgba(62, 216, 200, 0.10)",
-    isToday: false,
-    desc: "8/8 exercises · 12:10",
-    oldPain: 6,
-    newPain: 5,
-    painDiff: "↓1 pts",
-    diffColor: "#4BA882",
-  },
-  {
-    id: 3,
-    date: "7 Jul",
-    status: "Fair",
-    statusColor: "#D4A843",
-    statusBg: "rgba(212, 168, 67, 0.10)",
-    isToday: false,
-    desc: "7/8 exercises · 10:55",
-    oldPain: 6,
-    newPain: 5,
-    painDiff: "↓1 pts",
-    diffColor: "#4BA882",
-  },
-];
-
 const allSessionsFilters = [
   "All sessions",
   "Excellent",
   "Good",
   "Fair",
   "Poor",
-];
-const allSessionsData = [
-  {
-    id: 1,
-    day: "9",
-    month: "Jul",
-    title: "Today, 9 Jul 2026",
-    status: "Excellent",
-    statusColor: "#4BA882",
-    statusBg: "rgba(75, 168, 130, 0.10)",
-    isToday: true,
-    exercises: "8/8 exercises",
-    time: "11:42 min",
-    accuracy: "97% accuracy",
-    oldPain: 5,
-    newPain: 4,
-    painDiff: "↓1 pts",
-    diffColor: "#4BA882",
-    boxBg: "rgba(0, 153, 166, 0.08)",
-  },
-  {
-    id: 2,
-    day: "8",
-    month: "Jul",
-    title: "Yesterday, 8 Jul 2026",
-    status: "Good",
-    statusColor: "#3ED8C8",
-    statusBg: "rgba(59, 184, 176, 0.10)",
-    isToday: false,
-    exercises: "8/8 exercises",
-    time: "12:10 min",
-    accuracy: "95% accuracy",
-    oldPain: 6,
-    newPain: 5,
-    painDiff: "↓1 pts",
-    diffColor: "#4BA882",
-    boxBg: "#F0FAFB",
-  },
-  {
-    id: 3,
-    day: "7",
-    month: "Jul",
-    title: "Mon, 7 Jul 2026",
-    status: "Fair",
-    statusColor: "#D4A843",
-    statusBg: "rgba(212, 168, 67, 0.10)",
-    isToday: false,
-    exercises: "7/8 exercises",
-    time: "10:55 min",
-    accuracy: "91% accuracy",
-    oldPain: 6,
-    newPain: 5,
-    painDiff: "↓1 pts",
-    diffColor: "#4BA882",
-    boxBg: "#F0FAFB",
-  },
 ];
 
 const movementChart = [
@@ -784,6 +686,7 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
   const [selectedMinigame, setSelectedMinigame] = useState(null);
   const [minigameHistory, setMinigameHistory] = useState([]); // Awalnya kosong
   const [minigameLoading, setMinigameLoading] = useState(true);
+  const [monthlyGoal, setMonthlyGoal] = useState(0);
 
   // ── Dynamic session data ──
   const [sessionLogs, setSessionLogs] = useState([]);
@@ -791,10 +694,48 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
   const [sessionLoading, setSessionLoading] = useState(true);
 
   // ── Program & Weekly Schedule Store ──
-  const { activeProgram, weeklySchedule, setMockStatus } =
-    useProgramScheduleStore();
-  const isCompletedReview =
-    activeProgram?.status === "Completed / Review Required";
+  const { activeProgram, weeklySchedule, setMockStatus, fetchProgramFromApi } = useProgramScheduleStore();
+  const isCompletedReview = activeProgram?.status === "Completed / Review Required";
+
+  const dynamicCurrentWeek = useMemo(() => {
+    const currentDate = new Date();
+    // Bikin Senin jadi index 0, Minggu jadi 6
+    const dayOfWeek = currentDate.getDay() === 0 ? 6 : currentDate.getDay() - 1; 
+    
+    // Tarik tanggal mundur ke hari Senin minggu ini
+    const startOfWeek = new Date(currentDate);
+    startOfWeek.setDate(currentDate.getDate() - dayOfWeek);
+
+    const week = [];
+    const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+    
+    for (let i = 0; i < 7; i++) {
+      const dateObj = new Date(startOfWeek);
+      dateObj.setDate(startOfWeek.getDate() + i);
+      const isToday = dateObj.toDateString() === currentDate.toDateString();
+      
+      // Cocokin sama data sessionLogs buat nentuin status "completed"
+      const hasCompletedSession = sessionLogs.some(log => 
+        new Date(log.rawDate).toDateString() === dateObj.toDateString()
+      );
+
+      let status = "rest";
+      if (hasCompletedSession) {
+        status = "completed";
+      } else if (isToday) {
+        status = "today";
+      } else if (dateObj > currentDate) {
+        status = "upcoming";
+      }
+
+      week.push({ 
+        day: dayNames[i], 
+        date: dateObj.getDate(), 
+        status 
+      });
+    }
+    return week;
+  }, [sessionLogs]);
 
   // ── Helper: derive status label and color from pain_level ──
   const getStatusFromPain = (painLevel) => {
@@ -883,7 +824,6 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
         ? `Session #${log.session_number}`
         : "Session",
       time: `${durationMin} min`,
-      accuracy: "97% accuracy",
       oldPain: oldPain ?? "—",
       newPain: newPain ?? "—",
       painDiff,
@@ -1007,42 +947,53 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
 
   useEffect(() => {
     const fetchSessionData = async () => {
-      try {
-        const token = localStorage.getItem("accessToken");
-        const headers = { Authorization: `Bearer ${token}` };
+    try {
+      const token = localStorage.getItem("accessToken");
+      const headers = { Authorization: `Bearer ${token}` };
 
-        const logsRes = await fetch(`${API_BASE}/sessions/exercise/me`, {
-          headers,
-        });
-        if (logsRes.ok) {
-          const logsJson = await logsRes.json();
-          const data = logsJson.data ?? [];
-          setSessionLogs(data.map(formatLog));
-        }
-
-        const scheduleRes = await fetch(`${API_BASE}/sessions/stats/me`, {
-          headers,
-        });
-        if (scheduleRes.ok) {
-          const scheduleJson = await scheduleRes.json();
-          const stats = scheduleJson.data ?? null;
-          setSchedule(stats);
-
-          if (stats?.gamification) {
-            useStreakStore.setState({
-              currentStreak: stats.gamification.current_streak,
-              longestStreak: stats.gamification.highest_streak,
-              streakFreezeAvailable: stats.gamification.freeze_available,
-              lastCompletedDate: stats.gamification.last_completed_date,
-            });
-          }
-        }
-      } catch (e) {
-        console.error("Failed to fetch session data:", e);
-      } finally {
-        setSessionLoading(false);
+      // 1. Fetch riwayat log exercise
+      const logsRes = await fetch(`${API_BASE}/sessions/exercise/me`, {
+        headers,
+      });
+      if (logsRes.ok) {
+        const logsJson = await logsRes.json();
+        const data = logsJson.data ?? [];
+        setSessionLogs(data.map(formatLog));
       }
-    };
+
+      // 2. Fetch stats gamification & streak
+      const statsRes = await fetch(`${API_BASE}/sessions/stats/me`, {
+        headers,
+      });
+      if (statsRes.ok) {
+        const statsJson = await statsRes.json(); // <-- FIX: Nama variabel udah bener
+        const stats = statsJson.data ?? null;
+        setSchedule(stats);
+
+        if (stats?.gamification) {
+          useStreakStore.setState({
+            currentStreak: stats.gamification.current_streak,
+            longestStreak: stats.gamification.highest_streak,
+            streakFreezeAvailable: stats.gamification.freeze_available,
+            lastCompletedDate: stats.gamification.last_completed_date,
+          });
+        }
+      }
+
+      const goalRes = await fetch(`${API_BASE}/sessions/stats/monthly-goal`, {
+        headers,
+      });
+      if (goalRes.ok) {
+        const goalJson = await goalRes.json();
+        setMonthlyGoal(goalJson.data?.monthly_goal || 0);
+      }
+
+    } catch (e) {
+      console.error("Failed to fetch session data:", e);
+    } finally {
+      setSessionLoading(false);
+    }
+  };
 
     const fetchMinigameHistory = async () => {
       try {
@@ -1098,23 +1049,71 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
       }
     };
 
+    fetchProgramFromApi(); 
     fetchMinigameHistory();
     fetchSessionData();
   }, []);
 
   const mainContentRef = useRef(null);
-  const [user, setUser] = useState(() => {
+const [user, setUser] = useState(() => {
     try {
       const userStr = localStorage.getItem("user");
-      return userStr ? JSON.parse(userStr) : {};
+      return userStr ? JSON.parse(userStr) : null;
     } catch (e) {
-      return {};
+      return null;
     }
   });
 
   const [fullName, setFullName] = useState(user?.name || "");
   const [email, setEmail] = useState(user?.email || "");
   const [password, setPassword] = useState("");
+
+  useEffect(() => {
+    if (user) {
+      if (user.email) setEmail(user.email);
+      if (user.name) setFullName(user.name);
+    }
+  }, [user]);
+
+  // 2. Taruh fetch API di dalem useEffect biar cuma jalan 1 kali pas komponen dipasang!
+  useEffect(() => {
+    const fetchPatientProfile = async () => {
+      try {
+        const token = localStorage.getItem('accessToken');
+        if (!token) return;
+
+        const res = await fetch(`${API_BASE}/patients/me`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        if (res.ok) {
+          const json = await res.json();
+          const patientData = json.data; 
+
+          const fetchedFullName = patientData.user?.name || patientData.name || "";
+          const fetchedEmail = patientData.user?.email || patientData.email || "";
+
+          const freshUser = {
+            ...patientData,
+            name: fetchedFullName,
+            email: fetchedEmail,
+            role: "Patient" 
+          };
+
+          // Timpa state pakai data fresh dari DB
+          setUser(freshUser);
+          setFullName(fetchedFullName);
+          setEmail(fetchedEmail);
+          
+          localStorage.setItem("user", JSON.stringify(freshUser));
+        }
+      } catch (error) {
+        console.error("Gagal menarik data profil dari DB:", error);
+      }
+    };
+
+    fetchPatientProfile(); // Dipanggilnya di dalem useEffect!
+  }, []);
 
   // Logika pengecekan perubahan yang 100% aman
   const hasChanges = Boolean(
@@ -1123,9 +1122,52 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
     password !== "",
   );
 
-  const handleSaveChanges = () => {
+  const handleSaveChanges = async () => {
     if (!hasChanges) return;
-    alert("Changes saved successfully!");
+
+    try {
+      const token = localStorage.getItem('accessToken');
+      if (!token) return;
+
+      // Siapin payload yang mau dikirim
+      const payload = {};
+      if (fullName !== user?.name) payload.name = fullName;
+      if (email !== user?.email) payload.email = email;
+      if (password !== "") payload.password = password;
+
+      // Tembak API PATCH /api/v1/patients/me (sesuaikan base URL lu)
+      const res = await fetch(`${API_BASE}/patients/me`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (res.ok) {
+        const json = await res.json();
+        
+        // Update state user lokal biar UI langsung berubah
+        const updatedUser = {
+          ...user,
+          name: fullName,
+          email: email // Note: Kalo backend lu belom benerin email, ini cuma ilusi UI doang
+        };
+        
+        setUser(updatedUser);
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+        setPassword(""); // Kosongin field password abis sukses
+
+        alert("Profile updated successfully!");
+      } else {
+        const errJson = await res.json();
+        alert(`Failed to update profile: ${errJson.message || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error("Gagal update profile:", error);
+      alert("Terjadi kesalahan saat menghubungi server.");
+    }
   };
 
   const handleLogout = () => {
@@ -1143,16 +1185,14 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
       : sessionLogs.filter((s) => s.status === activeFilter);
 
   // ── Derived dynamic stats for Dashboard cards ──
-  const currentPainRaw = sessionLogs.length > 0 ? sessionLogs[0].newPain : null;
-  const currentPain =
-    currentPainRaw !== null && currentPainRaw !== "—" ? currentPainRaw : 0;
+const currentPainRaw = sessionLogs.length > 0 ? sessionLogs[0].newPain : null;
+  const currentPain = currentPainRaw !== null && currentPainRaw !== "—" ? currentPainRaw : null;
 
-  const startPainRaw =
-    sessionLogs.length > 0 ? sessionLogs[sessionLogs.length - 1].newPain : null;
-  const startPain =
-    startPainRaw !== null && startPainRaw !== "—" ? startPainRaw : currentPain;
-
-  const painImprovement = startPain - currentPain;
+  const startPainRaw = sessionLogs.length > 0 ? sessionLogs[sessionLogs.length - 1].oldPain : null; 
+  const startPain = startPainRaw !== null && startPainRaw !== "—" ? startPainRaw : currentPain;
+  const painImprovement = (startPain !== null && currentPain !== null) 
+    ? startPain - currentPain 
+    : 0;
 
   const totalSessionsDone = sessionLogs.length;
 
@@ -1186,13 +1226,7 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
       val: sessionLogs.length > 0 ? `${currentPain} / 10` : "—",
       sub: sessionLogs.length > 0 ? `from ${startPain}` : "current level",
       color: "#0C2830",
-    },
-    {
-      label: "STREAK",
-      val: `${currentStreak} days`,
-      sub: `best: ${highestStreak}d`,
-      color: "#0C2830",
-    },
+    }
   ];
 
   const chartPointsBase = sessionLogs.slice(0, 5).reverse();
@@ -1390,102 +1424,108 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
               {isCompletedReview && (
                 <div
                   style={{
-                    background:
-                      "linear-gradient(135deg, #0C2830 0%, #1A3B47 100%)",
+                    background: "linear-gradient(135deg, #0C2830 0%, #1A3B47 100%)",
                     borderRadius: "20px",
-                    padding: "24px",
+                    padding: "28px 32px",
                     color: "white",
                     border: "2px solid #3ED8C8",
                     boxShadow: "0 8px 24px rgba(12, 40, 48, 0.15)",
-                    position: "relative",
-                    overflow: "hidden",
+                    // FIX UTAMA: Card langsung dijadiin Flex, gak usah pake div perantara
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center", // Tengahin secara vertikal
+                    gap: "24px",
+                    width: "100%",
+                    boxSizing: "border-box", // Biar padding gak ngerusak width
                   }}
                 >
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "flex-start",
-                      gap: "16px",
-                      zIndex: 2,
-                      position: "relative",
-                    }}
-                  >
-                    <div>
-                      <div
-                        style={{
-                          display: "inline-flex",
-                          alignItems: "center",
-                          gap: "8px",
-                          background: "rgba(62, 216, 200, 0.15)",
-                          border: "1px solid #3ED8C8",
-                          color: "#3ED8C8",
-                          padding: "4px 12px",
-                          borderRadius: "20px",
-                          fontSize: "12px",
-                          fontFamily: "Space Mono",
-                          fontWeight: "700",
-                          marginBottom: "12px",
-                        }}
-                      >
-                        <span>🏆</span> MILESTONE COMPLETED — PROGRAM FINISHED
-                      </div>
-                      <div
-                        style={{
-                          fontSize: "22px",
-                          fontWeight: "700",
-                          marginBottom: "6px",
-                        }}
-                      >
-                        Program Phase Completed!
-                      </div>
-                      <div
-                        style={{
-                          fontSize: "14px",
-                          color: "#A2C3CA",
-                          maxWidth: "600px",
-                          lineHeight: "1.5",
-                        }}
-                      >
-                        You have completed all scheduled therapy sessions for
-                        this multi-week program. Your progress has been
-                        submitted to Dr. Sarah for evaluation. Mandatory medical
-                        exercises are currently paused.
-                      </div>
-                    </div>
+                  {/* BAGIAN KIRI (Teks) */}
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", flex: 1 }}>
                     <div
                       style={{
-                        background: "rgba(255, 255, 255, 0.08)",
-                        padding: "12px 18px",
-                        borderRadius: "16px",
-                        border: "1px solid rgba(255, 255, 255, 0.15)",
-                        textAlign: "center",
-                        flexShrink: 0,
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "8px",
+                        background: "rgba(62, 216, 200, 0.15)",
+                        border: "1px solid #3ED8C8",
+                        color: "#3ED8C8",
+                        padding: "4px 12px",
+                        borderRadius: "20px",
+                        fontSize: "12px",
+                        fontFamily: "Space Mono",
+                        fontWeight: "700",
+                        marginBottom: "16px",
                       }}
                     >
-                      <div
-                        style={{
-                          fontSize: "12px",
-                          color: "#3ED8C8",
-                          fontFamily: "Space Mono",
-                          textTransform: "uppercase",
-                        }}
-                      >
-                        Streak Status
-                      </div>
-                      <div
-                        style={{
-                          fontSize: "18px",
-                          fontWeight: "800",
-                          marginTop: "4px",
-                          color: "#C2EB30",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "6px",
-                        }}
-                      >
-                        <span>❄️</span> Protected
-                      </div>
+                      <span>🏆</span> MILESTONE COMPLETED — PROGRAM FINISHED
+                    </div>
+                    
+                    <div
+                      style={{
+                        fontSize: "24px",
+                        fontFamily: "Space Grotesk",
+                        fontWeight: "800",
+                        marginBottom: "8px",
+                      }}
+                    >
+                      Program Phase Completed!
+                    </div>
+                    
+                    <div
+                      style={{
+                        fontSize: "14px",
+                        color: "#A2C3CA",
+                        maxWidth: "580px",
+                        lineHeight: "1.5",
+                        margin: 0, // Mastiin gak ada margin sisa dari tag bawaan yang dorong ke bawah
+                      }}
+                    >
+                      You have completed all scheduled therapy sessions for
+                      this multi-week program. Your progress has been
+                      submitted to Dr. Sarah for evaluation. Mandatory medical
+                      exercises are currently paused.
+                    </div>
+                  </div>
+
+                  {/* BAGIAN KANAN (Kotak Streak) */}
+                  <div
+                    style={{
+                      background: "rgba(255, 255, 255, 0.08)",
+                      padding: "16px 24px",
+                      borderRadius: "16px",
+                      border: "1px solid rgba(255, 255, 255, 0.15)",
+                      textAlign: "center",
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "center",
+                      flexShrink: 0,
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontSize: "12px",
+                        color: "#3ED8C8",
+                        fontFamily: "Space Mono",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      Streak Status
+                    </div>
+                    
+                    <div
+                      style={{
+                        fontSize: "18px",
+                        fontFamily: "Space Grotesk",
+                        fontWeight: "800",
+                        marginTop: "4px",
+                        color: "#C2EB30",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "6px",
+                      }}
+                    >
+                      <span>❄️</span> Protected
                     </div>
                   </div>
                 </div>
@@ -1693,7 +1733,7 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
                       marginBottom: "auto",
                     }}
                   >
-                    Goal: 8/month
+                    Goal: {monthlyGoal}/month
                   </div>
                   <div
                     style={{
@@ -1733,7 +1773,7 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
                   boxShadow: "0 2px 8px rgba(0,0,0,0.02)",
                 }}
               >
-                {currentWeek.map((d, i) => (
+                {dynamicCurrentWeek.map((d, i) => (
                   <div
                     key={i}
                     style={{
@@ -2840,7 +2880,6 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
                           >
                             <span>{session.exercises}</span>
                             <span>{session.time}</span>
-                            <span>{session.accuracy}</span>
                           </div>
                         </div>
                         <div
@@ -3132,51 +3171,7 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
                         </span>
                       </div>
                     </div>
-                    <div
-                      style={{
-                        flex: "1 1 200px",
-                        background: "white",
-                        padding: "20px",
-                        borderRadius: "18px",
-                        border: "1px solid #E2E8F0",
-                        boxShadow: "0 2px 8px rgba(0,0,0,0.03)",
-                        textAlign: "center",
-                      }}
-                    >
-                      <div
-                        style={{
-                          color: "#7AAAB4",
-                          fontSize: "12px",
-                          fontFamily: "Space Mono",
-                          textTransform: "uppercase",
-                          letterSpacing: "1px",
-                          marginBottom: "8px",
-                        }}
-                      >
-                        Accuracy
-                      </div>
-                      <div>
-                        <span
-                          style={{
-                            color: "#3ED8C8",
-                            fontSize: "32px",
-                            fontFamily: "Space Mono",
-                            fontWeight: "700",
-                          }}
-                        >
-                          {selectedSession.accuracy.replace("% accuracy", "")}
-                        </span>
-                        <span
-                          style={{
-                            color: "#7AAAB4",
-                            fontSize: "14px",
-                            fontFamily: "Space Mono",
-                          }}
-                        >
-                          %
-                        </span>
-                      </div>
-                    </div>
+
                   </div>
                   <div
                     style={{

@@ -227,21 +227,55 @@ const patientService = {
    * Update patient profile.
    */
   async updateProfile(userId, updates) {
+    let updatedPatient = null;
+
+    // ==========================================
+    // 1. UPDATE ALAM PROFIL (Tabel 'patient')
+    // ==========================================
     const safeFields = {};
-    if (updates.name      !== undefined) safeFields.name      = updates.name;
+    if (updates.name !== undefined) safeFields.name = updates.name;
     if (updates.condition !== undefined) safeFields.condition = updates.condition;
-    if (updates.notes     !== undefined) safeFields.notes     = updates.notes;
+    if (updates.notes !== undefined) safeFields.notes = updates.notes;
 
-    const { data, error } = await supabase
-      .from('patient')
-      .update(safeFields)
-      .eq('user_id', userId)
-      .select()
-      .single();
+    // Cuma jalanin query kalau ada field profil yang mau diubah
+    if (Object.keys(safeFields).length > 0) {
+      const { data, error } = await supabase
+        .from('patient')
+        .update(safeFields)
+        .eq('user_id', userId)
+        .select()
+        .single();
 
-    if (error) throw new AppError('Gagal update profil: ' + error.message, 500);
-    return data;
-  },
+      if (error) {
+        throw new AppError('Gagal update profil publik: ' + error.message, 500);
+      }
+      updatedPatient = data;
+    }
+
+    // ==========================================
+    // 2. UPDATE ALAM KREDENSIAL (Supabase Auth)
+    // ==========================================
+    const authUpdates = {};
+    if (updates.email) authUpdates.email = updates.email;
+    if (updates.password) authUpdates.password = updates.password;
+
+    // Cuma jalanin API Admin kalau ada email/password yang dikirim
+    if (Object.keys(authUpdates).length > 0) {
+      // PENTING: supabase instance di sini WAJIB pakai Service Role Key!
+      const { data: authData, error: authError } = await supabase.auth.admin.updateUserById(
+        userId, 
+        authUpdates
+      );
+
+      if (authError) {
+        // Balikin error 400 karena biasanya gagal gara-gara email udah kepake atau password kurang kuat
+        throw new AppError('Gagal update email/password: ' + authError.message, 400); 
+      }
+    }
+
+    // Kalau profil gak diubah (cuma ganti password), kita return pesan sukses sederhana
+    return updatedPatient || { message: "Kredensial berhasil diperbarui, tidak ada perubahan profil." };
+  }
 };
 
 module.exports = patientService;

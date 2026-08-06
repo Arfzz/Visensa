@@ -261,19 +261,6 @@ export const PianoTilesGame = ({
             })}
           </div>
         </div>
-
-        {/* CARD 2: REACTION AGILITY */}
-        <div className="piano-card">
-          <div className="piano-card-header">
-            <Zap size={16} color="#64748B" />
-            <span>REACTION TIME</span>
-          </div>
-          <div className="piano-metric-val">240 ms</div>
-          <div className="piano-metric-subtext">
-            <span>•</span>
-            <span>Optimal Agility</span>
-          </div>
-        </div>
       </div>
 
       {/* --- COLUMN 2: CENTER PANEL (64% WIDTH) --- */}
@@ -477,13 +464,9 @@ export const PianoTilesGame = ({
         <div className="piano-card">
           <div className="piano-card-header">
             <Gauge size={16} color="#64748B" />
-            <span>SESSION METRICS</span>
+            <span>SESSION STATS</span>
           </div>
           <div className="piano-session-metrics-grid">
-            <div className="piano-session-metric-item">
-              <div className="piano-metric-val-sm">80 BPM</div>
-              <div className="piano-metric-lbl-sm">Moderate Rhythm</div>
-            </div>
             <div className="piano-session-metric-item">
               <div className="piano-metric-val-sm">{maxCombo}</div>
               <div className="piano-metric-lbl-sm">Max Combo Chain</div>
