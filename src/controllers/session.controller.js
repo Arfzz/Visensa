@@ -89,6 +89,22 @@ const sessionController = {
     }
   },
 
+  async getMonthlyGoalController(req, res, next) {
+    try {
+      const userId = req.user.id; // Ambil ID user dari JWT auth
+      const monthlyGoal = await sessionService.getMonthlyGoal(userId);
+
+      return res.status(200).json({
+        success: true,
+        data: {
+          monthly_goal: monthlyGoal
+        }
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
   // ====================================================
   // MINIGAME LOGS (Piano Tiles)
   // ====================================================
@@ -140,6 +156,31 @@ const sessionController = {
       next(err);
     }
   },
+
+  async getSessionStats (req, res, next) {
+  try {
+    const userId = req.user.id; // Asumsi lu ngambil userId dari token JWT lu
+    
+    // 1. Tarik stats dari fungsi lu yang lama
+    const patientData = await sessionService.getPatientStats(req.user.profile.id); // Asumsi patientId
+    
+    // 2. Tarik angka target bulanan pake fungsi yang baru lu selipin tadi
+    const monthlyGoal = await sessionService.getMonthlyGoal(userId);
+
+    // 3. Gabungin datanya pas dilempar ke Frontend
+    return res.status(200).json({
+      success: true,
+      data: {
+        ...patientData, // Nge-spread data stats & history gamification lu
+        monthly_goal: monthlyGoal // <-- Ini angka dinamisnya masuk!
+      }
+    });
+
+  } catch (error) {
+    next(error); // Lempar ke error handler
+  }
+}
+
 };
 
 module.exports = sessionController;

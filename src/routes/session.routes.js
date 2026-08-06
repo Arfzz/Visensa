@@ -85,4 +85,11 @@ router.get(
   sessionController.getMyStats
 );
 
+// GET    /api/v1/sessions/stats/monthly-goal  → Patient: get monthly exercise goal
+router.get(
+  '/stats/monthly-goal',
+  authorize(ROLES.PATIENT),
+  sessionController.getMonthlyGoalController
+);
+
 module.exports = router;
