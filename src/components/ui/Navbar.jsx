@@ -171,20 +171,11 @@ export default function Navbar() {
             <>
               <Link
                 to="/login"
-                className="navbar__signin"
+                className="navbar__cta btn-primary"
                 id="nav-signin"
                 style={{ textDecoration: "none" }}
               >
-                Sign in
-              </Link>
-
-              <Link
-                to="/register"
-                className="navbar__cta btn-primary"
-                id="nav-get-started"
-                style={{ textDecoration: "none" }}
-              >
-                Get started
+                Sign In
                 <svg
                   width="14"
                   height="14"

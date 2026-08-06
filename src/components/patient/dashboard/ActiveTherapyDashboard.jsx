@@ -6,6 +6,7 @@ import PatientWeeklyStrip from "./PatientWeeklyStrip";
 import PatientPainTrend from "./PatientPainTrend";
 import PatientRecentSessions from "./PatientRecentSessions";
 import PatientRightSidebar from "./PatientRightSidebar";
+import { generateSchedulePreview } from "../../../utils/scheduleCalculator";
 
 const ActiveTherapyDashboard = ({
   patient,
@@ -92,6 +93,23 @@ const ActiveTherapyDashboard = ({
     stats?.avg_accuracy ??
     stats?.accuracy ??
     (sessionLogs.length > 0 ? 95 : null);
+
+  const formatYearMonthDay = (dateObj) => {
+    const y = dateObj.getFullYear();
+    const m = String(dateObj.getMonth() + 1).padStart(2, "0");
+    const d = String(dateObj.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  };
+
+  const scheduleList = generateSchedulePreview({
+    startDate: program?.start_date || program?.startDate || new Date().toISOString().split("T")[0],
+    frequencyPerWeek: schedule?.frequencyPerWeek || program?.frequency_per_week || 3,
+    programDurationWeeks: program?.program_duration_weeks || program?.programDurationWeeks || 4,
+  });
+
+  const todayStrLocal = formatYearMonthDay(new Date());
+  const todaySchedule = scheduleList.find(s => s.date === todayStrLocal);
+  const isTodayScheduled = todaySchedule ? todaySchedule.status === "exercise" : false;
 
   return (
     <div
@@ -186,6 +204,7 @@ const ActiveTherapyDashboard = ({
         jointAccuracy={jointAccuracy}
         doctorName={doctorName}
         nextReviewDate={nextReviewDate}
+        isTodayScheduled={isTodayScheduled}
       />
     </div>
   );

@@ -12,6 +12,7 @@ const PatientRightSidebar = ({
   jointAccuracy,
   doctorName,
   nextReviewDate,
+  isTodayScheduled = true,
 }) => {
   const sidebarRef = useRef(null);
 
@@ -94,6 +95,31 @@ const PatientRightSidebar = ({
             <Lock size={16} />
             <span>Program Completed (Pending Review)</span>
           </button>
+        ) : !isTodayScheduled ? (
+          <button
+            disabled
+            type="button"
+            style={{
+              width: "100%",
+              padding: "16px",
+              background: "rgba(200, 112, 74, 0.15)",
+              border: "1.5px solid rgba(200, 112, 74, 0.4)",
+              borderRadius: "16px",
+              color: "#C8704A",
+              fontSize: "15px",
+              fontFamily: "Space Grotesk, sans-serif",
+              fontWeight: "700",
+              cursor: "not-allowed",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              gap: "8px",
+              marginBottom: "12px",
+            }}
+          >
+            <Lock size={16} />
+            <span>Scheduled Rest Day</span>
+          </button>
         ) : (
           <button
             onClick={onStartSession}
@@ -122,11 +148,7 @@ const PatientRightSidebar = ({
           </button>
         )}
 
-        <div style={{ color: "#7AAAB4", fontSize: "13px", fontFamily: "Space Mono, monospace" }}>
-          {isCompletedReview
-            ? "Mandatory exercises paused · Play Minigames"
-            : "8 exercises · ~12 min · Left hand"}
-        </div>
+
       </div>
 
       {/* --- HAND GRAPHIC & FLOATING OVERLAY CARDS CANVAS --- */}

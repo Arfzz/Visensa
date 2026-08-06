@@ -471,6 +471,17 @@ export const PianoTilesGame = ({
               <div className="piano-metric-val-sm">{maxCombo}</div>
               <div className="piano-metric-lbl-sm">Max Combo Chain</div>
             </div>
+            <div className="piano-session-metric-item" style={{ marginTop: "4px" }}>
+              <div className="piano-metric-lbl-sm" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
+                <span>Track Progress</span>
+                <span style={{ fontWeight: 600, color: '#334155' }}>
+                  {Math.floor(durationSeconds / 60)}:{(durationSeconds % 60).toString().padStart(2, '0')} / 1:40
+                </span>
+              </div>
+              <div style={{ width: '100%', height: '6px', background: 'rgba(0,0,0,0.05)', borderRadius: '3px', overflow: 'hidden' }}>
+                <div style={{ width: `${Math.min(100, (durationSeconds / 100) * 100)}%`, height: '100%', background: '#00B8B0', transition: 'width 1s linear' }} />
+              </div>
+            </div>
           </div>
         </div>
 
@@ -508,8 +519,18 @@ export const PianoTilesGame = ({
                 <span>Exit Game</span>
               </button>
             ) : (
-              <div className="piano-controls-waiting">
-                Waiting to start...
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px", width: "100%" }}>
+                <div className="piano-controls-waiting" style={{ textAlign: "center" }}>
+                  Waiting to start...
+                </div>
+                <button 
+                  onClick={handleExitToDashboard} 
+                  className="piano-action-btn piano-control-btn surrender"
+                  style={{ width: "100%" }}
+                >
+                  <RotateCcw size={16} />
+                  <span>Exit to Dashboard</span>
+                </button>
               </div>
             )}
           </div>
