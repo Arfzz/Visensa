@@ -13,6 +13,12 @@ router.use(authenticate);
 // GET /api/v1/programs/patient/:patientId — Doctor/Patient: get active program & weekly schedules
 router.get('/patient/:patientId', programController.getActiveProgram);
 
+// POST /api/v1/programs/patient/:patientId — Doctor/Patient: assign program with patientId in URL
+router.post('/patient/:patientId', authorize(ROLES.DOCTOR, ROLES.PATIENT), (req, res, next) => {
+  req.body.patient_id = req.params.patientId;
+  next();
+}, programController.createProgram);
+
 // POST /api/v1/programs — Doctor/Patient: create/assign new program
 router.post('/', authorize(ROLES.DOCTOR, ROLES.PATIENT), validate(createProgramSchema), programController.createProgram);
 

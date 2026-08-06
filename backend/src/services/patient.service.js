@@ -139,34 +139,7 @@ const patientService = {
       }));
     }
 
-    return [
-      {
-        id: 1,
-        date: "9",
-        month: "Jul",
-        status: "Excellent",
-        scoreColor: "#4BA882",
-        statusBg: "rgba(75, 168, 130, 0.10)",
-        scoreFrom: 5,
-        scoreTo: 4,
-        diff: "↓1 pts",
-        time: "11:42",
-        text: "Felt improvement in finger extension. Less tingling in phantom fingers after session.",
-      },
-      {
-        id: 2,
-        date: "8",
-        month: "Jul",
-        status: "Good",
-        scoreColor: "#3ED8C8",
-        statusBg: "rgba(62, 216, 200, 0.10)",
-        scoreFrom: 6,
-        scoreTo: 5,
-        diff: "↓1 pts",
-        time: "12:10",
-        text: "Wrist rotation still uncomfortable. Finger exercises feel easier.",
-      },
-    ];
+    return [];
   },
 
   /**

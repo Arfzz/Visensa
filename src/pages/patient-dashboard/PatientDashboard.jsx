@@ -7,6 +7,7 @@ import InteractivePracticeHub from "../../features/gamification/interactive-prac
 import InteractivePracticeDashboardCTA from "../../features/gamification/interactive-practice/InteractivePracticeDashboardCTA";
 import { useProgramScheduleStore } from "../../store/useProgramScheduleStore";
 import { useStreakStore } from "../../features/gamification/streak/useStreakStore";
+import { Clock, ShieldAlert, ShieldCheck, Sparkles, ChevronRight } from "lucide-react";
 
 const API_BASE = "http://localhost:3000/api/v1";
 
@@ -946,6 +947,7 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
   );
 
   useEffect(() => {
+    fetchProgramFromApi();
     const fetchSessionData = async () => {
     try {
       const token = localStorage.getItem("accessToken");
@@ -1207,6 +1209,14 @@ const currentPainRaw = sessionLogs.length > 0 ? sessionLogs[0].newPain : null;
     schedule?.gamification?.completed_exercises ?? totalSessionsDone;
   const currentStreak = schedule?.gamification?.current_streak ?? 0;
   const highestStreak = schedule?.gamification?.highest_streak ?? 0;
+
+  // Patient program DB status check (unassigned / new patient with no active program)
+  const isUnassigned =
+    !activeProgram ||
+    activeProgram?.status === "unassigned" ||
+    activeProgram?.status === "Unassigned" ||
+    activeProgram?.status === "new_patient" ||
+    (!activeProgram?.startDate && completedExercises === 0);
 
   const dynamicTopStats = [
     {
@@ -1531,32 +1541,167 @@ const currentPainRaw = sessionLogs.length > 0 ? sessionLogs[0].newPain : null;
                 </div>
               )}
 
-              {/* INTERAKTIF PRACTICE SECONDARY CTA BANNER */}
-              <InteractivePracticeDashboardCTA
-                onNavigate={() => setActiveMenu("Interactive Practice")}
-              />
+              {/* WELCOME / AWAITING PRESCRIPTION FLASH CARD (ZERO STATE) */}
+              {isUnassigned ? (
+                <div
+                  style={{
+                    background: "white",
+                    borderRadius: "24px",
+                    border: "1.5px solid #C4E8EC",
+                    padding: "36px",
+                    boxShadow: "0 8px 30px rgba(0, 153, 166, 0.08)",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "24px",
+                    marginBottom: "10px",
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "flex-start", gap: "20px" }}>
+                    <div
+                      style={{
+                        width: "56px",
+                        height: "56px",
+                        background: "rgba(0, 153, 166, 0.1)",
+                        borderRadius: "18px",
+                        border: "1.5px solid rgba(0, 153, 166, 0.2)",
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        flexShrink: 0,
+                      }}
+                    >
+                      <Clock size={28} color="#0099A6" />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "12px",
+                          marginBottom: "8px",
+                          flexWrap: "wrap",
+                        }}
+                      >
+                        <span
+                          style={{
+                            color: "#0C2830",
+                            fontSize: "24px",
+                            fontFamily: "Space Grotesk",
+                            fontWeight: "700",
+                          }}
+                        >
+                          Welcome to Visensa, {fullName || "Patient"}!
+                        </span>
+                        <span
+                          style={{
+                            background: "rgba(75, 168, 130, 0.1)",
+                            border: "1px solid rgba(75, 168, 130, 0.3)",
+                            color: "#4BA882",
+                            padding: "4px 12px",
+                            borderRadius: "20px",
+                            fontSize: "12px",
+                            fontFamily: "Space Mono",
+                            fontWeight: "700",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "6px",
+                          }}
+                        >
+                          <ShieldCheck size={14} color="#4BA882" /> Daily Streak Protected
+                        </span>
+                      </div>
+                      <p
+                        style={{
+                          color: "#3A6870",
+                          fontSize: "15px",
+                          fontFamily: "Space Grotesk",
+                          lineHeight: "1.6",
+                          margin: 0,
+                          maxWidth: "680px",
+                        }}
+                      >
+                        Your clinical account is active. Dr. Sarah is currently reviewing your intake data to prescribe your custom rehabilitation schedule. Your exercises and analytics will unlock here automatically once your schedule begins.
+                      </p>
+                    </div>
+                  </div>
 
-              <div
-                style={{
-                  display: "flex",
-                  background: "white",
-                  padding: "24px",
-                  borderRadius: "20px",
-                  border: "1.5px solid #C4E8EC",
-                  boxShadow: "0 2px 10px rgba(0,0,0,0.02)",
-                  flexShrink: 0,
-                }}
-              >
-                {dynamicTopStats.map((stat, i) => (
                   <div
-                    key={i}
                     style={{
-                      flex: 1,
-                      borderRight: i < 3 ? "1.5px solid #E2E8F0" : "none",
-                      paddingLeft: i === 0 ? "0" : "24px",
-                      paddingRight: i === 3 ? "0" : "24px",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      background: "#F0FAFB",
+                      padding: "20px 24px",
+                      borderRadius: "16px",
+                      border: "1px solid #C4E8EC",
+                      marginTop: "4px",
+                      flexWrap: "wrap",
+                      gap: "16px",
                     }}
                   >
+                    <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                      <Sparkles size={20} color="#0099A6" />
+                      <span
+                        style={{
+                          color: "#0C2830",
+                          fontSize: "15px",
+                          fontFamily: "Space Grotesk",
+                          fontWeight: "600",
+                        }}
+                      >
+                        Want to warm up while waiting? Try interactive practice.
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => setActiveMenu("Interactive Practice")}
+                      style={{
+                        padding: "10px 20px",
+                        background: "#0099A6",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "12px",
+                        fontSize: "14px",
+                        fontFamily: "Space Grotesk",
+                        fontWeight: "700",
+                        cursor: "pointer",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "8px",
+                        boxShadow: "0 4px 12px rgba(0, 153, 166, 0.2)",
+                      }}
+                    >
+                      Open Practice <ChevronRight size={16} />
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  {/* INTERAKTIF PRACTICE SECONDARY CTA BANNER */}
+                  <InteractivePracticeDashboardCTA
+                    onNavigate={() => setActiveMenu("Interactive Practice")}
+                  />
+
+                  <div
+                    style={{
+                      display: "flex",
+                      background: "white",
+                      padding: "24px",
+                      borderRadius: "20px",
+                      border: "1.5px solid #C4E8EC",
+                      boxShadow: "0 2px 10px rgba(0,0,0,0.02)",
+                      flexShrink: 0,
+                    }}
+                  >
+                    {dynamicTopStats.map((stat, i) => (
+                      <div
+                        key={i}
+                        style={{
+                          flex: 1,
+                          borderRight: i < 3 ? "1.5px solid #E2E8F0" : "none",
+                          paddingLeft: i === 0 ? "0" : "24px",
+                          paddingRight: i === 3 ? "0" : "24px",
+                        }}
+                      >
                     <div
                       style={{
                         color: "#7AAAB4",
@@ -2069,6 +2214,8 @@ const currentPainRaw = sessionLogs.length > 0 ? sessionLogs[0].newPain : null;
                   ))}
                 </div>
               </div>
+            </>
+          )}
 
               <div
                 style={{
