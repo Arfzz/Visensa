@@ -199,16 +199,13 @@ const sessionService = {
 
   async getMonthlyGoal (userId) {
     // 1. Dapetin tanggal awal dan akhir bulan ini
-  const date = new Date();
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  
-  const firstDay = `${year}-${month}-01`; // Hasil: "2026-08-01"
-  
-  const lastDayObj = new Date(year, date.getMonth() + 1, 0);
-  const lastDay = `${year}-${month}-${String(lastDayObj.getDate()).padStart(2, '0')}`; // Hasil: "2026-08-31"
-
-  console.log("=== DEBUG MONTHLY GOAL ===");
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    
+    const firstDay = `${year}-${month}-01`;
+    const lastDayObj = new Date(year, date.getMonth() + 1, 0);
+    const lastDay = `${year}-${month}-${String(lastDayObj.getDate()).padStart(2, '0')}`;
 
     // 2. Cari ID pasien
     const { data: patient, error: patientErr } = await supabase
@@ -218,44 +215,41 @@ const sessionService = {
       .single();
 
     if (patientErr || !patient) {
-      console.log("GAGAL STEP 2: Pasien gak ketemu / error", patientErr);
-      return 0;
+      return 8; // Default fallback goal
     }
 
-    // 3. Cari program yang lagi aktif buat pasien ini
-    const { data: activeProgram, error: progErr } = await supabase
+    // 3. Cari program yang paling baru/aktif buat pasien ini
+    const { data: activePrograms, error: progErr } = await supabase
       .from('patient_programs') 
-      .select('id')
+      .select('id, frequency_per_week')
       .eq('patient_id', patient.id)
-      .eq('status', 'active')
-      .single();
+      .order('created_at', { ascending: false })
+      .limit(1);
+
+    const activeProgram = activePrograms?.[0];
 
     if (progErr || !activeProgram) {
-      console.log("GAGAL STEP 3: Program aktif gak ketemu / error", progErr);
-      return 0; 
+      return 8; // Default fallback goal
     }
+
+    const fallbackGoal = (Number(activeProgram.frequency_per_week) || 3) * 4;
 
     // 4. Hitung total target_sessions dari minggu-minggu di bulan ini
     const { data: weeklyTargets, error: targetErr } = await supabase
-    .from('weekly_schedule')
-    .select('target_sessions')
-    .eq('program_id', activeProgram.id)
-    .lte('week_start_date', lastDay)
-    .gte('week_end_date', firstDay);
+      .from('weekly_schedule')
+      .select('target_sessions')
+      .eq('program_id', activeProgram.id)
+      .lte('week_start_date', lastDay)
+      .gte('week_end_date', firstDay);
 
-  if (targetErr || !weeklyTargets) {
-    console.log("GAGAL STEP 4: Query weekly_schedule error", targetErr);
-    return 0;
-  }
-
-  console.log("DATA WEEKLY TARGET DITEMUKAN:", weeklyTargets);
+    if (targetErr || !weeklyTargets || weeklyTargets.length === 0) {
+      return fallbackGoal;
+    }
 
     // 5. Jumlahin semua target_sessions
-    // Kalau di DB lu kolomnya beda, ganti week.target_sessions jadi nama kolom lu
     const totalMonthlyGoal = weeklyTargets.reduce((sum, week) => sum + (week.target_sessions || 0), 0);
 
-    console.log("HASIL AKHIR:", totalMonthlyGoal);
-    return totalMonthlyGoal;
+    return totalMonthlyGoal > 0 ? totalMonthlyGoal : fallbackGoal;
   },
   /**
    * Get a single exercise log by ID.
