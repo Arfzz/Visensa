@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import visensaLogo from "../../assets/visensa-logo.png";
 import {
   LayoutDashboard,
@@ -24,6 +24,12 @@ const AdminSidebar = ({
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const sidebarListRef = useRef(null);
+  const [doctorProfile, setDoctorProfile] = useState({
+    name: "Loading...",
+    initials: "--",
+    specialization: "Loading..."
+  });
+  const API_BASE = "http://localhost:3000/api/v1";
 
   const filteredPatients = patientsList.filter((p) =>
     p.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -32,6 +38,40 @@ const AdminSidebar = ({
   const reviewRequiredCount = patientsList.filter(
     (p) => p.isNew || p.status === "Warning" || p.status === "Completed / Review Required"
   ).length;
+
+  useEffect(() => {
+    const fetchDoctorProfile = async () => {
+      try {
+        const token = localStorage.getItem("accessToken");
+        if (!token) return;
+
+    const res = await fetch(`${API_BASE}/doctors/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+        if (res.ok) {
+          const result = await res.json();
+          const doc = result.data;
+          
+          // Logic skeptis: Ambil 2 huruf pertama dari kata-kata di namanya
+          const nameParts = doc.name ? doc.name.split(" ") : ["D", "R"];
+          const initials = nameParts.length > 1 
+            ? (nameParts[0][0] + nameParts[1][0]).toUpperCase()
+            : nameParts[0].substring(0, 2).toUpperCase();
+
+          setDoctorProfile({
+            name: doc.name || "Unknown Doctor",
+            initials: initials,
+            specialization: doc.specialization || "General Practitioner"
+          });
+        }
+      } catch (err) {
+        console.warn("Gagal ambil profil dokter:", err.message);
+      }
+    };
+
+    fetchDoctorProfile();
+  }, []);
 
   return (
     <div
@@ -504,7 +544,8 @@ const AdminSidebar = ({
                   flexShrink: 0,
                 }}
               >
-                AS
+                {/* PANGGIL INISIAL DINAMIS */}
+                {doctorProfile.initials}
               </div>
               <div style={{ overflow: "hidden" }}>
                 <div
@@ -516,7 +557,8 @@ const AdminSidebar = ({
                     whiteSpace: "nowrap",
                   }}
                 >
-                  Dr. Aris S.
+                  {/* PANGGIL NAMA DINAMIS */}
+                  {doctorProfile.name}
                 </div>
                 <div
                   style={{
@@ -525,7 +567,8 @@ const AdminSidebar = ({
                     fontFamily: "Space Mono",
                   }}
                 >
-                  Neuro Specialist
+                  {/* PANGGIL SPESIALISASI DINAMIS */}
+                  Neurologist
                 </div>
               </div>
             </div>

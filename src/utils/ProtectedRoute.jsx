@@ -17,7 +17,7 @@ const ProtectedRoute = ({ allowedRoles }) => {
     // Cek identitas aslinya, lalu pulangkan ke "rumahnya" masing-masing
     if (user.role === 'patient') {
       // Karena pasien nggak boleh ke sini, balikin ke dashboard pasien
-      return <Navigate to="/intro" replace />; 
+      return <Navigate to="/patient-dashboard" replace />; 
     } 
     
     if (user.role === 'doctor') {
