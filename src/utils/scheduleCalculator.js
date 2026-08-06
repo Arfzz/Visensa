@@ -1,11 +1,12 @@
 // --- WEEKLY PATTERNS FOR EVEN DISTRIBUTION ---
+// Calendar Day Indices (Mon = 0, Tue = 1, Wed = 2, Thu = 3, Fri = 4, Sat = 5, Sun = 6)
 export const WEEKLY_PATTERNS = {
-  1: [0],                  // Day 1 (e.g. Mon) -> 1 session
-  2: [0, 3],               // Day 1 & 4 (e.g. Mon & Thu) -> 2 sessions
-  3: [0, 2, 4],            // Day 1, 3, 5 (e.g. Mon, Wed, Fri) -> 3 sessions
-  4: [0, 2, 4, 6],         // Day 1, 3, 5, 7 (e.g. Mon, Wed, Fri, Sun) -> 4 sessions
+  1: [0],                  // Mon -> 1 session
+  2: [0, 3],               // Mon & Thu -> 2 sessions
+  3: [0, 2, 4],            // Mon, Wed, Fri -> 3 sessions
+  4: [0, 2, 4, 6],         // Mon, Wed, Fri, Sun -> 4 sessions
   5: [0, 1, 3, 4, 5],      // 5 exercise days, 2 rest days -> 5 sessions
-  6: [0, 1, 2, 3, 4, 5],   // 6 exercise days, day 7 rest -> 6 sessions
+  6: [0, 1, 2, 3, 4, 5],   // 6 exercise days, Sun rest -> 6 sessions
   7: [0, 1, 2, 3, 4, 5, 6] // Everyday -> 7 sessions
 };
 
@@ -13,7 +14,7 @@ const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 /**
  * Generates an array of daily objects for a patient's therapy schedule program.
- * 
+ *
  * @param {Object} params
  * @param {Date|string} params.startDate - Start date of program (defaults to D+1 if invalid)
  * @param {number} params.frequencyPerWeek - Weekly exercise frequency (1 to 7)
@@ -23,10 +24,10 @@ const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 export const generateSchedulePreview = ({
   startDate,
   frequencyPerWeek = 3,
-  programDurationWeeks = 4
+  programDurationWeeks = 4,
 }) => {
   const start = startDate ? new Date(startDate) : new Date();
-  
+
   if (isNaN(start.getTime())) {
     start.setTime(Date.now() + 86400000);
   }
@@ -47,8 +48,10 @@ export const generateSchedulePreview = ({
     const day = String(currentDate.getDate()).padStart(2, "0");
     const dateStr = `${year}-${month}-${day}`;
 
-    const dayOfWeekIndex = i % 7;
-    const isExercise = pattern.includes(dayOfWeekIndex);
+    // FIX: Match pattern against the ACTUAL CALENDAR DAY index (Mon = 0, Tue = 1, ..., Fri = 4, Sat = 5, Sun = 6)
+    // This ensures Friday is ALWAYS Friday regardless of what day of the week startDate lands on.
+    const calendarDayIndex = (currentDate.getDay() + 6) % 7;
+    const isExercise = pattern.includes(calendarDayIndex);
     const status = isExercise ? "exercise" : "rest";
     const dayName = DAY_NAMES[currentDate.getDay()];
     const weekNumber = Math.floor(i / 7) + 1;
@@ -58,7 +61,7 @@ export const generateSchedulePreview = ({
       dayName,
       status,
       weekNumber,
-      isFixedProtocol: isExercise
+      isFixedProtocol: isExercise,
     });
   }
 
@@ -71,7 +74,7 @@ export const generateSchedulePreview = ({
 export const getTomorrowDateString = () => {
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
-  
+
   const year = tomorrow.getFullYear();
   const month = String(tomorrow.getMonth() + 1).padStart(2, "0");
   const day = String(tomorrow.getDate()).padStart(2, "0");

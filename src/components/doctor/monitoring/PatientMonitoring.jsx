@@ -80,6 +80,7 @@ const PatientMonitoring = ({
           patient={patient}
           program={activeProgram}
           weeklySchedule={weeklySchedule}
+          onRefreshData={onRefreshData}
         />
       )}
     </div>

@@ -34,7 +34,7 @@ const AdminOverview = ({ onSelectPatient, onAddPatient, patients = mockPatientsD
         if (res.ok) {
           const result = await res.json();
           if (result.data) {
-            setStatsData(result.data.stats);
+            setStatsData(result.data.stats || result.data);
           }
         }
       } catch (err) {
@@ -50,6 +50,10 @@ const AdminOverview = ({ onSelectPatient, onAddPatient, patients = mockPatientsD
       onSelectPatient(patient);
     }
   };
+
+  const totalPatientsCount = statsData?.totalPatients ?? patients.length;
+  const activePatientsCount = statsData?.activePatients ?? patients.filter(p => p.status === "Active" || p.status === "Excellent" || p.status === "Good").length;
+  const totalSessionsCount = statsData?.totalSessionsThisMonth ?? statsData?.totalExercisesThisMonth ?? patients.reduce((acc, p) => acc + (p.totalExercises || 0), 0);
 
   return (
     <div style={{ width: "100%", boxSizing: "border-box" }}>
@@ -83,8 +87,8 @@ const AdminOverview = ({ onSelectPatient, onAddPatient, patients = mockPatientsD
             <div style={{ color: "#7AAAB4", fontSize: "14px", fontFamily: "Space Mono", fontWeight: "600", textTransform: "uppercase", letterSpacing: "1px" }}>Total Patients</div>
           </div>
           <div style={{ display: "flex", alignItems: "baseline", gap: "12px" }}>
-            <span style={{ color: "#0C2830", fontSize: "40px", fontFamily: "Space Grotesk", fontWeight: "700" }}>{statsData?.totalPatients ?? patients.length}</span>
-            <span style={{ color: "#4BA882", fontSize: "14px", fontWeight: "600" }}>+2 this month</span>
+            <span style={{ color: "#0C2830", fontSize: "40px", fontFamily: "Space Grotesk", fontWeight: "700" }}>{totalPatientsCount}</span>
+            <span style={{ color: "#4BA882", fontSize: "14px", fontWeight: "600" }}>Registered</span>
           </div>
         </div>
 
@@ -93,11 +97,11 @@ const AdminOverview = ({ onSelectPatient, onAddPatient, patients = mockPatientsD
             <div style={{ width: "40px", height: "40px", background: "rgba(75, 168, 130, 0.1)", borderRadius: "12px", display: "flex", justifyContent: "center", alignItems: "center" }}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4BA882" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
             </div>
-            <div style={{ color: "#7AAAB4", fontSize: "14px", fontFamily: "Space Mono", fontWeight: "600", textTransform: "uppercase", letterSpacing: "1px" }}>Avg Compliance</div>
+            <div style={{ color: "#7AAAB4", fontSize: "14px", fontFamily: "Space Mono", fontWeight: "600", textTransform: "uppercase", letterSpacing: "1px" }}>Active Patients</div>
           </div>
           <div style={{ display: "flex", alignItems: "baseline", gap: "12px" }}>
-            <span style={{ color: "#0C2830", fontSize: "40px", fontFamily: "Space Grotesk", fontWeight: "700" }}>85%</span>
-            <span style={{ color: "#D4A843", fontSize: "14px", fontWeight: "600" }}>Needs attention</span>
+            <span style={{ color: "#0C2830", fontSize: "40px", fontFamily: "Space Grotesk", fontWeight: "700" }}>{activePatientsCount}</span>
+            <span style={{ color: "#4BA882", fontSize: "14px", fontWeight: "600" }}>Active therapy</span>
           </div>
         </div>
 
@@ -109,8 +113,8 @@ const AdminOverview = ({ onSelectPatient, onAddPatient, patients = mockPatientsD
             <div style={{ color: "#7AAAB4", fontSize: "14px", fontFamily: "Space Mono", fontWeight: "600", textTransform: "uppercase", letterSpacing: "1px" }}>Total Sessions</div>
           </div>
           <div style={{ display: "flex", alignItems: "baseline", gap: "12px" }}>
-            <span style={{ color: "#0C2830", fontSize: "40px", fontFamily: "Space Grotesk", fontWeight: "700" }}>{statsData?.totalExercisesThisMonth || 100}</span>
-            <span style={{ color: "#4BA882", fontSize: "14px", fontWeight: "600" }}>+12 this week</span>
+            <span style={{ color: "#0C2830", fontSize: "40px", fontFamily: "Space Grotesk", fontWeight: "700" }}>{totalSessionsCount}</span>
+            <span style={{ color: "#4BA882", fontSize: "14px", fontWeight: "600" }}>This month</span>
           </div>
         </div>
       </div>
@@ -138,83 +142,59 @@ const AdminOverview = ({ onSelectPatient, onAddPatient, patients = mockPatientsD
                 <th style={{ padding: "16px 30px", color: "#7AAAB4", fontSize: "13px", fontFamily: "Space Mono", fontWeight: "600", textTransform: "uppercase", letterSpacing: "1px", borderBottom: "1px solid #E2E8F0" }}>Condition</th>
                 <th style={{ padding: "16px 30px", color: "#7AAAB4", fontSize: "13px", fontFamily: "Space Mono", fontWeight: "600", textTransform: "uppercase", letterSpacing: "1px", borderBottom: "1px solid #E2E8F0" }}>Sessions</th>
                 <th style={{ padding: "16px 30px", color: "#7AAAB4", fontSize: "13px", fontFamily: "Space Mono", fontWeight: "600", textTransform: "uppercase", letterSpacing: "1px", borderBottom: "1px solid #E2E8F0" }}>Last Pain Score</th>
+                <th style={{ padding: "16px 30px", color: "#7AAAB4", fontSize: "13px", fontFamily: "Space Mono", fontWeight: "600", textTransform: "uppercase", letterSpacing: "1px", borderBottom: "1px solid #E2E8F0" }}>Compliance</th>
                 <th style={{ padding: "16px 30px", color: "#7AAAB4", fontSize: "13px", fontFamily: "Space Mono", fontWeight: "600", textTransform: "uppercase", letterSpacing: "1px", borderBottom: "1px solid #E2E8F0" }}>Status</th>
-                <th style={{ padding: "16px 30px", color: "#7AAAB4", fontSize: "13px", fontFamily: "Space Mono", fontWeight: "600", textTransform: "uppercase", letterSpacing: "1px", borderBottom: "1px solid #E2E8F0" }}>Action</th>
               </tr>
             </thead>
             <tbody>
-              {filteredPatients.map((patient, index) => {
-                const statusTheme = getStatusColor(patient.status || (patient.isNew ? "New" : "Good"));
-                const lastPain = patient.lastPainScore || (patient.pain ? parseInt(patient.pain) : 4);
-                const prevPain = patient.previousPainScore || lastPain + 1;
-                const painTrend = lastPain < prevPain ? "↓" : lastPain > prevPain ? "↑" : "—";
-                const painTrendColor = lastPain < prevPain ? "#4BA882" : lastPain > prevPain ? "#C0574C" : "#7AAAB4";
-
+              {filteredPatients.map((patient) => {
+                const statusStyle = getStatusColor(patient.status);
                 return (
                   <tr 
                     key={patient.id} 
                     onClick={() => handlePatientClick(patient)}
-                    style={{ borderBottom: index !== filteredPatients.length - 1 ? "1px solid #E2E8F0" : "none", cursor: "pointer", transition: "background 0.2s" }} 
-                    onMouseEnter={(e) => e.currentTarget.style.background = "#F8FAFC"} 
+                    style={{ borderBottom: "1px solid #E2E8F0", cursor: "pointer", transition: "background 0.15s ease" }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = "#F8FAFC"}
                     onMouseLeave={(e) => e.currentTarget.style.background = "white"}
                   >
                     <td style={{ padding: "20px 30px" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-                        <div style={{ width: "42px", height: "42px", borderRadius: "12px", background: "rgba(0, 153, 166, 0.1)", color: "#0099A6", display: "flex", justifyContent: "center", alignItems: "center", fontSize: "14px", fontFamily: "Space Grotesk", fontWeight: "700", flexShrink: 0 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+                        <div style={{ width: "38px", height: "38px", borderRadius: "12px", background: patient.color || "#0099A6", color: "white", display: "flex", justifyContent: "center", alignItems: "center", fontWeight: "700", fontFamily: "Space Grotesk", fontSize: "14px" }}>
                           {patient.id}
                         </div>
                         <div>
-                          <div style={{ color: "#0C2830", fontSize: "16px", fontFamily: "Space Grotesk", fontWeight: "700", marginBottom: "4px" }}>{patient.name}</div>
-                          <div style={{ color: "#7AAAB4", fontSize: "13px", fontFamily: "Space Grotesk" }}>{patient.lastActive || "Recently active"}</div>
+                          <div style={{ color: "#0C2830", fontWeight: "700", fontSize: "15px", fontFamily: "Space Grotesk" }}>{patient.name}</div>
+                          <div style={{ color: "#7AAAB4", fontSize: "13px", fontFamily: "Space Grotesk" }}>{patient.lastActive}</div>
                         </div>
                       </div>
                     </td>
-                    <td style={{ padding: "20px 30px", color: "#3A6870", fontSize: "15px", fontFamily: "Space Grotesk", fontWeight: "500" }}>
+                    <td style={{ padding: "20px 30px", color: "#3A6870", fontSize: "14px", fontFamily: "Space Grotesk", fontWeight: "500" }}>
                       {patient.condition}
                     </td>
-                    <td style={{ padding: "20px 30px" }}>
-                      <div style={{ color: "#0C2830", fontSize: "16px", fontFamily: "Space Mono", fontWeight: "600", marginBottom: "4px" }}>{patient.totalExercises ?? patient.sessions ?? 0}</div>
-                      <div style={{ color: "#7AAAB4", fontSize: "13px", fontFamily: "Space Mono" }}>{patient.compliance} comp.</div>
+                    <td style={{ padding: "20px 30px", color: "#0C2830", fontSize: "15px", fontFamily: "Space Mono", fontWeight: "700" }}>
+                      {patient.totalExercises}
                     </td>
                     <td style={{ padding: "20px 30px" }}>
                       <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                        <span style={{ color: "#D4A843", fontSize: "20px", fontFamily: "Space Mono", fontWeight: "700" }}>{lastPain}</span>
-                        <span style={{ color: "#7AAAB4", fontSize: "14px", fontFamily: "Space Mono" }}>/10</span>
-                        {(patient.totalExercises > 0 || patient.sessions > 0) && (
-                          <span style={{ color: painTrendColor, fontSize: "14px", fontFamily: "Space Mono", fontWeight: "600", marginLeft: "4px" }}>
-                            {painTrend}
-                          </span>
+                        <span style={{ color: "#0C2830", fontSize: "15px", fontFamily: "Space Mono", fontWeight: "700" }}>{patient.lastPainScore}/10</span>
+                        {patient.previousPainScore !== undefined && patient.lastPainScore < patient.previousPainScore && (
+                          <span style={{ color: "#4BA882", fontSize: "12px", fontWeight: "600" }}>↓</span>
                         )}
                       </div>
                     </td>
-                    <td style={{ padding: "20px 30px" }}>
-                      <div style={{ display: "inline-flex", padding: "6px 12px", background: statusTheme.bg, color: statusTheme.text, border: `1px solid ${statusTheme.border}`, borderRadius: "100px", fontSize: "13px", fontFamily: "Space Mono", fontWeight: "700" }}>
-                        {patient.status || (patient.isNew ? "New" : "Active")}
-                      </div>
+                    <td style={{ padding: "20px 30px", color: "#0C2830", fontSize: "15px", fontFamily: "Space Mono", fontWeight: "700" }}>
+                      {patient.compliance}
                     </td>
                     <td style={{ padding: "20px 30px" }}>
-                      <button 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handlePatientClick(patient);
-                        }}
-                        style={{ padding: "8px 16px", background: "white", border: "1px solid #C4E8EC", color: "#0099A6", borderRadius: "8px", fontSize: "14px", fontFamily: "Space Grotesk", fontWeight: "600", cursor: "pointer", transition: "all 0.2s" }}
-                        onMouseEnter={(e) => { e.target.style.background = "#0099A6"; e.target.style.color = "white"; }}
-                        onMouseLeave={(e) => { e.target.style.background = "white"; e.target.style.color = "#0099A6"; }}
-                      >
-                        View
-                      </button>
+                      <span style={{ padding: "6px 14px", borderRadius: "20px", background: statusStyle.bg, color: statusStyle.text, border: `1px solid ${statusStyle.border}`, fontSize: "13px", fontFamily: "Space Mono", fontWeight: "700" }}>
+                        {patient.status}
+                      </span>
                     </td>
                   </tr>
                 );
               })}
             </tbody>
           </table>
-          {filteredPatients.length === 0 && (
-            <div style={{ padding: "40px", textAlign: "center", color: "#7AAAB4", fontSize: "15px", fontFamily: "Space Grotesk" }}>
-              No patients found matching "{searchQuery}"
-            </div>
-          )}
         </div>
       </div>
     </div>
