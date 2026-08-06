@@ -218,6 +218,7 @@ const Dashboard = () => {
   const {
     activeProgram,
     weeklySchedule,
+    fetchProgramFromApi,
     extendProgram,
     reassignProgram,
     assignInitialProgram,
@@ -307,6 +308,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (activePatient?.id) {
+      // 1. Sync feedback logs from DB
       (async () => {
         try {
           const token = localStorage.getItem("accessToken");
@@ -325,8 +327,25 @@ const Dashboard = () => {
           console.warn("Feedback logs API sync notice:", err.message);
         }
       })();
+
+      // 2. Sync active program & weekly schedule from DB for calendar preview
+      (async () => {
+        try {
+          const data = await fetchProgramFromApi(activePatient.id);
+          if (data?.activeProgram) {
+            if (data.activeProgram.startDate) setPlanStartDate(data.activeProgram.startDate);
+            if (data.activeProgram.programDurationWeeks) setPlanDuration(data.activeProgram.programDurationWeeks);
+          }
+          if (data?.weeklySchedule) {
+            if (data.weeklySchedule.frequencyPerWeek) setPlanFreq(data.weeklySchedule.frequencyPerWeek);
+            if (data.weeklySchedule.restIntervalDays) setPlanInterval(data.weeklySchedule.restIntervalDays);
+          }
+        } catch (err) {
+          console.warn("Calendar program DB sync notice:", err.message);
+        }
+      })();
     }
-  }, [activePatient?.id]);
+  }, [activePatient?.id, fetchProgramFromApi]);
 
   const handleRegisterPatientSubmit = async (e) => {
     if (e) e.preventDefault();
