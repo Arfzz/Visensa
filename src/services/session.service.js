@@ -238,7 +238,7 @@ const sessionService = {
     const activeProgram = activePrograms?.[0];
 
     if (progErr || !activeProgram) {
-      return 8; // Default fallback goal
+      return 0; // Default fallback goal
     }
 
     const fallbackGoal = (Number(activeProgram.frequency_per_week) || 3) * 4;
