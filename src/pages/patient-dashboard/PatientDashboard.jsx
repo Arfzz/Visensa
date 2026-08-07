@@ -35,7 +35,7 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
   const [sessionLogs, setSessionLogs] = useState([]);
   const [gamificationStats, setGamificationStats] = useState(null);
   const [notifications, setNotifications] = useState([]);
-  const [monthlyGoal, setMonthlyGoal] = useState(12);
+  const [monthlyGoal, setMonthlyGoal] = useState(0);
   const [minigameHistory, setMinigameHistory] = useState([]);
 
   // --- SETTINGS FORM STATE ---

@@ -4,7 +4,7 @@ const PatientTealCards = ({
   currentPain,
   initialPain,
   sessionsThisMonth = 0,
-  monthlyGoal = 8,
+  monthlyGoal = 0,
 }) => {
   const painValDisplay = currentPain !== null && currentPain !== undefined && currentPain !== "—" && currentPain !== ""
     ? String(currentPain).replace("/10", "").trim()

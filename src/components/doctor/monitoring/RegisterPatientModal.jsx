@@ -268,7 +268,6 @@ const RegisterPatientModal = ({ isOpen, onClose, onSuccess }) => {
               }}
             />
           </div>
-
           <div>
             <label
               style={{
@@ -280,13 +279,13 @@ const RegisterPatientModal = ({ isOpen, onClose, onSuccess }) => {
                 marginBottom: "6px",
               }}
             >
-              Primary Diagnosis / Condition *
+              Password *
             </label>
             <input
-              type="text"
-              placeholder="e.g. Stroke / Hemiparesis"
-              value={condition}
-              onChange={(e) => setCondition(e.target.value)}
+              type="password"
+              placeholder="Minimal 6 karakter"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               required
               style={{
                 width: "100%",
@@ -303,7 +302,70 @@ const RegisterPatientModal = ({ isOpen, onClose, onSuccess }) => {
               }}
             />
           </div>
-
+          <div>
+            <label
+              style={{
+                display: "block",
+                color: "#3A6870",
+                fontSize: "13.5px",
+                fontFamily: "Space Grotesk",
+                fontWeight: "600",
+                marginBottom: "6px",
+              }}
+            >
+              Primary Diagnosis / Condition *
+            </label>
+            <div style={{ position: "relative" }}>
+              <select
+                value={condition}
+                onChange={(e) => setCondition(e.target.value)}
+                required
+                style={{
+                  width: "100%",
+                  height: "44px",
+                  padding: "0 16px",
+                  background: "#F8FAFC",
+                  border: "1.5px solid #E2E8F0",
+                  borderRadius: "12px",
+                  color: condition ? "#0C2830" : "#94A3B8", // Biar abu-abu kalo belum milih
+                  fontSize: "14px",
+                  fontFamily: "Space Grotesk",
+                  outline: "none",
+                  appearance: "none",
+                  boxSizing: "border-box",
+                  cursor: "pointer",
+                }}
+              >
+                <option value="" disabled hidden>
+                  Select a condition...
+                </option>
+                <option value="Stroke">Stroke</option>
+                <option value="Phantom Limb Pain">Phantom Limb Pain</option>
+              </select>
+              <div
+                style={{
+                  position: "absolute",
+                  right: "16px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  pointerEvents: "none",
+                }}
+              >
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#7AAAB4"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </div>
+            </div>
+          </div>
           <div>
             <label
               style={{

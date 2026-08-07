@@ -10,6 +10,7 @@ router.use('/minigame',      require('./minigame.routes'));
 router.use('/programs',      require('./program.routes'));
 router.use('/notifications', require('./notification.routes'));
 router.use('/doctors',       require('./doctor.routes'));
+router.use('/landing-page',   require('./landingpage.routes'));
 
 // API info endpoint
 router.get('/', (req, res) => {
@@ -24,7 +25,8 @@ router.get('/', (req, res) => {
       minigame:      '/api/v1/minigame',
       programs:      '/api/v1/programs',
       notifications: '/api/v1/notifications',
-      doctors:       '/api/v1/doctors'
+      doctors:       '/api/v1/doctors',
+      landingpage:   '/api/v1/landing-page',
     },
     docs: '/api/v1/docs',
   });

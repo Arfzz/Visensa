@@ -14,7 +14,7 @@ const ActiveTherapyDashboard = ({
   stats,
   sessionLogs = [],
   notifications = [],
-  monthlyGoal = 8,
+  monthlyGoal = 0,
   onOpenPractice,
   onStartSession,
   onMarkAllRead,

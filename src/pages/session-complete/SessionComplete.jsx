@@ -14,6 +14,7 @@ const SessionComplete = () => {
   const [painScore, setPainScore] = useState(7);
   const [isSaving, setIsSaving] = useState(false);
   const [previousPain, setPreviousPain] = useState(null);
+  const [notes, setNotes] = useState("");
 
   useEffect(() => {
     const fetchPreviousPain = async () => {
@@ -50,6 +51,7 @@ const SessionComplete = () => {
         body: JSON.stringify({
           durationSeconds,
           painLevel: painScore,
+          notes: notes
         }),
       });
 
@@ -407,6 +409,8 @@ const SessionComplete = () => {
             </div>
             <textarea
               placeholder="Anything to note? (e.g. 'Felt a tingling sensation during exercise 4') — visible to your therapist."
+              value={notes} // <-- Ikat ke state
+              onChange={(e) => setNotes(e.target.value)} 
               style={{
                 width: "100%",
                 height: "100px",
