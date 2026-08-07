@@ -43,10 +43,10 @@ const sessionService = {
     const { data: log, error } = await supabase
       .from('exercise_logs')
       .insert([{
-        schedule_id:      scheduleId,
+        schedule_id: scheduleId,
         duration_seconds: data.durationSeconds,
-        session_number:   data.sessionNumber ?? null,
-        pain_level:       data.painLevel     ?? null,
+        session_number: data.sessionNumber ?? null,
+        pain_level: data.painLevel ?? null,
       }])
       .select()
       .single();
@@ -55,8 +55,8 @@ const sessionService = {
 
     // Update gamification_stats: increment completed_exercises
     await supabase.rpc('increment_completed_exercises', { p_patient_id: schedule.patient_id })
-      .then(() => {}) // Non-blocking — fails silently if RPC not set up yet
-      .catch(() => {});
+      .then(() => { }) // Non-blocking — fails silently if RPC not set up yet
+      .catch(() => { });
 
     return log;
   },
@@ -69,41 +69,49 @@ const sessionService = {
    * @param {object} data        — { durationSeconds, painLevel, sessionNumber? }
    */
   async logExerciseDirect(patientId, data) {
-    // 1. Fetch patient's doctor_id to create a valid patient_programs row
-    const { data: patient } = await supabase
-      .from('patient')
-      .select('doctor_id')
-      .eq('id', patientId)
-      .single();
-
-    let doctorId = patient?.doctor_id;
-
-    // Fallback: If no doctor assigned, find any doctor to prevent not-null constraint error
-    if (!doctorId) {
-      const { data: fallbackDoctor } = await supabase.from('doctor').select('id').limit(1).single();
-      if (fallbackDoctor) {
-        doctorId = fallbackDoctor.id;
-        // Optionally update patient's doctor
-        await supabase.from('patient').update({ doctor_id: doctorId }).eq('id', patientId);
-      }
-    }
-
-    if (!doctorId) throw new AppError('Tidak ada dokter di sistem untuk di-assign ke program ini.', 400);
-
-    // 2. Always create a new program to bypass the accidental UNIQUE constraint on program_id in exercise_logs
-    const { data: newProgram, error: nsError } = await supabase
+    // 1. Fetch the most recent active program for this patient
+    const { data: activePrograms } = await supabase
       .from('patient_programs')
-      .insert([{
-        patient_id: patientId,
-        doctor_id: doctorId,
-        status: 'completed', // Replaces is_active: false
-        start_date: new Date().toISOString()
-      }])
-      .select('id')
-      .single();
+      .select('id, doctor_id, status')
+      .eq('patient_id', patientId)
+      .order('created_at', { ascending: false })
+      .limit(1);
 
-    if (nsError) throw new AppError('Gagal membuat jadwal latihan: ' + nsError.message, 500);
-    const schedule = newProgram;
+    let schedule = activePrograms?.[0];
+
+    // 2. Fallback: If no program exists, create a fresh ACTIVE program
+    if (!schedule) {
+      const { data: patient } = await supabase
+        .from('patient')
+        .select('doctor_id')
+        .eq('id', patientId)
+        .single();
+        
+      let doctorId = patient?.doctor_id;
+      if (!doctorId) {
+        const { data: fallbackDoctor } = await supabase.from('doctor').select('id').limit(1).single();
+        if (fallbackDoctor) {
+          doctorId = fallbackDoctor.id;
+          await supabase.from('patient').update({ doctor_id: doctorId }).eq('id', patientId);
+        }
+      }
+
+      if (!doctorId) throw new AppError('Tidak ada dokter di sistem untuk di-assign ke program ini.', 400);
+
+      const { data: newProgram, error: nsError } = await supabase
+        .from('patient_programs')
+        .insert([{
+          patient_id: patientId,
+          doctor_id: doctorId,
+          status: 'Active',
+          start_date: new Date().toISOString()
+        }])
+        .select('id')
+        .single();
+
+      if (nsError) throw new AppError('Gagal membuat jadwal latihan: ' + nsError.message, 500);
+      schedule = newProgram;
+    }
 
     // 3. Derive running session number for this program
     const { count: totalLogs } = await supabase
@@ -113,11 +121,11 @@ const sessionService = {
 
     const sessionNumber = (totalLogs ?? 0) + 1;
 
-    // 4. Insert the log
+    // 4. Insert the exercise log attached to the ACTIVE program
     const { data: log, error } = await supabase
       .from('exercise_logs')
       .insert([{
-        schedule_id:      schedule.id,
+        schedule_id: schedule.id,
         duration_seconds: data.durationSeconds ?? 0,
         session_number:   data.sessionNumber ?? sessionNumber,
         pain_level:       data.painLevel ?? null,
@@ -130,8 +138,8 @@ const sessionService = {
 
     // Best-effort: update gamification_stats
     await supabase.rpc('increment_completed_exercises', { p_patient_id: patientId })
-      .then(() => {})
-      .catch(() => {});
+      .then(() => { })
+      .catch(() => { });
 
     return log;
   },
@@ -143,7 +151,7 @@ const sessionService = {
    */
   async getPatientExerciseLogs(patientId, { page, limit }) {
     const from = (page - 1) * limit;
-    const to   = from + limit - 1;
+    const to = from + limit - 1;
 
     // Step 1: Get all program IDs for this patient
     const { data: programs } = await supabase
@@ -171,7 +179,7 @@ const sessionService = {
    */
   async getAllExerciseLogs({ page, limit, patientId }) {
     const from = (page - 1) * limit;
-    const to   = from + limit - 1;
+    const to = from + limit - 1;
 
     let programIds = null;
     if (patientId) {
@@ -198,12 +206,12 @@ const sessionService = {
     return { data: data ?? [], total: count ?? 0 };
   },
 
-  async getMonthlyGoal (userId) {
+  async getMonthlyGoal(userId) {
     // 1. Dapetin tanggal awal dan akhir bulan ini
     const date = new Date();
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
-    
+
     const firstDay = `${year}-${month}-01`;
     const lastDayObj = new Date(year, date.getMonth() + 1, 0);
     const lastDay = `${year}-${month}-${String(lastDayObj.getDate()).padStart(2, '0')}`;
@@ -221,7 +229,7 @@ const sessionService = {
 
     // 3. Cari program yang paling baru/aktif buat pasien ini
     const { data: activePrograms, error: progErr } = await supabase
-      .from('patient_programs') 
+      .from('patient_programs')
       .select('id, frequency_per_week')
       .eq('patient_id', patient.id)
       .order('created_at', { ascending: false })
@@ -280,12 +288,12 @@ const sessionService = {
     const { data: log, error } = await supabase
       .from('minigame_logs')
       .insert([{
-        patient_id:       patientId,
-        minigame_id:      data.minigameId ?? null,
-        score:            data.score,
+        patient_id: patientId,
+        minigame_id: data.minigameId ?? null,
+        score: data.score,
         duration_seconds: data.durationSeconds,
-        max_combo:        data.maxCombo ?? 0,
-        played_at:        new Date().toISOString(),
+        max_combo: data.maxCombo ?? 0,
+        played_at: new Date().toISOString(),
       }])
       .select()
       .single();
@@ -303,7 +311,7 @@ const sessionService = {
    */
   async getPatientMinigameLogs(patientId, { page, limit }) {
     const from = (page - 1) * limit;
-    const to   = from + limit - 1;
+    const to = from + limit - 1;
 
     const { data, error, count } = await supabase
       .from('minigame_logs')
@@ -357,7 +365,7 @@ const sessionService = {
       .from('patient_programs')
       .select('id')
       .eq('patient_id', patientId);
-    
+
     let allExerciseLogs = [];
     if (programs && programs.length > 0) {
       const pIds = programs.map(p => p.id);
@@ -373,10 +381,16 @@ const sessionService = {
 
     // Compute Streak Logic
     const allDates = new Set();
+
+    const getLocalDateStr = (isoString) => {
+      const d = new Date(isoString);
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    };
+
     // Include minigames with duration >= 60s
-    (minigames || []).filter(m => m.duration_seconds >= 60 && m.played_at).forEach(m => allDates.add(m.played_at.split('T')[0]));
+    (minigames || []).filter(m => m.duration_seconds >= 60 && m.played_at).forEach(m => allDates.add(getLocalDateStr(m.played_at)));
     // Include exercises with duration >= 60s
-    (allExerciseLogs || []).filter(e => e.duration_seconds >= 60 && e.created_at).forEach(e => allDates.add(e.created_at.split('T')[0]));
+    (allExerciseLogs || []).filter(e => e.duration_seconds >= 60 && e.created_at).forEach(e => allDates.add(getLocalDateStr(e.created_at)));
 
     const sortedDates = Array.from(allDates).sort();
 
@@ -406,7 +420,7 @@ const sessionService = {
       }
 
       const diffDays = Math.round((dateObj - lastDate) / (1000 * 60 * 60 * 24));
-      
+
       if (diffDays === 1) {
         currentStreak++;
         lastDate = dateObj;
@@ -428,9 +442,9 @@ const sessionService = {
     if (lastDate) {
       // We use current server date, midnight
       const today = new Date();
-      today.setHours(0,0,0,0);
+      today.setHours(0, 0, 0, 0);
       const last = new Date(lastDate);
-      last.setHours(0,0,0,0);
+      last.setHours(0, 0, 0, 0);
 
       const diffDays = Math.round((today - last) / (1000 * 60 * 60 * 24));
 
@@ -470,28 +484,34 @@ const sessionService = {
     try {
       const { data: existing } = await supabase
         .from('gamification_stats')
-        .select('total_minigame_score, current_streak, highest_streak')
+        .select('*')
         .eq('patient_id', patientId)
-        .single();
+        .maybeSingle();
 
-      const today          = new Date().toDateString();
-      const currentStreak  = existing ? existing.current_streak + 1 : 1;
-      const highestStreak  = existing ? Math.max(existing.highest_streak, currentStreak) : 1;
-      const totalScore     = existing ? existing.total_minigame_score + newScore : newScore;
+      const totalScore = existing ? (existing.total_minigame_score || 0) + newScore : newScore;
 
-      await supabase
-        .from('gamification_stats')
-        .upsert({
-          patient_id:          patientId,
-          total_minigame_score: totalScore,
-          current_streak:       currentStreak,
-          highest_streak:       highestStreak,
-          updated_at:           new Date().toISOString(),
-        }, { onConflict: 'patient_id' });
-    } catch {
-      // Non-blocking — stat update failure should not block session logging
+      if (existing) {
+        await supabase
+          .from('gamification_stats')
+          .update({
+            total_minigame_score: totalScore,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('patient_id', patientId);
+      } else {
+        await supabase
+          .from('gamification_stats')
+          .insert([{
+            patient_id: patientId,
+            total_minigame_score: totalScore,
+            updated_at: new Date().toISOString(),
+          }]);
+      }
+    } catch (e) {
+      console.error('Failed to update gamification stats:', e);
     }
-  },
+  }
 };
+
 
 module.exports = sessionService;
