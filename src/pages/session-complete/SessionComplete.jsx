@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
-const API_BASE = 'http://localhost:3000/api/v1';
+const API_BASE = import.meta.env.VITE_API_URL || "https://visensa-production.up.railway.app/api/v1";
 
 const SessionComplete = () => {
   const navigate = useNavigate();

@@ -40,7 +40,7 @@ const Register = () => {
 
     try {
       // Sesuaikan URL dan port dengan backend Express lu
-      const response = await fetch('http://localhost:3000/api/v1/auth/register', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || "https://visensa-production.up.railway.app/api/v1"}/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

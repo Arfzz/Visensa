@@ -184,7 +184,7 @@ export const PianoTilesGame = ({
       setIsSaving(true);
       console.log("Menyimpan data ke DB...", payload);
       
-      const response = await fetch("http://localhost:3000/api/v1/minigame/logs", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || "https://visensa-production.up.railway.app/api/v1"}/minigame/logs`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

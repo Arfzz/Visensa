@@ -21,7 +21,7 @@ export default function TestimonialSection() {
   const [testimonials, setTestimonials] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  const API_BASE = "http://localhost:3000/api/v1";
+  const API_BASE = import.meta.env.VITE_API_URL || "https://visensa-production.up.railway.app/api/v1";
 
   // ── Scroll trigger: run bars from 0 → target width ───────────────
   useEffect(() => {

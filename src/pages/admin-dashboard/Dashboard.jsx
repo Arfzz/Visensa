@@ -67,7 +67,7 @@ const Dashboard = () => {
     (async () => {
       try {
         const token = localStorage.getItem("accessToken");
-        const res = await fetch("http://localhost:3000/api/v1/notifications", {
+        const res = await fetch(`${import.meta.env.VITE_API_URL || "https://visensa-production.up.railway.app/api/v1"}/notifications`, {
           headers: {
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
           },
@@ -87,7 +87,7 @@ const Dashboard = () => {
     (async () => {
       try {
         const token = localStorage.getItem("accessToken");
-        const res = await fetch("http://localhost:3000/api/v1/patients", {
+        const res = await fetch(`${import.meta.env.VITE_API_URL || "https://visensa-production.up.railway.app/api/v1"}/patients`, {
           headers: {
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
           },
@@ -144,7 +144,7 @@ const Dashboard = () => {
         const progData = await fetchProgramFromApi(targetId);
 
         // 2. Fetch Specific Patient Profile Details from DB
-        const patRes = await fetch(`http://localhost:3000/api/v1/patients/${targetId}`, { headers });
+        const patRes = await fetch(`${import.meta.env.VITE_API_URL || "https://visensa-production.up.railway.app/api/v1"}/patients/${targetId}`, { headers });
         let dbPatient = null;
         if (patRes.ok) {
           const result = await patRes.json();
@@ -152,7 +152,7 @@ const Dashboard = () => {
         }
 
         // 3. Fetch Patient Feedback Logs from DB
-        const logsRes = await fetch(`http://localhost:3000/api/v1/patients/${targetId}/feedback-logs`, { headers });
+        const logsRes = await fetch(`${import.meta.env.VITE_API_URL || "https://visensa-production.up.railway.app/api/v1"}/patients/${targetId}/feedback-logs`, { headers });
         let dbLogs = [];
         if (logsRes.ok) {
           const result = await logsRes.json();
@@ -213,7 +213,7 @@ const Dashboard = () => {
     try {
       const token = localStorage.getItem("accessToken");
       if (targetId) {
-        await fetch("http://localhost:3000/api/v1/programs", {
+        await fetch(`${import.meta.env.VITE_API_URL || "https://visensa-production.up.railway.app/api/v1"}/programs`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
