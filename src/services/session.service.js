@@ -121,6 +121,7 @@ const sessionService = {
         duration_seconds: data.durationSeconds ?? 0,
         session_number:   data.sessionNumber ?? sessionNumber,
         pain_level:       data.painLevel ?? null,
+        notes:            data.notes ?? null
       }])
       .select()
       .single();
