@@ -17,7 +17,24 @@ const app = express();
 app.use(helmet());
 
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+  origin: function (origin, callback) {
+    const allowedOrigins = [
+      'http://localhost:5173',
+      'http://127.0.0.1:5173'
+    ];
+    
+    // Parse multiple comma-separated URLs if provided
+    if (process.env.CORS_ORIGIN) {
+      process.env.CORS_ORIGIN.split(',').forEach(url => allowedOrigins.push(url.trim()));
+    }
+
+    // Allow requests with no origin (like Postman or curl) or if origin is in our allowed list
+    if (!origin || allowedOrigins.includes(origin) || allowedOrigins.includes('*')) {
+      callback(null, true);
+    } else {
+      callback(new Error('Blocked by CORS'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
