@@ -1,15 +1,16 @@
 import React, { useRef } from "react";
-import { Play, Lock } from "lucide-react";
 import avatarHands from "../../../assets/avatar-hands.png";
+import { Lock, Play, Check } from "lucide-react";
 
 const PatientRightSidebar = ({
   isCompletedReview = false,
+  isTodayCompleted = false,
   onStartSession,
   currentPain,
   initialPain,
   currentWeek = 1,
   completedSessions = 0,
-  jointAccuracy,
+  totalDurationMinutes = 0,
   doctorName,
   nextReviewDate,
   isTodayScheduled = true,
@@ -36,7 +37,6 @@ const PatientRightSidebar = ({
     painSubtext = "no data";
   }
 
-  const accuracyDisplay = jointAccuracy !== null && jointAccuracy !== undefined ? jointAccuracy : 0;
   const docNameDisplay = doctorName ? (doctorName.startsWith("Dr.") ? doctorName : `Dr. ${doctorName}`) : "Clinical Team";
   const reviewDateDisplay = nextReviewDate || "Schedule Pending";
 
@@ -120,6 +120,31 @@ const PatientRightSidebar = ({
             <Lock size={16} />
             <span>Scheduled Rest Day</span>
           </button>
+        ) : isTodayCompleted ? (
+          <button
+            disabled
+            type="button"
+            style={{
+              width: "100%",
+              padding: "16px",
+              background: "rgba(75, 168, 130, 0.15)", // Warna hijau sukses tipis
+              border: "1.5px solid rgba(75, 168, 130, 0.4)",
+              borderRadius: "16px",
+              color: "#4BA882", // Teks hijau sukses
+              fontSize: "15px",
+              fontFamily: "Space Grotesk, sans-serif",
+              fontWeight: "700",
+              cursor: "not-allowed",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              gap: "8px",
+              marginBottom: "12px",
+            }}
+          >
+            <Check size={16} />
+            <span>Today's Session Done!</span>
+          </button>
         ) : (
           <button
             onClick={onStartSession}
@@ -187,7 +212,7 @@ const PatientRightSidebar = ({
           }}
         />
 
-        {/* 1. JOINT ACCURACY CARD */}
+        {/* 1. TOTAL TIME CARD (Pengganti Joint Accuracy) */}
         <div
           className="animate-float-1"
           style={{
@@ -197,50 +222,46 @@ const PatientRightSidebar = ({
             background: "white",
             padding: "16px",
             borderRadius: "18px",
-            boxShadow: "0 8px 24px rgba(59,184,176,0.15)",
-            border: "1.5px solid rgba(59,184,176,0.2)",
+            boxShadow: "0 8px 24px rgba(99, 102, 241, 0.15)", 
+            border: "1.5px solid rgba(99, 102, 241, 0.2)",
             zIndex: 3,
           }}
         >
           <div
             style={{
-              color: "#7AAAB4",
+              color: "#818CF8",
               fontSize: "11px",
               fontFamily: "Space Mono, monospace",
               marginBottom: "8px",
               letterSpacing: "1px",
             }}
           >
-            JOINT ACCURACY
+            TOTAL DURATION
           </div>
-          <div style={{ display: "flex", alignItems: "baseline", gap: "2px", marginBottom: "6px" }}>
+          <div style={{ display: "flex", alignItems: "baseline", gap: "4px", marginBottom: "6px" }}>
             <span
               style={{
-                color: "#3ED8C8",
+                color: "#4F46E5",
                 fontSize: "30px",
                 fontFamily: "Space Mono, monospace",
                 fontWeight: "700",
               }}
             >
-              {accuracyDisplay}
+              {totalDurationMinutes}
             </span>
-            <span style={{ color: "#7AAAB4", fontSize: "14px", fontFamily: "Space Mono, monospace" }}>
-              %
+            <span style={{ color: "#818CF8", fontSize: "14px", fontFamily: "Space Mono, monospace" }}>
+              MINS
             </span>
           </div>
-          <div style={{ display: "flex", gap: "4px" }}>
-            {[0.5, 0.6, 0.7, 0.8, 1].map((opacity, idx) => (
-              <div
-                key={idx}
-                style={{
-                  width: "14px",
-                  height: "8px",
-                  background: "#3ED8C8",
-                  borderRadius: "2px",
-                  opacity,
-                }}
-              />
-            ))}
+          <div
+            style={{
+              color: "#818CF8",
+              fontSize: "12px",
+              fontWeight: "600",
+              fontFamily: "Space Grotesk, sans-serif",
+            }}
+          >
+            All-time practice
           </div>
         </div>
 

@@ -11,13 +11,14 @@ const PatientFeedbackOverview = ({
   onRefreshData,
 }) => {
   const [isExtending, setIsExtending] = useState(false);
+  const [successModal, setSuccessModal] = useState({ isOpen: false, message: "" });
 
   const logs = useMemo(() => {
     return Array.isArray(feedbackLogs) ? feedbackLogs : [];
   }, [feedbackLogs]);
 
   // --- EXTEND PROGRAM HANDLER (POST /api/v1/programs/:programId/extend) ---
-  const handleExtendProgram = async (additionalWeeks = 2) => {
+const handleExtendProgram = async (additionalWeeks = 2) => {
     const programId = program?.id;
     if (!programId) {
       alert("No active program found to extend.");
@@ -37,8 +38,18 @@ const PatientFeedbackOverview = ({
       });
 
       if (res.ok) {
-        alert(`Successfully extended program protocol by +${additionalWeeks} weeks!`);
+        // HAPUS alert lama, GANTI pake state modal
+        setSuccessModal({ 
+          isOpen: true, 
+          message: `Berhasil memperpanjang jadwal terapi +${additionalWeeks} minggu!` 
+        });
+        
         if (onRefreshData) onRefreshData();
+
+        // Otomatis nutup modal setelah 3 detik biar user ga repot nge-klik
+        setTimeout(() => {
+          setSuccessModal({ isOpen: false, message: "" });
+        }, 3000);
       } else {
         const errJson = await res.json();
         alert(`Failed to extend program: ${errJson.message || "Unknown error"}`);
@@ -388,6 +399,58 @@ const PatientFeedbackOverview = ({
           )}
         </div>
       </div>
+      {successModal.isOpen && (
+        <div style={{
+          position: "fixed",
+          top: 0, left: 0, right: 0, bottom: 0,
+          background: "rgba(0, 20, 25, 0.6)",
+          backdropFilter: "blur(4px)",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          zIndex: 9999
+        }}>
+          <div style={{
+            background: "white",
+            padding: "32px",
+            borderRadius: "24px",
+            width: "320px",
+            textAlign: "center",
+            boxShadow: "0 10px 40px rgba(0,0,0,0.1)"
+          }}>
+            <div style={{
+              width: "60px", height: "60px", 
+              background: "#E6F6F4", 
+              borderRadius: "50%", 
+              display: "flex", justifyContent: "center", alignItems: "center",
+              margin: "0 auto 20px"
+            }}>
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#4BA882" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </div>
+            
+            <h3 style={{ margin: "0 0 8px 0", color: "#0C2830", fontFamily: "Space Grotesk", fontSize: "20px" }}>
+              Berhasil!
+            </h3>
+            <p style={{ margin: "0 0 24px 0", color: "#7AAAB4", fontFamily: "Space Grotesk", fontSize: "15px" }}>
+              {successModal.message}
+            </p>
+            
+            <button 
+              onClick={() => setSuccessModal({ isOpen: false, message: "" })}
+              style={{
+                width: "100%", padding: "12px", background: "#0099A6", 
+                color: "white", border: "none", borderRadius: "12px", 
+                fontFamily: "Space Grotesk", fontWeight: "600", fontSize: "15px",
+                cursor: "pointer"
+              }}
+            >
+              Tutup
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

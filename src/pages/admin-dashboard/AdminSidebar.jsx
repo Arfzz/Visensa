@@ -204,34 +204,6 @@ const AdminSidebar = ({
             <LayoutDashboard size={20} style={{ flexShrink: 0 }} />
             {isSidebarOpen && <span>Overview</span>}
           </button>
-
-          <button
-            onClick={() => setActiveView("schedules")}
-            style={{
-              width: "100%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: isSidebarOpen ? "flex-start" : "center",
-              gap: "12px",
-              padding: isSidebarOpen ? "12px 16px" : "12px 0",
-              borderRadius: "12px",
-              border: "none",
-              background:
-                activeView === "schedules"
-                  ? "linear-gradient(135deg, #0099A6 0%, #007580 100%)"
-                  : "transparent",
-              color: activeView === "schedules" ? "#FFFFFF" : "#7AAAB4",
-              fontSize: "14px",
-              fontFamily: "Space Grotesk, sans-serif",
-              fontWeight: activeView === "schedules" ? "700" : "600",
-              cursor: "pointer",
-              transition: "all 0.2s ease",
-            }}
-            title="Therapy Schedules"
-          >
-            <Calendar size={20} style={{ flexShrink: 0 }} />
-            {isSidebarOpen && <span>Therapy Schedules</span>}
-          </button>
         </div>
 
         {/* --- DIVIDER --- */}

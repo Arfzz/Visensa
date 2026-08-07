@@ -683,35 +683,7 @@ const SessionComplete = () => {
             >
               {isSaving ? "Saving..." : "Back to Dashboard"}
             </button>
-            <button
-              onClick={() => handleSubmit(true)}
-              disabled={isSaving}
-              style={{
-                width: "100%",
-                padding: "24px 20px",
-                background: isSaving
-                  ? "#E2E8F0"
-                  : "#FFFFFF",
-                borderRadius: "16px",
-                border: "2px solid #0099A6",
-                color: isSaving ? "#7AAAB4" : "#0099A6",
-                fontSize: "15px",
-                fontFamily: "Space Grotesk",
-                fontWeight: "700",
-                cursor: isSaving ? "not-allowed" : "pointer",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                alignItems: "center",
-                textAlign: "center",
-                lineHeight: "1.6",
-                whiteSpace: "normal",
-                gap: "8px",
-                transition: "all 0.2s ease"
-              }}
-            >
-              Wahai Kesatria, sebelum dikau menantang gelanggang yang sesungguhnya, berangkatlah menuju Balairung Penempaan Irama. Di sanalah jemari dikau akan ditempa tanpa belas kasihan, hingga setiap sentuhan menjelma setepat bidikan pemanah terbaik di seluruh negeri. Janganlah kembali sebelum irama itu tunduk kepada kehendakmu.
-            </button>
+
           </div>
         </div>
       </div>

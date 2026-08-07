@@ -25,6 +25,8 @@ export default function Navbar() {
       try {
         setUser(JSON.parse(userStr));
       } catch (e) { }
+    } else {
+      setUser(null);
     }
   }, []);
 

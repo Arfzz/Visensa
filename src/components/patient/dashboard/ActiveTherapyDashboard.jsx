@@ -28,10 +28,14 @@ const ActiveTherapyDashboard = ({
     patient?.doctor?.name ||
     program?.doctor_name ||
     null;
+  const totalDurationMinutes = Math.round(
+    (sessionLogs?.reduce((total, log) => total + (log.durationSeconds || 0), 0) || 0) / 60
+  );
   const programStatus =
     program?.status === "Completed / Review Required"
       ? "Completed / Review Required"
       : program?.status || "Active";
+  const isTodayCompleted = sessionLogs?.some((log) => log.isToday) || false;
   const isCompletedReview = program?.status === "Completed / Review Required";
 
   const totalSessionsDone = sessionLogs.length;
@@ -196,12 +200,13 @@ const ActiveTherapyDashboard = ({
       {/* I. RIGHT SIDEBAR COLUMN */}
       <PatientRightSidebar
         isCompletedReview={isCompletedReview}
+        isTodayCompleted={isTodayCompleted}
         onStartSession={onStartSession}
         currentPain={currentPain}
         initialPain={startPain}
         currentWeek={currentWeek}
         completedSessions={completedExercises}
-        jointAccuracy={jointAccuracy}
+        totalDurationMinutes={totalDurationMinutes}
         doctorName={doctorName}
         nextReviewDate={nextReviewDate}
         isTodayScheduled={isTodayScheduled}

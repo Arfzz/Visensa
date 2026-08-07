@@ -1,11 +1,29 @@
 import { useMemo } from "react";
-import { LayoutDashboard, Clock, Gamepad2, Settings, Flame, Clock1, Clock10Icon } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { 
+  LayoutDashboard, 
+  Clock, 
+  Gamepad2, 
+  Settings, 
+  Flame, 
+  Clock1, 
+  Clock10Icon, 
+  LogOut 
+} from "lucide-react";
 import visensaLogo from "../../assets/visensa-logo.png";
 import { useStreakStore } from "../../features/gamification/streak/useStreakStore";
 
 export const PatientSidebar = ({ activeMenu, onSelectMenu }) => {
-  // --- STORE DATA ---
+  // --- STORE & NAVIGATION ---
   const currentStreak = useStreakStore((state) => state.currentStreak);
+  const navigate = useNavigate();
+
+  // --- LOGIC LOGOUT ---
+  const handleLogout = () => {
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("user");
+    navigate("/login"); 
+  };
 
   // --- MENU ITEMS WITH ICONS ---
   const menuItems = useMemo(
@@ -18,6 +36,7 @@ export const PatientSidebar = ({ activeMenu, onSelectMenu }) => {
     ],
     []
   );
+
   return (
     <>
       <style>
@@ -33,6 +52,9 @@ export const PatientSidebar = ({ activeMenu, onSelectMenu }) => {
             box-sizing: border-box;
             z-index: 10;
             box-shadow: 0px 13px 80px rgba(226, 236, 249, 0.25);
+          }
+          .logout-btn {
+            margin-top: auto; 
           }
           @media (max-width: 1024px) {
             .patient-sidebar {
@@ -93,100 +115,144 @@ export const PatientSidebar = ({ activeMenu, onSelectMenu }) => {
             .menu-badge svg {
               display: none !important;
             }
+            .logout-btn {
+              margin-top: 0 !important; 
+            }
           }
         `}
       </style>
       <div className="patient-sidebar">
-      {/* --- SIDEBAR HEADER LOGO --- */}
-      <div className="sidebar-header" style={{ display: "flex", alignItems: "center", gap: "12px", paddingLeft: "15px", marginBottom: "45px" }}>
-        <img src={visensaLogo} alt="VISENSA" style={{ width: "24px", height: "auto" }} />
-        <div style={{ color: "#F0FAFB", fontSize: "26px", fontWeight: "800", letterSpacing: "1px", fontFamily: "Space Grotesk, sans-serif" }}>
-          VISENSA
+        {/* --- SIDEBAR HEADER LOGO --- */}
+        <div className="sidebar-header" style={{ display: "flex", alignItems: "center", gap: "12px", paddingLeft: "15px", marginBottom: "45px" }}>
+          <img src={visensaLogo} alt="VISENSA" style={{ width: "24px", height: "auto" }} />
+          <div style={{ color: "#F0FAFB", fontSize: "26px", fontWeight: "800", letterSpacing: "1px", fontFamily: "Space Grotesk, sans-serif" }}>
+            VISENSA
+          </div>
         </div>
-      </div>
 
-      {/* --- MENU NAVIGATION LIST WITH ICONS --- */}
-      <div className="sidebar-menu-list" style={{ display: "flex", flexDirection: "column", gap: "12px", flex: 1 }}>
-        {menuItems.map((item) => {
-          const isActive = activeMenu === item.id;
-          const IconComponent = item.icon;
+        {/* --- MENU NAVIGATION LIST WITH ICONS --- */}
+        <div className="sidebar-menu-list" style={{ display: "flex", flexDirection: "column", gap: "12px", flex: 1 }}>
+          {menuItems.map((item) => {
+            const isActive = activeMenu === item.id;
+            const IconComponent = item.icon;
 
-          return (
-            <div
-              key={item.id}
-              className={`menu-item-container ${isActive ? "active" : ""}`}
-              onClick={() => onSelectMenu(item.id)}
-              style={{
-                padding: "16px 20px",
-                background: isActive ? "linear-gradient(135deg, #C8F135 0%, #96C000 100%)" : "transparent",
-                borderRadius: "16px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                gap: "12px",
-                cursor: "pointer",
-                boxShadow: isActive ? "0px 5px 17px rgba(31, 168, 143, 0.30)" : "none",
-                transition: "all 0.2s ease",
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
-                <IconComponent
-                  size={20}
-                  color={isActive ? "#1A2332" : "#7AAAB4"}
-                  strokeWidth={2.5}
-                  style={{ flexShrink: 0 }}
-                />
-                <div
-                  className="menu-item-text"
-                  style={{
-                    color: isActive ? "#1A2332" : "#7AAAB4",
-                    fontSize: "16.5px",
-                    fontWeight: isActive ? "700" : "500",
-                    fontFamily: "Space Grotesk, sans-serif",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {item.label}
-                </div>
-              </div>
-
-              {/* STREAK NUMERIC BADGE FOR INTERACTIVE PRACTICE */}
-              {item.hasBadge && (
-                <div
-                  className="menu-badge"
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "4px",
-                    padding: "4px 10px",
-                    borderRadius: "12px",
-                    background: isActive ? "rgba(26, 35, 50, 0.15)" : "rgba(245, 158, 11, 0.15)",
-                    border: isActive ? "1px solid rgba(26, 35, 50, 0.25)" : "1px solid rgba(245, 158, 11, 0.3)",
-                    flexShrink: 0,
-                  }}
-                >
-                  <Flame
-                    size={14}
-                    color={isActive ? "#1A2332" : "#F59E0B"}
-                    fill={isActive ? "rgba(26, 35, 50, 0.3)" : "rgba(245, 158, 11, 0.3)"}
+            return (
+              <div
+                key={item.id}
+                className={`menu-item-container ${isActive ? "active" : ""}`}
+                onClick={() => onSelectMenu(item.id)}
+                style={{
+                  padding: "16px 20px",
+                  background: isActive ? "linear-gradient(135deg, #C8F135 0%, #96C000 100%)" : "transparent",
+                  borderRadius: "16px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: "12px",
+                  cursor: "pointer",
+                  boxShadow: isActive ? "0px 5px 17px rgba(31, 168, 143, 0.30)" : "none",
+                  transition: "all 0.2s ease",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+                  <IconComponent
+                    size={20}
+                    color={isActive ? "#1A2332" : "#7AAAB4"}
+                    strokeWidth={2.5}
+                    style={{ flexShrink: 0 }}
                   />
-                  <span
+                  <div
+                    className="menu-item-text"
                     style={{
-                      color: isActive ? "#1A2332" : "#F59E0B",
-                      fontSize: "13.5px",
-                      fontWeight: "700",
-                      fontFamily: "Space Mono, monospace",
+                      color: isActive ? "#1A2332" : "#7AAAB4",
+                      fontSize: "16.5px",
+                      fontWeight: isActive ? "700" : "500",
+                      fontFamily: "Space Grotesk, sans-serif",
+                      whiteSpace: "nowrap",
                     }}
                   >
-                    {currentStreak}
-                  </span>
+                    {item.label}
+                  </div>
                 </div>
-              )}
+
+                {item.hasBadge && (
+                  <div
+                    className="menu-badge"
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                      padding: "4px 10px",
+                      borderRadius: "12px",
+                      background: isActive ? "rgba(26, 35, 50, 0.15)" : "rgba(245, 158, 11, 0.15)",
+                      border: isActive ? "1px solid rgba(26, 35, 50, 0.25)" : "1px solid rgba(245, 158, 11, 0.3)",
+                      flexShrink: 0,
+                    }}
+                  >
+                    <Flame
+                      size={14}
+                      color={isActive ? "#1A2332" : "#F59E0B"}
+                      fill={isActive ? "rgba(26, 35, 50, 0.3)" : "rgba(245, 158, 11, 0.3)"}
+                    />
+                    <span
+                      style={{
+                        color: isActive ? "#1A2332" : "#F59E0B",
+                        fontSize: "13.5px",
+                        fontWeight: "700",
+                        fontFamily: "Space Mono, monospace",
+                      }}
+                    >
+                      {currentStreak}
+                    </span>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+
+          {/* TOMBOL LOGOUT */}
+          <div
+            className="menu-item-container logout-btn"
+            onClick={handleLogout}
+            style={{
+              padding: "16px 20px",
+              background: "transparent",
+              borderRadius: "16px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "flex-start",
+              gap: "12px",
+              cursor: "pointer",
+              transition: "all 0.2s ease",
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(239, 68, 68, 0.1)")}
+            onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+              <LogOut
+                size={20}
+                color="#EF4444"
+                strokeWidth={2.5}
+                style={{ flexShrink: 0 }}
+              />
+              <div
+                className="menu-item-text"
+                style={{
+                  color: "#EF4444",
+                  fontSize: "16.5px",
+                  fontWeight: "600",
+                  fontFamily: "Space Grotesk, sans-serif",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                Log Out
+              </div>
             </div>
-          );
-        })}
+          </div>
+          {/* END LOGOUT */}
+
+        </div>
       </div>
-    </div>
     </>
   );
 };
