@@ -4,6 +4,7 @@ import PatientSidebar from "./PatientSidebar";
 import PatientOnboardingCard from "../../components/patient/dashboard/PatientOnboardingCard";
 import ActiveTherapyDashboard from "../../components/patient/dashboard/ActiveTherapyDashboard";
 import PatientSessionsView from "../../components/patient/dashboard/PatientSessionsView";
+import PatientSessionDetail from "../../components/patient/dashboard/PatientSessionDetail";
 import InteractivePracticeHub from "../../features/gamification/interactive-practice/InteractivePracticeHub";
 import { useProgramScheduleStore } from "../../store/useProgramScheduleStore";
 import { useStreakStore } from "../../features/gamification/streak/useStreakStore";
@@ -184,7 +185,7 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
     };
 
     fetchData();
-  }, [fetchProgramFromApi, user?.id]);
+  }, [fetchProgramFromApi, user?.id, activeMenu]);
 
   // --- PROGRAM ASSIGNMENT GUARD ---
   const isExplicitlyUnassigned =
@@ -232,6 +233,11 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
     localStorage.removeItem("user");
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
+    for (let key in localStorage) {
+      if (key.includes('streak')) {
+        localStorage.removeItem(key);
+      }
+    }
     navigate("/");
   };
 
@@ -287,12 +293,19 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
           </div>
         ) : activeMenu === "Sessions" ? (
           /* SESSIONS TAB */
-          <PatientSessionsView
-            sessionLogs={sessionLogs}
-            onSelectSession={setSelectedSession}
-            notifications={notifications}
-            onMarkAllRead={handleMarkAllNotificationsRead}
-          />
+          selectedSession ? (
+            <PatientSessionDetail
+              session={selectedSession}
+              onBack={() => setSelectedSession(null)}
+            />
+          ) : (
+            <PatientSessionsView
+              sessionLogs={sessionLogs}
+              onSelectSession={setSelectedSession}
+              notifications={notifications}
+              onMarkAllRead={handleMarkAllNotificationsRead}
+            />
+          )
         ) : activeMenu === "Game History" || activeMenu === "Practice History" ? (
           /* PRACTICE HISTORY TAB WITH PIANO MUSIC ICON */
           <div className="hide-scroll" style={{ flex: 1, overflowY: "auto", paddingRight: "10px" }}>
@@ -347,10 +360,10 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
 
                       <div style={{ textAlign: "right" }}>
                         <div style={{ color: "#0099A6", fontFamily: "Space Mono, monospace", fontWeight: "700", fontSize: "14px" }}>
-                          {m.played_at ? new Date(m.played_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "Recent"}
+                          {new Date(m.played_at || m.created_at || Date.now()).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                         </div>
                         <div style={{ color: "#7AAAB4", fontSize: "12px", fontFamily: "Space Mono, monospace", marginTop: "2px" }}>
-                          {m.played_at ? new Date(m.played_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ""}
+                          {new Date(m.played_at || m.created_at || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </div>
                       </div>
                     </div>
@@ -417,6 +430,7 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
             onMarkAllRead={handleMarkAllNotificationsRead}
           />
         )}
+
       </div>
     </>
   );

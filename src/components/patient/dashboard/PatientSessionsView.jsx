@@ -168,11 +168,10 @@ const PatientSessionsView = ({
                   style={{
                     display: "flex",
                     alignItems: "center",
-                    padding: "20px 24px",
-                    borderRadius: "18px",
-                    background: "white",
-                    border: "1.5px solid #C4E8EC",
-                    boxShadow: "0 2px 10px rgba(0,0,0,0.02)",
+                    padding: "14px 18px",
+                    borderRadius: "14px",
+                    background: session.boxBg || (isToday ? "rgba(0, 153, 166, 0.04)" : "#F8FAFC"),
+                    border: "1px solid #E2E8F0",
                     cursor: "pointer",
                     transition: "all 0.15s ease",
                   }}
@@ -180,34 +179,35 @@ const PatientSessionsView = ({
                   {/* DOT INDICATOR */}
                   <div
                     style={{
-                      width: "10px",
-                      height: "10px",
+                      width: "8px",
+                      height: "8px",
                       borderRadius: "50%",
                       background: isToday ? "#0099A6" : "#E2E8F0",
-                      marginRight: "20px",
+                      marginRight: "16px",
                       flexShrink: 0,
                     }}
                   />
 
-                  {/* SESSION DETAILS */}
+                  {/* DATE & STATUS */}
                   <div style={{ flex: 1 }}>
                     <div
                       style={{
                         display: "flex",
                         alignItems: "center",
-                        gap: "10px",
+                        gap: "8px",
                         marginBottom: "4px",
+                        flexWrap: "wrap",
                       }}
                     >
                       <span
                         style={{
                           color: "#0C2830",
-                          fontSize: "16px",
-                          fontWeight: "700",
+                          fontSize: "15px",
+                          fontWeight: "600",
                           fontFamily: "Space Grotesk, sans-serif",
                         }}
                       >
-                        {session.title || session.date || "Therapy Session"}
+                        {session.date || session.title || "Therapy Session"}
                       </span>
 
                       <span
@@ -215,9 +215,9 @@ const PatientSessionsView = ({
                           background: session.statusBg || "rgba(0, 153, 166, 0.10)",
                           border: `1px solid ${session.statusColor || "#0099A6"}30`,
                           color: session.statusColor || "#0099A6",
-                          padding: "3px 12px",
-                          borderRadius: "16px",
-                          fontSize: "12.5px",
+                          padding: "2px 10px",
+                          borderRadius: "14px",
+                          fontSize: "12px",
                           fontFamily: "Space Mono, monospace",
                           fontWeight: "700",
                         }}
@@ -229,7 +229,7 @@ const PatientSessionsView = ({
                         <span
                           style={{
                             color: "#0099A6",
-                            fontSize: "12.5px",
+                            fontSize: "12px",
                             fontFamily: "Space Mono, monospace",
                             fontWeight: "700",
                           }}
@@ -242,7 +242,7 @@ const PatientSessionsView = ({
                     <div
                       style={{
                         color: "#7AAAB4",
-                        fontSize: "13.5px",
+                        fontSize: "13px",
                         fontFamily: "Space Mono, monospace",
                       }}
                     >
@@ -267,11 +267,11 @@ const PatientSessionsView = ({
                         fontWeight: "700",
                       }}
                     >
-                      <span style={{ color: "#D4A843", fontSize: "16px" }}>
+                      <span style={{ color: "#D4A843", fontSize: "15px" }}>
                         {session.oldPain ?? "—"}
                       </span>
                       <ArrowRight size={14} color="#7AAAB4" />
-                      <span style={{ color: "#D4A843", fontSize: "16px" }}>
+                      <span style={{ color: "#D4A843", fontSize: "15px" }}>
                         {session.newPain ?? "—"}
                       </span>
                     </div>

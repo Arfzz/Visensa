@@ -274,7 +274,7 @@ const PatientFeedbackOverview = ({
             >
               <MessageSquare size={24} color="#0099A6" style={{ opacity: 0.6 }} />
               <div>
-                No session feedback recorded yet. Clinical observations will appear here once the patient completes their first therapy session.
+                This patient haven't completed any therapy sessions yet. Clinical observations will appear here once they do.
               </div>
             </div>
           ) : (

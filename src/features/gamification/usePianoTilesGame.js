@@ -64,18 +64,18 @@ export function usePianoTilesGame(bgmUrl = '/musics/fairytale.mp3') {
   const frameTickCallbackRef = useRef(null);
   const [durationSeconds, setDurationSeconds] = useState(0);
   const sessionStartTimeRef = useRef(0);
+  const lastDurationSecRef = useRef(0);
 
   const setOnFrameTick = useCallback((callback) => {
     frameTickCallbackRef.current = callback;
   }, []);
 
 const endGame = useCallback(() => {
-    if (bgmRef.current) bgmRef.current.pause();
-    if (animFrameIdRef.current) cancelAnimationFrame(animFrameIdRef.current);
-    if (sessionStartTimeRef.current > 0) {
-      const currentDuration = Math.floor((Date.now() - sessionStartTimeRef.current) / 1000);
-      setDurationSeconds(currentDuration);
+    if (bgmRef.current) {
+      bgmRef.current.pause();
+      setDurationSeconds(Math.floor(bgmRef.current.currentTime));
     }
+    if (animFrameIdRef.current) cancelAnimationFrame(animFrameIdRef.current);
     
     setGameStatus('gameover'); 
   }, []);
@@ -257,6 +257,14 @@ const endGame = useCallback(() => {
       }
     }
 
+    if (bgmRef.current) {
+      const currentDuration = Math.floor(bgmRef.current.currentTime);
+      if (currentDuration !== lastDurationSecRef.current) {
+        lastDurationSecRef.current = currentDuration;
+        setDurationSeconds(currentDuration);
+      }
+    }
+
     const speedPerMs = 100 / FALL_DURATION_MS;
     const pool = tilePoolRef.current;
     const safeElapsed = Math.min(elapsed, 100);
@@ -295,6 +303,7 @@ const endGame = useCallback(() => {
     lastSpawnTimeRef.current = 0;
 
     sessionStartTimeRef.current = Date.now(); // CATET WAKTU MULAI
+    lastDurationSecRef.current = 0;
     setDurationSeconds(0); // RESET DURASI
     
     setScore(0);
