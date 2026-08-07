@@ -1,0 +1,654 @@
+/* --- 3-COLUMN CLINICAL MIRROR THERAPY COCKPIT STYLES --- */
+
+.piano-cockpit-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  width: 100%;
+  min-height: 75vh;
+  padding: 1rem;
+  box-sizing: border-box;
+  background-color: #F8FAFC;
+  border-radius: 20px;
+  border: 1px solid #E2E8F0;
+  font-family: var(--font-sans, 'Space Grotesk', system-ui, -apple-system, sans-serif);
+  color: #0F172A;
+  user-select: none;
+}
+
+@media (min-width: 1025px) {
+  .piano-cockpit-wrapper {
+    flex-direction: row;
+    gap: 0;
+  }
+}
+
+/* Side Panels (18% Desktop Width) with Vertical Column Divider Lines */
+.piano-side-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (min-width: 1025px) {
+  .piano-side-panel {
+    width: 18%;
+    flex: 0 0 18%;
+  }
+
+  .piano-side-panel.left-panel {
+    border-right: 1.5px solid #CBD5E1;
+    padding-right: 1.25rem;
+  }
+
+  .piano-side-panel.right-panel {
+    border-left: 1.5px solid #CBD5E1;
+    padding-left: 1.25rem;
+  }
+}
+
+/* Center Panel (64% Desktop Width) */
+.piano-center-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+  flex-grow: 1;
+  box-sizing: border-box;
+}
+
+@media (min-width: 1025px) {
+  .piano-center-panel {
+    width: 64%;
+    flex: 1 1 64%;
+    padding: 0 1.25rem;
+  }
+}
+
+/* Medical Card Container */
+.piano-card {
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.piano-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #64748B;
+  text-transform: uppercase;
+}
+
+/* Finger Flexion Progress Bars */
+.piano-finger-bar-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.piano-finger-bar-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.piano-finger-bar-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+.piano-finger-bar-track {
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.05);
+  width: 100%;
+}
+
+.piano-finger-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.15s ease-out;
+}
+
+/* Metric Display */
+.piano-metric-val {
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-family: var(--font-mono, monospace);
+  color: #0F172A;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.piano-metric-subtext {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #059669;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* Diagnostic Status Items */
+.piano-status-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.piano-status-primary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #0F172A;
+}
+
+.piano-status-sub {
+  font-size: 0.75rem;
+  color: #64748B;
+  padding-left: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+/* Session Metrics Grid */
+.piano-session-metrics-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.piano-session-metric-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.piano-metric-val-sm {
+  font-size: 1.25rem;
+  font-weight: 700;
+  font-family: var(--font-mono, monospace);
+  color: #0F172A;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.piano-metric-lbl-sm {
+  font-size: 0.75rem;
+  color: #64748B;
+}
+
+/* Integrated Med-Tech Topbar */
+.piano-integrated-header {
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  padding: 0.75rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+  z-index: 10;
+}
+
+.piano-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.piano-score-group {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.piano-score-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #64748B;
+  text-transform: uppercase;
+}
+
+.piano-score-val-large {
+  font-size: 1.25rem;
+  font-weight: 800;
+  font-family: var(--font-mono, monospace);
+  color: #0F172A;
+}
+
+.piano-max-combo-pill {
+  padding: 3px 8px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  background-color: #ECFDF5;
+  color: #047857;
+  border: 1px solid #A7F3D0;
+  border-radius: 9999px;
+}
+
+.piano-warmup-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 180px;
+  max-width: 260px;
+  width: 100%;
+}
+
+.piano-warmup-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #475569;
+}
+
+.piano-warmup-status {
+  font-weight: 600;
+  color: #1E293B;
+}
+
+.piano-warmup-track {
+  width: 100%;
+  background-color: #F1F5F9;
+  height: 6px;
+  border-radius: 9999px;
+  overflow: hidden;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.piano-warmup-fill {
+  background-color: #00B8B0;
+  height: 100%;
+  border-radius: 9999px;
+  transition: width 0.3s ease;
+}
+
+.piano-header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.piano-streak-pill {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  background-color: #FFFBEB;
+  border: 1px solid #FDE68A;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #D97706;
+}
+
+.piano-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #334155;
+  background-color: #F1F5F9;
+  border: 1px solid #CBD5E1;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.piano-action-btn:hover {
+  background-color: #E2E8F0;
+}
+
+.piano-exit-btn {
+  color: #BE123C;
+  background-color: #FFE4E6;
+  border-color: #FECDD3;
+}
+
+.piano-exit-btn:hover {
+  background-color: #FECDD3;
+}
+
+.piano-side-panel.right-panel {
+  position: relative;
+  z-index: 99998; 
+  /* Trik jitu: biarin area kosong nembus klik, tapi daleman card tetep bisa diklik */
+  pointer-events: none; 
+}
+
+.piano-side-panel.right-panel .piano-card {
+  pointer-events: auto; /* Balikin fungsi klik buat semua kartu di kanan */
+}
+
+/* Card khusus Controls */
+.piano-controls-card {
+  margin-top: auto;
+  position: relative;
+  z-index: 99999; 
+}
+
+.piano-controls-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+/* Tombol Controls */
+.piano-control-btn {
+  width: 100%;
+  justify-content: center;
+  padding: 10px;
+  position: relative;
+  z-index: 99999;
+  cursor: pointer;
+}
+
+.piano-control-btn.surrender {
+  background-color: #FEE2E2;
+  color: #EF4444;
+  border: 1px solid #FCA5A5;
+}
+
+.piano-control-btn.surrender:hover {
+  background-color: #FECACA;
+}
+
+.piano-controls-waiting {
+  text-align: center;
+  color: #94A3B8;
+  font-size: 13px;
+  padding: 10px;
+}
+
+/* 3D Canvas Arena Container */
+.piano-arena-container {
+  width: 100%;
+  min-height: 500px;
+  flex: 1;
+  border-radius: 16px;
+  overflow: hidden;
+  position: relative;
+  background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+  border: 1px solid #CBD5E1;
+  display: flex;
+  flex-direction: column;
+}
+
+.piano-stage {
+  position: relative;
+  flex: 1;
+  display: flex;
+  background: transparent;
+  overflow: hidden;
+}
+
+/* 4 Vertical Piano Lane Columns Background & Dividers */
+.piano-lanes-bg {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.piano-lane {
+  flex: 1;
+  height: 100%;
+  border-right: 1.5px solid #CBD5E1;
+  background-color: rgba(255, 255, 255, 0.4);
+  transition: background-color 0.12s ease;
+}
+
+.piano-lane:nth-child(even) {
+  background-color: rgba(248, 250, 252, 0.2);
+}
+
+.piano-lane:last-child {
+  border-right: none;
+}
+
+.piano-lane.active-press {
+  background-color: rgba(0, 184, 176, 0.18) !important;
+}
+
+/* Glowing Hit-Zone Line */
+.piano-hit-zone-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 4.5rem;
+  border-top: 3px solid #06b6d4;
+  box-shadow: 0 0 10px rgba(6, 182, 212, 0.4);
+  z-index: 8;
+}
+
+/* Falling Tiles */
+.piano-tile {
+  position: absolute;
+  width: 22%;
+  height: 60px;
+  border-radius: 12px;
+  transform: translate3d(0, -50%, 0);
+  will-change: transform;
+  backface-visibility: hidden;
+  z-index: 5;
+  box-sizing: border-box;
+}
+
+.piano-tile-finger-badge {
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+  font-weight: 800;
+  color: #FFFFFF;
+}
+
+/* Bottom Large Target Pads Grid */
+.piano-target-pads-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  height: 4.5rem;
+  border-top: 2px solid rgba(0, 0, 0, 0.1);
+  background-color: #FFFFFF;
+  z-index: 9;
+}
+
+.piano-target-pad-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 0.875rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: all 0.12s ease;
+  border-right: 1.5px solid #CBD5E1;
+  user-select: none;
+}
+
+.piano-target-pad-item:last-child {
+  border-right: none;
+}
+
+.piano-target-pad-item.active {
+  transform: scale(1.02);
+  box-shadow: inset 0 0 12px currentColor;
+}
+
+/* Floating Feedback Popups */
+.piano-feedback-popup {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  pointer-events: none;
+  z-index: 20;
+  background-color: #FFFFFF;
+  border: 2px solid currentColor;
+}
+
+.piano-feedback-popup.perfect {
+  color: #059669;
+  border-color: #10B981;
+}
+
+.piano-feedback-popup.hit {
+  color: #0284C7;
+  border-color: #38BDF8;
+}
+
+.piano-feedback-popup.miss {
+  color: #DC2626;
+  border-color: #FCA5A5;
+}
+
+/* Overlays */
+.piano-overlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(248, 250, 252, 0.94);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  pointer-events: auto;
+  padding: 24px;
+  text-align: center;
+}
+
+.piano-overlay-card {
+  max-width: 440px;
+  width: 100%;
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 16px;
+  padding: 32px 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+}
+
+.piano-overlay-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #0F172A;
+  margin: 0;
+}
+
+.piano-btn-primary {
+  padding: 12px 36px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  background-color: #00B8B0;
+  border: none;
+  border-radius: 24px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.piano-btn-primary:hover {
+  background-color: #009990;
+}
+
+.piano-btn-secondary {
+  padding: 10px 24px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #475569;
+  background-color: #F1F5F9;
+  border: 1px solid #CBD5E1;
+  border-radius: 18px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.piano-btn-secondary:hover {
+  background-color: #E2E8F0;
+}
+
+.piano-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  width: 100%;
+}
+
+.piano-stat-card {
+  background-color: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 10px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.piano-stat-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #64748B;
+  text-transform: uppercase;
+}
+
+.piano-stat-value {
+  font-size: 1.25rem;
+  font-weight: 800;
+  font-family: var(--font-mono, monospace);
+  color: #0F172A;
+}
+
+.piano-stat-value.main { color: #00B8B0; }
+.piano-stat-value.perfect { color: #059669; }
+.piano-stat-value.good { color: #0284C7; }
+
+/* Overlay Mode Overrides */
+.piano-cockpit-wrapper.overlay-mode {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}

@@ -6,6 +6,67 @@ import avatarHands from "../../assets/avatar-hands.png";
 const RegisterDoctor = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: ''
+  });
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    setErrorMessage('');
+
+    if (!formData.name || !formData.email || !formData.password) {
+      setErrorMessage('Semua field wajib diisi ya Dok.');
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || "https://visensa-production.up.railway.app/api/v1"}/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+          role: 'doctor' // Hardcoded for this page
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        if (data.errors && data.errors.length > 0) {
+          const errorMessages = data.errors.map(err => err.message).join(' | ');
+          throw new Error(errorMessages);
+        }
+        throw new Error(data.message || 'Gagal register, coba cek inputan lagi.');
+      }
+
+      localStorage.setItem('accessToken', data.data.accessToken);
+      localStorage.setItem('refreshToken', data.data.refreshToken);
+      localStorage.setItem('user', JSON.stringify(data.data.user));
+
+      navigate('/admin-dashboard');
+      
+    } catch (error) {
+      setErrorMessage(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div style={{ width: "100vw", height: "100vh", display: "flex", flexDirection: "row", backgroundColor: "#F1F7F7", overflow: "hidden", margin: 0, padding: 0 }}>
@@ -63,7 +124,7 @@ const RegisterDoctor = () => {
         </div>
       </div>
 
-      {/* SISI KANAN: Form Register Doctor (DI-SCALE DOWN PROPORSIONAL) */}
+      {/* SISI KANAN: Form Register Doctor */}
       <div style={{ flex: 1, height: "100vh", overflowY: "auto", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", paddingTop: "40px", paddingBottom: "40px", boxSizing: "border-box" }}>
         <div style={{ width: "100%", maxWidth: "440px", padding: "0 20px" }}>
           <div onClick={() => navigate("/")} style={{ color: "#7AAAB4", fontSize: "13px", fontFamily: "Space Mono", cursor: "pointer", marginBottom: "24px" }}>← Back to home</div>
@@ -84,31 +145,61 @@ const RegisterDoctor = () => {
             <div style={{ color: "#7AAAB4", fontSize: "14px", fontFamily: "Space Grotesk", marginTop: "4px" }}>Set up your clinical workspace.</div>
           </div>
 
-          {/* Input Fields Container */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "16px", marginBottom: "24px" }}>
+          {errorMessage && (
+            <div style={{ padding: "10px", backgroundColor: "#FFEBEB", color: "#D32F2F", borderRadius: "8px", fontSize: "12px", marginBottom: "16px", fontFamily: "Space Grotesk, sans-serif" }}>
+              {errorMessage}
+            </div>
+          )}
+
+          {/* Input Fields Container in a form */}
+          <form onSubmit={handleRegister} style={{ display: "flex", flexDirection: "column", gap: "16px", marginBottom: "24px" }}>
             <div>
               <div style={{ color: "#7AAAB4", fontSize: "12px", fontFamily: "Space Mono", letterSpacing: "1px", marginBottom: "6px" }}>FULL NAME & TITLE</div>
-              <input type="text" placeholder="e.g. Dr. Sarah K., OTR/L" style={{ width: "100%", height: "46px", padding: "0 16px", background: "#F0FAFB", border: "1px solid #C4E8EC", borderRadius: "10px", fontSize: "14px", boxSizing: "border-box", outline: "none", fontFamily: "Space Grotesk", color: "#1C1816" }} />
+              <input 
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                type="text" 
+                placeholder="e.g. Dr. Sarah K., OTR/L" 
+                style={{ width: "100%", height: "46px", padding: "0 16px", background: "#F0FAFB", border: "1px solid #C4E8EC", borderRadius: "10px", fontSize: "14px", boxSizing: "border-box", outline: "none", fontFamily: "Space Grotesk", color: "#1C1816" }} 
+              />
             </div>
             <div>
               <div style={{ color: "#7AAAB4", fontSize: "12px", fontFamily: "Space Mono", letterSpacing: "1px", marginBottom: "6px" }}>CLINIC EMAIL</div>
-              <input type="email" placeholder="your@clinic.com" style={{ width: "100%", height: "46px", padding: "0 16px", background: "#F0FAFB", border: "1px solid #C4E8EC", borderRadius: "10px", fontSize: "14px", boxSizing: "border-box", outline: "none", fontFamily: "Space Grotesk", color: "#1C1816" }} />
+              <input 
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                type="email" 
+                placeholder="your@clinic.com" 
+                style={{ width: "100%", height: "46px", padding: "0 16px", background: "#F0FAFB", border: "1px solid #C4E8EC", borderRadius: "10px", fontSize: "14px", boxSizing: "border-box", outline: "none", fontFamily: "Space Grotesk", color: "#1C1816" }} 
+              />
             </div>
             <div>
               <div style={{ color: "#7AAAB4", fontSize: "12px", fontFamily: "Space Mono", letterSpacing: "1px", marginBottom: "6px" }}>CREATE PASSWORD</div>
               <div style={{ position: "relative", width: "100%" }}>
-                <input type={showPassword ? "text" : "password"} placeholder="••••••••" style={{ width: "100%", height: "46px", padding: "0 16px", paddingRight: "46px", background: "#F0FAFB", border: "1px solid #C4E8EC", borderRadius: "10px", fontSize: "14px", boxSizing: "border-box", outline: "none", fontFamily: "Space Grotesk", color: "#1C1816" }} />
+                <input 
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  type={showPassword ? "text" : "password"} 
+                  placeholder="Min. 8 characters" 
+                  style={{ width: "100%", height: "46px", padding: "0 16px", paddingRight: "46px", background: "#F0FAFB", border: "1px solid #C4E8EC", borderRadius: "10px", fontSize: "14px", boxSizing: "border-box", outline: "none", fontFamily: "Space Grotesk", color: "#1C1816" }} 
+                />
                 <div onClick={() => setShowPassword(!showPassword)} style={{ position: "absolute", right: "16px", top: "14px", cursor: "pointer", display: "flex", alignItems: "center" }}>
                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={showPassword ? "#0099A6" : "#7AAAB4"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* Submit Button */}
-          <button onClick={() => navigate('/admin-dashboard')} style={{ width: "100%", height: "48px", background: "#0099A6", border: "none", borderRadius: "24px", boxShadow: "0px 4px 12px rgba(200, 112, 74, 0.2)", color: "white", fontSize: "15px", fontFamily: "Space Grotesk", fontWeight: "600", cursor: "pointer", display: "flex", justifyContent: "center", alignItems: "center", gap: "10px" }}>
-            <span>Create Account</span>
-          </button>
+            {/* Submit Button */}
+            <button 
+              type="submit"
+              disabled={isLoading}
+              style={{ width: "100%", height: "48px", background: isLoading ? "#7AAAB4" : "#0099A6", border: "none", borderRadius: "24px", boxShadow: "0px 4px 12px rgba(200, 112, 74, 0.2)", color: "white", fontSize: "15px", fontFamily: "Space Grotesk", fontWeight: "600", cursor: isLoading ? "not-allowed" : "pointer", display: "flex", justifyContent: "center", alignItems: "center", gap: "10px", marginTop: "8px" }}>
+              <span>{isLoading ? 'Creating Account...' : 'Create Account'}</span>
+            </button>
+          </form>
         </div>
       </div>
     </div>

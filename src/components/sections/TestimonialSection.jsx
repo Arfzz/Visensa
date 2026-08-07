@@ -13,18 +13,15 @@ const PAIN_DATA = [
   { week: 'Week 6', score: '3/10', pct: 30 },
   { week: 'Week 8', score: '2/10', pct: 20 },
 ]
-
-const QUOTES = [
-  '"After 12 years of phantom pain, I had my first pain-free morning three weeks into my VISENSA programme."',
-  '"I was sceptical at first. By week four, my occupational therapist was asking me what I was doing differently."',
-  '"No hardware. No clinic visits. Just real progress — from my living room."',
-]
-
 export default function TestimonialSection() {
   // ── animated bar widths ────────────────────────────────────────────
   const [animated, setAnimated]   = useState(false)
   const chartRef                  = useRef(null)
   const cardRef                   = useRef(null)
+  const [testimonials, setTestimonials] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const API_BASE = import.meta.env.VITE_API_URL || "https://visensa-production.up.railway.app/api/v1";
 
   // ── Scroll trigger: run bars from 0 → target width ───────────────
   useEffect(() => {
@@ -91,6 +88,39 @@ export default function TestimonialSection() {
     }
   }, [])
 
+  useEffect(() => {
+    const fetchTestimonials = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/landing-page/testimonials`);
+        if (res.ok) {
+          const json = await res.json();
+          if (json.data && json.data.length > 0) {
+            setTestimonials(json.data);
+          }
+        }
+      } catch (err) {
+        console.warn("Gagal ambil testimoni", err);
+      }
+    };
+    fetchTestimonials();
+  }, []);
+
+  // 2. Timer buat muter index testimoni tiap 8 detik
+  // (Sesuaikan waktunya biar pas sama durasi ngetik TextType lu)
+  useEffect(() => {
+    if (testimonials.length <= 1) return; // Kalo datanya cuma 1, ga usah diputer
+
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % testimonials.length);
+    }, 8000); // Ganti tiap 8 detik
+
+    return () => clearInterval(interval);
+  }, [testimonials.length]);
+
+  if (testimonials.length === 0) return null; // Atau render skeleton loading
+
+  const activeTestimonial = testimonials[currentIndex];
+
   return (
     <section className="testimonial" id="testimonial">
       <div className="testimonial__container container">
@@ -101,7 +131,8 @@ export default function TestimonialSection() {
 
           <blockquote className="testimonial__quote">
             <TextType
-              text={QUOTES}
+              key={currentIndex} 
+              text={[activeTestimonial.quote]} // Lempar 1 kalimat aja
               as="span"
               typingSpeed={28}
               deletingSpeed={14}
@@ -115,10 +146,16 @@ export default function TestimonialSection() {
           </blockquote>
 
           <div className="testimonial__author">
-            <div className="testimonial__avatar">R</div>
+            <div className="testimonial__avatar">
+              {activeTestimonial.initial}
+            </div>
             <div className="testimonial__author-info">
-              <span className="testimonial__author-name">Robert M.</span>
-              <span className="testimonial__author-desc">Above-elbow amputee · 8 weeks on programme</span>
+              <span className="testimonial__author-name">
+                {activeTestimonial.name}
+              </span>
+              <span className="testimonial__author-desc">
+                {activeTestimonial.desc}
+              </span>
             </div>
           </div>
         </div>
@@ -129,7 +166,7 @@ export default function TestimonialSection() {
           ref={cardRef}
           style={{ willChange: 'transform' }}
         >
-          <p className="mono-label">Robert's pain journey</p>
+          <p className="mono-label">{activeTestimonial.name}'s' pain journey</p>
 
           <div className="pain-chart" ref={chartRef}>
             {PAIN_DATA.map((row, i) => (
@@ -139,7 +176,7 @@ export default function TestimonialSection() {
                   {/* Bar starts at 0, GSAP animates it to pct on scroll */}
                   <div
                     className={`pain-chart__bar pain-chart__bar--${i}`}
-                    style={{ width: 0 }}
+                    style={{ width: `${row.pct}%` }}
                   />
                 </div>
                 <span className="pain-chart__score">{row.score}</span>
