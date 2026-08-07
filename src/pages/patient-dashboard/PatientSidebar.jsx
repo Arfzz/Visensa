@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { 
   LayoutDashboard, 
   Clock, 
+  Calendar,
   Gamepad2, 
   Settings, 
   Flame, 
@@ -30,6 +31,7 @@ export const PatientSidebar = ({ activeMenu, onSelectMenu }) => {
     () => [
       { id: "Dashboard", label: "Dashboard", icon: LayoutDashboard },
       { id: "Sessions", label: "Sessions", icon: Clock },
+      { id: "My Plan", label: "My Plan", icon: Calendar },
       { id: "Interactive Practice", label: "Interactive Practice", icon: Gamepad2, hasBadge: true },
       { id: "Game History", label: "Practice History", icon: Clock10Icon },
       { id: "Settings", label: "Settings", icon: Settings },

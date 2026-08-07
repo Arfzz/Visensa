@@ -19,6 +19,7 @@ const ActiveTherapyDashboard = ({
   onOpenPractice,
   onStartSession,
   onMarkAllRead,
+  onOpenMonthlyPlan,
 }) => {
   const mainContentRef = useRef(null);
 
@@ -188,6 +189,7 @@ const ActiveTherapyDashboard = ({
           sessionLogs={sessionLogs}
           weeklySchedule={schedule}
           program={program}
+          onOpenMonthlyPlan={onOpenMonthlyPlan}
         />
 
         {/* G. SECTION 4: BOTTOM PAIN TREND CARD */}

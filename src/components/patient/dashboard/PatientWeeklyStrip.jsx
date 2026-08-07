@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { Check } from "lucide-react";
+import { Check, Calendar } from "lucide-react";
 import { generateSchedulePreview } from "../../../utils/scheduleCalculator";
 
 const formatYearMonthDay = (dateObj) => {
@@ -9,7 +9,12 @@ const formatYearMonthDay = (dateObj) => {
   return `${y}-${m}-${d}`;
 };
 
-const PatientWeeklyStrip = ({ sessionLogs = [], weeklySchedule, program }) => {
+const PatientWeeklyStrip = ({
+  sessionLogs = [],
+  weeklySchedule,
+  program,
+  onOpenMonthlyPlan,
+}) => {
   const startDate = program?.startDate || program?.start_date || new Date().toISOString().split("T")[0];
   const frequencyPerWeek = weeklySchedule?.frequencyPerWeek || program?.frequency_per_week || 3;
   const programDurationWeeks = program?.programDurationWeeks || program?.program_duration_weeks || 4;
@@ -85,14 +90,62 @@ const PatientWeeklyStrip = ({ sessionLogs = [], weeklySchedule, program }) => {
         borderRadius: "20px",
         border: "1.5px solid #C4E8EC",
         display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
+        flexDirection: "column",
+        gap: "16px",
         flexShrink: 0,
         boxShadow: "0 2px 10px rgba(0,0,0,0.02)",
         width: "100%",
         boxSizing: "border-box",
       }}
     >
+      {/* HEADER WITH ACTION LINK */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          width: "100%",
+        }}
+      >
+        <div
+          style={{
+            color: "#0C2830",
+            fontSize: "16px",
+            fontWeight: "700",
+            fontFamily: "Space Grotesk, sans-serif",
+          }}
+        >
+          Weekly Therapy Overview
+        </div>
+
+        <div
+          onClick={onOpenMonthlyPlan}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "6px",
+            color: "#0099A6",
+            fontSize: "14px",
+            fontWeight: "600",
+            fontFamily: "Space Grotesk, sans-serif",
+            cursor: "pointer",
+            transition: "opacity 0.2s ease",
+          }}
+        >
+          <Calendar size={15} color="#0099A6" />
+          <span>View Full Monthly Plan</span>
+        </div>
+      </div>
+
+      {/* 7-DAY STRIP */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          width: "100%",
+        }}
+      >
       {weekDays.map((item, idx) => {
         const isToday = item.status === "today";
         const isCompleted = item.status === "completed";
@@ -191,6 +244,7 @@ const PatientWeeklyStrip = ({ sessionLogs = [], weeklySchedule, program }) => {
           </div>
         );
       })}
+      </div>
     </div>
   );
 };
