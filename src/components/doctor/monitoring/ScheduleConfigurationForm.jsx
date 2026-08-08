@@ -1,15 +1,6 @@
-import React, { useState, useEffect, useMemo } from "react";
-import { generateSchedulePreview, getTomorrowDateString } from "../../../utils/scheduleCalculator";
-import { Calendar as CalendarIcon, Save, RotateCcw, Clock, ShieldCheck, Database, ChevronLeft, ChevronRight } from "lucide-react";
-
-const calendarDaysHeader = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-
-const formatYearMonthDay = (dateObj) => {
-  const y = dateObj.getFullYear();
-  const m = String(dateObj.getMonth() + 1).padStart(2, "0");
-  const d = String(dateObj.getDate()).padStart(2, "0");
-  return `${y}-${m}-${d}`;
-};
+import React, { useState, useEffect } from "react";
+import { getTomorrowDateString } from "../../../utils/scheduleCalculator";
+import { Save, Database } from "lucide-react";
 
 const ScheduleConfigurationForm = ({
   onSaveInitialProgram,
@@ -18,20 +9,11 @@ const ScheduleConfigurationForm = ({
   weeklySchedule,
 }) => {
   const [planFreq, setPlanFreq] = useState(weeklySchedule?.frequencyPerWeek || 3);
-  const [planInterval, setPlanInterval] = useState(weeklySchedule?.restIntervalDays || 1);
-  const [planDuration, setPlanDuration] = useState(activeProgram?.programDurationWeeks || 4);
-  const [planStartDate, setPlanStartDate] = useState(activeProgram?.startDate || getTomorrowDateString());
-  const [previewDate, setPreviewDate] = useState(new Date());
-
   // --- SYNC DATABASE PROGRAM & SCHEDULE DATA ---
   useEffect(() => {
     if (activeProgram) {
       if (activeProgram.startDate) {
         setPlanStartDate(activeProgram.startDate);
-        const parsedDate = new Date(activeProgram.startDate);
-        if (!isNaN(parsedDate.getTime())) {
-          setPreviewDate(parsedDate);
-        }
       }
       if (activeProgram.programDurationWeeks) {
         setPlanDuration(Number(activeProgram.programDurationWeeks));
@@ -41,92 +23,12 @@ const ScheduleConfigurationForm = ({
       if (weeklySchedule.frequencyPerWeek) {
         setPlanFreq(Number(weeklySchedule.frequencyPerWeek));
       }
-      if (weeklySchedule.restIntervalDays !== undefined) {
-        setPlanInterval(Number(weeklySchedule.restIntervalDays));
-      }
     }
   }, [activeProgram, weeklySchedule, patient?.id]);
 
   const handleFrequencyChange = (val) => {
-    const freqVal = Number(val);
-    setPlanFreq(freqVal);
-    if (freqVal >= 4 && planInterval > 1) {
-      setPlanInterval(1);
-    }
+    setPlanFreq(Number(val));
   };
-
-  const programSchedule = useMemo(() => {
-    return generateSchedulePreview({
-      startDate: planStartDate,
-      frequencyPerWeek: planFreq,
-      programDurationWeeks: planDuration,
-    });
-  }, [planStartDate, planFreq, planDuration]);
-
-  const scheduleMap = useMemo(() => {
-    const map = new Map();
-    programSchedule.forEach((item) => {
-      map.set(item.date, item.status);
-    });
-    return map;
-  }, [programSchedule]);
-
-  const handlePrevMonth = () => {
-    setPreviewDate((prev) => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
-  };
-
-  const handleNextMonth = () => {
-    setPreviewDate((prev) => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
-  };
-
-  const calendarCells = useMemo(() => {
-    const year = previewDate.getFullYear();
-    const month = previewDate.getMonth();
-
-    const firstDayOfMonth = new Date(year, month, 1);
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    const startDayIndex = (firstDayOfMonth.getDay() + 6) % 7;
-    const prevMonthDays = new Date(year, month, 0).getDate();
-
-    const cells = [];
-
-    for (let i = startDayIndex - 1; i >= 0; i--) {
-      const dayNum = prevMonthDays - i;
-      const dateObj = new Date(year, month - 1, dayNum);
-      const dateStr = formatYearMonthDay(dateObj);
-      cells.push({
-        date: dayNum,
-        isCurrentMonth: false,
-        dateStr,
-        status: scheduleMap.get(dateStr) || null,
-      });
-    }
-
-    for (let d = 1; d <= daysInMonth; d++) {
-      const dateObj = new Date(year, month, d);
-      const dateStr = formatYearMonthDay(dateObj);
-      cells.push({
-        date: d,
-        isCurrentMonth: true,
-        dateStr,
-        status: scheduleMap.get(dateStr) || null,
-      });
-    }
-
-    const remainingCells = (7 - (cells.length % 7)) % 7;
-    for (let d = 1; d <= remainingCells; d++) {
-      const dateObj = new Date(year, month + 1, d);
-      const dateStr = formatYearMonthDay(dateObj);
-      cells.push({
-        date: d,
-        isCurrentMonth: false,
-        dateStr,
-        status: scheduleMap.get(dateStr) || null,
-      });
-    }
-
-    return cells;
-  }, [previewDate, scheduleMap]);
 
   const handleSubmit = (e) => {
     if (e) e.preventDefault();
@@ -134,7 +36,7 @@ const ScheduleConfigurationForm = ({
       onSaveInitialProgram({
         patientId: patient?.id,
         frequencyPerWeek: planFreq,
-        restIntervalDays: planInterval,
+        restIntervalDays: 1, // Defaulting to 1 as it is no longer configurable
         programDurationWeeks: planDuration,
         startDate: planStartDate,
       });
@@ -223,7 +125,7 @@ const ScheduleConfigurationForm = ({
         </div>
       </div>
 
-      {/* 4 COMPACT INPUTS GRID */}
+      {/* 3 COMPACT INPUTS GRID */}
       <div
         style={{
           display: "grid",
@@ -272,45 +174,8 @@ const ScheduleConfigurationForm = ({
           </select>
         </div>
 
-        {/* 2. Rest Interval */}
-        <div>
-          <div
-            style={{
-              fontSize: "14px",
-              fontFamily: "Space Grotesk, sans-serif",
-              fontWeight: "600",
-              color: "#3A6870",
-              marginBottom: "8px",
-            }}
-          >
-            Rest interval
-          </div>
-          <select
-            value={planInterval}
-            onChange={(e) => setPlanInterval(Number(e.target.value))}
-            style={{
-              width: "100%",
-              height: "46px",
-              padding: "0 16px",
-              background: "#F8FAFC",
-              border: "1.5px solid #E2E8F0",
-              borderRadius: "12px",
-              color: "#0C2830",
-              fontSize: "14.5px",
-              fontFamily: "Space Grotesk, sans-serif",
-              outline: "none",
-              cursor: "pointer",
-            }}
-          >
-            <option value={0}>No rest (0 days)</option>
-            <option value={1}>1 day rest</option>
-            <option value={2} disabled={planFreq >= 4}>
-              2 days rest {planFreq >= 4 ? "(Disabled: ≥4x/wk)" : ""}
-            </option>
-          </select>
-        </div>
 
-        {/* 3. Program Duration */}
+        {/* 2. Program Duration */}
         <div>
           <div
             style={{
@@ -347,7 +212,7 @@ const ScheduleConfigurationForm = ({
           </select>
         </div>
 
-        {/* 4. Start Date */}
+        {/* 3. Start Date */}
         <div>
           <div
             style={{
@@ -382,216 +247,6 @@ const ScheduleConfigurationForm = ({
         </div>
       </div>
 
-      {/* INTEGRATED PATIENT CALENDAR PREVIEW */}
-      <div
-        style={{
-          background: "#F8FAFC",
-          borderRadius: "16px",
-          border: "1px solid #E2E8F0",
-          padding: "20px",
-          marginBottom: "24px",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "16px",
-            flexWrap: "wrap",
-            gap: "10px",
-          }}
-        >
-          <div>
-            <div
-              style={{
-                color: "#0C2830",
-                fontSize: "16px",
-                fontFamily: "Space Grotesk, sans-serif",
-                fontWeight: "700",
-              }}
-            >
-              Integrated Patient Calendar Preview
-            </div>
-            <div
-              style={{
-                color: "#7AAAB4",
-                fontSize: "13px",
-                fontFamily: "Space Grotesk, sans-serif",
-              }}
-            >
-              Reactive schedule projection for {patient?.name || "Patient"}
-            </div>
-          </div>
-
-          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <span
-              style={{
-                color: "#0C2830",
-                fontSize: "15px",
-                fontFamily: "Space Grotesk, sans-serif",
-                fontWeight: "700",
-              }}
-            >
-              {previewDate.toLocaleString("default", { month: "long", year: "numeric" })}
-            </span>
-            <div style={{ display: "flex", gap: "6px" }}>
-              <button
-                onClick={handlePrevMonth}
-                type="button"
-                style={{
-                  width: "32px",
-                  height: "32px",
-                  background: "white",
-                  border: "1px solid #E2E8F0",
-                  borderRadius: "8px",
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  cursor: "pointer",
-                  color: "#3A6870",
-                  fontWeight: "700",
-                }}
-              >
-                <ChevronLeft size={16} />
-              </button>
-              <button
-                onClick={handleNextMonth}
-                type="button"
-                style={{
-                  width: "32px",
-                  height: "32px",
-                  background: "white",
-                  border: "1px solid #E2E8F0",
-                  borderRadius: "8px",
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  cursor: "pointer",
-                  color: "#3A6870",
-                  fontWeight: "700",
-                }}
-              >
-                <ChevronRight size={16} />
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* CALENDAR GRID */}
-        <div
-          style={{
-            background: "#E2E8F0",
-            border: "1px solid #E2E8F0",
-            borderRadius: "14px",
-            overflow: "hidden",
-          }}
-        >
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(7, 1fr)",
-              background: "white",
-              borderBottom: "1px solid #E2E8F0",
-            }}
-          >
-            {calendarDaysHeader.map((day, i) => (
-              <div
-                key={i}
-                style={{
-                  padding: "10px 0",
-                  textAlign: "center",
-                  color: "#7AAAB4",
-                  fontSize: "12px",
-                  fontFamily: "Space Grotesk, sans-serif",
-                  fontWeight: "700",
-                  textTransform: "uppercase",
-                }}
-              >
-                {day}
-              </div>
-            ))}
-          </div>
-
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(7, 1fr)",
-              gap: "1px",
-              background: "#E2E8F0",
-            }}
-          >
-            {calendarCells.map((cell, idx) => {
-              const isExercise = cell.status === "exercise";
-              const isRest = cell.status === "rest";
-
-              return (
-                <div
-                  key={idx}
-                  style={{
-                    background: cell.isCurrentMonth ? "white" : "#F8FAFC",
-                    minHeight: "70px",
-                    padding: "8px",
-                    display: "flex",
-                    flexDirection: "column",
-                    boxSizing: "border-box",
-                    opacity: cell.isCurrentMonth ? 1 : 0.45,
-                  }}
-                >
-                  <div
-                    style={{
-                      alignSelf: "flex-end",
-                      color: cell.isCurrentMonth ? "#0C2830" : "#94A3B8",
-                      fontSize: "13px",
-                      fontFamily: "Space Grotesk, sans-serif",
-                      fontWeight: "600",
-                    }}
-                  >
-                    {cell.date}
-                  </div>
-
-                  <div style={{ marginTop: "auto" }}>
-                    {isExercise && (
-                      <div
-                        style={{
-                          background: "rgba(0, 153, 166, 0.12)",
-                          border: "1px solid rgba(0, 153, 166, 0.25)",
-                          borderRadius: "6px",
-                          padding: "2px 4px",
-                          color: "#0099A6",
-                          fontSize: "10.5px",
-                          fontFamily: "Space Mono, monospace",
-                          fontWeight: "700",
-                          textAlign: "center",
-                        }}
-                      >
-                        Session
-                      </div>
-                    )}
-                    {isRest && (
-                      <div
-                        style={{
-                          background: "rgba(148, 163, 184, 0.1)",
-                          border: "1px solid rgba(148, 163, 184, 0.2)",
-                          borderRadius: "6px",
-                          padding: "2px 4px",
-                          color: "#64748B",
-                          fontSize: "10.5px",
-                          fontFamily: "Space Mono, monospace",
-                          fontWeight: "600",
-                          textAlign: "center",
-                        }}
-                      >
-                        Rest
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
 
       {/* SAVE INITIAL PROGRAM ACTION BUTTON */}
       <div style={{ display: "flex", justifyContent: "flex-end" }}>
