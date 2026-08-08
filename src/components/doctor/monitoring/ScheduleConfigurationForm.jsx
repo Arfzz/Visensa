@@ -18,7 +18,6 @@ const ScheduleConfigurationForm = ({
   weeklySchedule,
 }) => {
   const [planFreq, setPlanFreq] = useState(weeklySchedule?.frequencyPerWeek || 3);
-  const [planInterval, setPlanInterval] = useState(weeklySchedule?.restIntervalDays || 1);
   const [planDuration, setPlanDuration] = useState(activeProgram?.programDurationWeeks || 4);
   const [planStartDate, setPlanStartDate] = useState(activeProgram?.startDate || getTomorrowDateString());
   const [previewDate, setPreviewDate] = useState(new Date());
@@ -41,18 +40,11 @@ const ScheduleConfigurationForm = ({
       if (weeklySchedule.frequencyPerWeek) {
         setPlanFreq(Number(weeklySchedule.frequencyPerWeek));
       }
-      if (weeklySchedule.restIntervalDays !== undefined) {
-        setPlanInterval(Number(weeklySchedule.restIntervalDays));
-      }
     }
   }, [activeProgram, weeklySchedule, patient?.id]);
 
   const handleFrequencyChange = (val) => {
-    const freqVal = Number(val);
-    setPlanFreq(freqVal);
-    if (freqVal >= 4 && planInterval > 1) {
-      setPlanInterval(1);
-    }
+    setPlanFreq(Number(val));
   };
 
   const programSchedule = useMemo(() => {
@@ -134,7 +126,7 @@ const ScheduleConfigurationForm = ({
       onSaveInitialProgram({
         patientId: patient?.id,
         frequencyPerWeek: planFreq,
-        restIntervalDays: planInterval,
+        restIntervalDays: 1, // Defaulting to 1 as it is no longer configurable
         programDurationWeeks: planDuration,
         startDate: planStartDate,
       });
@@ -223,7 +215,7 @@ const ScheduleConfigurationForm = ({
         </div>
       </div>
 
-      {/* 4 COMPACT INPUTS GRID */}
+      {/* 3 COMPACT INPUTS GRID */}
       <div
         style={{
           display: "grid",
@@ -272,45 +264,8 @@ const ScheduleConfigurationForm = ({
           </select>
         </div>
 
-        {/* 2. Rest Interval */}
-        <div>
-          <div
-            style={{
-              fontSize: "14px",
-              fontFamily: "Space Grotesk, sans-serif",
-              fontWeight: "600",
-              color: "#3A6870",
-              marginBottom: "8px",
-            }}
-          >
-            Rest interval
-          </div>
-          <select
-            value={planInterval}
-            onChange={(e) => setPlanInterval(Number(e.target.value))}
-            style={{
-              width: "100%",
-              height: "46px",
-              padding: "0 16px",
-              background: "#F8FAFC",
-              border: "1.5px solid #E2E8F0",
-              borderRadius: "12px",
-              color: "#0C2830",
-              fontSize: "14.5px",
-              fontFamily: "Space Grotesk, sans-serif",
-              outline: "none",
-              cursor: "pointer",
-            }}
-          >
-            <option value={0}>No rest (0 days)</option>
-            <option value={1}>1 day rest</option>
-            <option value={2} disabled={planFreq >= 4}>
-              2 days rest {planFreq >= 4 ? "(Disabled: ≥4x/wk)" : ""}
-            </option>
-          </select>
-        </div>
 
-        {/* 3. Program Duration */}
+        {/* 2. Program Duration */}
         <div>
           <div
             style={{
@@ -347,7 +302,7 @@ const ScheduleConfigurationForm = ({
           </select>
         </div>
 
-        {/* 4. Start Date */}
+        {/* 3. Start Date */}
         <div>
           <div
             style={{
@@ -596,27 +551,28 @@ const ScheduleConfigurationForm = ({
       {/* SAVE INITIAL PROGRAM ACTION BUTTON */}
       <div style={{ display: "flex", justifyContent: "flex-end" }}>
         <button
-          onClick={handleSubmit}
+          onClick={activeProgram ? undefined : handleSubmit}
           type="button"
+          disabled={!!activeProgram}
           style={{
             padding: "14px 28px",
-            background: "linear-gradient(135deg, #0099A6 0%, #007580 100%)",
+            background: activeProgram ? "#CBD5E1" : "linear-gradient(135deg, #0099A6 0%, #007580 100%)",
             border: "none",
             borderRadius: "14px",
-            color: "white",
+            color: activeProgram ? "#64748B" : "white",
             fontSize: "15px",
             fontFamily: "Space Grotesk, sans-serif",
             fontWeight: "700",
-            cursor: "pointer",
+            cursor: activeProgram ? "not-allowed" : "pointer",
             display: "flex",
             alignItems: "center",
             gap: "10px",
-            boxShadow: "0 4px 18px rgba(0, 153, 166, 0.3)",
+            boxShadow: activeProgram ? "none" : "0 4px 18px rgba(0, 153, 166, 0.3)",
             transition: "all 0.2s ease",
           }}
         >
           <Save size={18} />
-          <span>Save Initial Program & Publish</span>
+          <span>{activeProgram ? "Update Therapy Program" : "Add Schedule"}</span>
         </button>
       </div>
     </div>

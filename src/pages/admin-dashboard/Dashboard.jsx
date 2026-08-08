@@ -213,8 +213,14 @@ const Dashboard = () => {
     try {
       const token = localStorage.getItem("accessToken");
       if (targetId) {
-        await fetch(`${import.meta.env.VITE_API_URL || "https://visensa-production.up.railway.app/api/v1"}/programs`, {
-          method: "POST",
+        const hasExistingProgram = Boolean(activeProgram?.id);
+        const endpoint = hasExistingProgram 
+          ? `${import.meta.env.VITE_API_URL || "https://visensa-production.up.railway.app/api/v1"}/programs/${activeProgram.id}/reassign`
+          : `${import.meta.env.VITE_API_URL || "https://visensa-production.up.railway.app/api/v1"}/programs`;
+        const method = hasExistingProgram ? "PATCH" : "POST";
+
+        await fetch(endpoint, {
+          method,
           headers: {
             "Content-Type": "application/json",
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -289,9 +295,32 @@ const Dashboard = () => {
   };
 
   // --- REGISTER NEW PATIENT SUCCESS ---
-  const handleRegisterSuccess = (newPatient) => {
-    setPatientsList((prev) => [newPatient, ...prev]);
-    setActivePatient(newPatient);
+  const handleRegisterSuccess = async (newPatient) => {
+    let syncedPatient = newPatient;
+    try {
+      const token = localStorage.getItem("accessToken");
+      const targetId = newPatient.rawId || newPatient.id;
+      if (targetId) {
+        const patRes = await fetch(`${import.meta.env.VITE_API_URL || "https://visensa-production.up.railway.app/api/v1"}/patients/${targetId}`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {}
+        });
+        if (patRes.ok) {
+          const result = await patRes.json();
+          if (result.data) {
+            syncedPatient = {
+              ...newPatient,
+              pain: result.data.pain ?? result.data.pain_level ?? newPatient.pain,
+              condition: result.data.condition || newPatient.condition,
+            };
+          }
+        }
+      }
+    } catch(err) {
+      console.warn("Sync new patient data error", err);
+    }
+
+    setPatientsList((prev) => [syncedPatient, ...prev]);
+    await handleSelectPatient(syncedPatient);
     setActiveView("patient");
   };
 
