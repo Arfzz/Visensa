@@ -9,7 +9,7 @@ import PatientMonthlyPlanModal from "../../components/patient/dashboard/PatientM
 import InteractivePracticeHub from "../../features/gamification/interactive-practice/InteractivePracticeHub";
 import { useProgramScheduleStore } from "../../store/useProgramScheduleStore";
 import { useStreakStore } from "../../features/gamification/streak/useStreakStore";
-import { LogOut, Save, Music, Gamepad2 } from "lucide-react";
+import { Save, Music, User, Mail, Shield, Calendar } from "lucide-react";
 
 const API_BASE = import.meta.env.VITE_API_URL || "https://visensa-production.up.railway.app/api/v1";
 
@@ -23,6 +23,7 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
   );
   const [selectedSession, setSelectedSession] = useState(null);
   const [isMonthlyPlanModalOpen, setIsMonthlyPlanModalOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   // --- DYNAMIC DATA STATES ---
   const [user, setUser] = useState(() => {
@@ -286,6 +287,8 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
             setActiveMenu(menu);
             setSelectedSession(null);
           }}
+          isSidebarOpen={isSidebarOpen}
+          setIsSidebarOpen={setIsSidebarOpen}
         />
 
         {/* 2. DYNAMIC CONTENT CANVAS */}
@@ -391,34 +394,112 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
         ) : activeMenu === "Settings" ? (
           /* SETTINGS TAB */
           <div className="hide-scroll" style={{ flex: 1, overflowY: "auto", paddingRight: "10px" }}>
-            <div style={{ background: "white", padding: "32px", borderRadius: "24px", border: "1.5px solid #C4E8EC", maxWidth: "600px" }}>
-              <div style={{ color: "#0C2830", fontSize: "24px", fontWeight: "700", marginBottom: "24px" }}>
-                Account Settings
+            {/* Page Header */}
+            <div style={{ marginBottom: "32px" }}>
+              <div style={{ color: "#0C2830", fontSize: "28px", fontWeight: "700", fontFamily: "Space Grotesk, sans-serif" }}>
+                Settings
               </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: "16px", marginBottom: "24px" }}>
-                <div>
-                  <label style={{ color: "#3A6870", fontSize: "14px", fontWeight: "600", display: "block", marginBottom: "6px" }}>Full Name</label>
-                  <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} style={{ width: "100%", height: "46px", padding: "0 16px", background: "#F8FAFC", border: "1.5px solid #E2E8F0", borderRadius: "12px", outline: "none" }} />
-                </div>
-                <div>
-                  <label style={{ color: "#3A6870", fontSize: "14px", fontWeight: "600", display: "block", marginBottom: "6px" }}>Email Address</label>
-                  <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} style={{ width: "100%", height: "46px", padding: "0 16px", background: "#F8FAFC", border: "1.5px solid #E2E8F0", borderRadius: "12px", outline: "none" }} />
-                </div>
-                <div>
-                  <label style={{ color: "#3A6870", fontSize: "14px", fontWeight: "600", display: "block", marginBottom: "6px" }}>New Password</label>
-                  <input type="password" value={password} placeholder="Leave blank to keep unchanged" onChange={(e) => setPassword(e.target.value)} style={{ width: "100%", height: "46px", padding: "0 16px", background: "#F8FAFC", border: "1.5px solid #E2E8F0", borderRadius: "12px", outline: "none" }} />
-                </div>
-              </div>
-              <div style={{ display: "flex", gap: "12px" }}>
-                <button onClick={handleSaveProfile} type="button" style={{ padding: "12px 24px", background: "#0099A6", color: "white", border: "none", borderRadius: "12px", fontWeight: "700", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px" }}>
-                  <Save size={16} /> Save Profile
-                </button>
-                <button onClick={handleLogout} type="button" style={{ padding: "12px 24px", background: "rgba(192, 87, 76, 0.1)", color: "#C0574C", border: "1px solid rgba(192, 87, 76, 0.3)", borderRadius: "12px", fontWeight: "700", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px" }}>
-                  <LogOut size={16} /> Log Out
-                </button>
+              <div style={{ color: "#7AAAB4", fontSize: "14px", fontFamily: "Space Grotesk, sans-serif", marginTop: "4px" }}>
+                Manage your profile and preferences.
               </div>
             </div>
-          </div>
+
+            {/* Content Grid */}
+            <div style={{ display: "flex", gap: "24px", flexWrap: "wrap", alignItems: "flex-start" }}>
+              {/* Card 1: Your Profile */}
+              <div style={{ flex: "1 1 500px", background: "white", padding: "32px", borderRadius: "16px", border: "1.5px solid #F1F5F9", boxShadow: "0 2px 10px rgba(0,0,0,0.02)" }}>
+                <div style={{ color: "#0C2830", fontSize: "16px", fontWeight: "700", fontFamily: "Space Grotesk, sans-serif", marginBottom: "32px" }}>
+                  Your profile
+                </div>
+                
+                <div style={{ display: "flex", flexDirection: "column", gap: "24px", marginBottom: "32px" }}>
+                  <div>
+                    <label style={{ color: "#7AAAB4", fontSize: "12px", fontFamily: "Space Mono, monospace", fontWeight: "700", letterSpacing: "1px", display: "block", marginBottom: "8px", textTransform: "uppercase" }}>Full Name</label>
+                    <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} style={{ width: "100%", height: "48px", padding: "0 16px", background: "#FFFFFF", border: "1.5px solid #E2E8F0", borderRadius: "12px", outline: "none", fontSize: "15px", fontFamily: "Space Grotesk, sans-serif", color: "#1A2332", boxSizing: "border-box" }} />
+                  </div>
+                  <div>
+                    <label style={{ color: "#7AAAB4", fontSize: "12px", fontFamily: "Space Mono, monospace", fontWeight: "700", letterSpacing: "1px", display: "block", marginBottom: "8px", textTransform: "uppercase" }}>Email Address</label>
+                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} style={{ width: "100%", height: "48px", padding: "0 16px", background: "#FFFFFF", border: "1.5px solid #E2E8F0", borderRadius: "12px", outline: "none", fontSize: "15px", fontFamily: "Space Grotesk, sans-serif", color: "#1A2332", boxSizing: "border-box" }} />
+                  </div>
+                  <div>
+                    <label style={{ color: "#7AAAB4", fontSize: "12px", fontFamily: "Space Mono, monospace", fontWeight: "700", letterSpacing: "1px", display: "block", marginBottom: "8px", textTransform: "uppercase" }}>Change Password</label>
+                    <input type="password" value={password} placeholder="Enter new password" onChange={(e) => setPassword(e.target.value)} style={{ width: "100%", height: "48px", padding: "0 16px", background: "#FFFFFF", border: "1.5px solid #E2E8F0", borderRadius: "12px", outline: "none", fontSize: "15px", fontFamily: "Space Grotesk, sans-serif", color: "#1A2332", boxSizing: "border-box" }} />
+                  </div>
+                </div>
+                
+                <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                  <button onClick={handleSaveProfile} type="button" style={{ padding: "12px 24px", background: "#B5E3E7", color: "#ffffff", border: "none", borderRadius: "12px", fontWeight: "700", fontFamily: "Space Grotesk, sans-serif", fontSize: "15px", cursor: "pointer", transition: "all 0.2s" }} onMouseEnter={(e) => e.target.style.background = "#9ACBCD"} onMouseLeave={(e) => e.target.style.background = "#B5E3E7"}>
+                    Save changes
+                  </button>
+                </div>
+              </div>
+
+              {/* Card 2: Account Details & Logout */}
+              <div style={{ flex: "1 1 300px", background: "white", borderRadius: "16px", border: "1.5px solid #F1F5F9", boxShadow: "0 2px 10px rgba(0,0,0,0.02)", display: "flex", flexDirection: "column" }}>
+                <div style={{ padding: "24px 32px", borderBottom: "1.5px solid #F1F5F9" }}>
+                  <div style={{ color: "#0C2830", fontSize: "16px", fontWeight: "700", fontFamily: "Space Grotesk, sans-serif" }}>
+                    Account
+                  </div>
+                </div>
+                
+                <div style={{ padding: "32px", display: "flex", flexDirection: "column", gap: "24px" }}>
+                  <div>
+                    <div style={{ color: "#0C2830", fontSize: "14px", fontWeight: "700", fontFamily: "Space Grotesk, sans-serif", marginBottom: "4px" }}>Full Name</div>
+                    <div style={{ color: "#94A3B8", fontSize: "14px", fontFamily: "Space Grotesk, sans-serif" }}>{user?.name || "Loading..."}</div>
+                  </div>
+                  <div>
+                    <div style={{ color: "#0C2830", fontSize: "14px", fontWeight: "700", fontFamily: "Space Grotesk, sans-serif", marginBottom: "4px" }}>Account Role</div>
+                    <div style={{ color: "#94A3B8", fontSize: "14px", fontFamily: "Space Grotesk, sans-serif" }}>Patient</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* KANAN: CURRENT BIODATA CARD */}
+            <div style={{ flex: "1 1 300px", background: "linear-gradient(180deg, #FFFFFF 0%, #F4FAFB 100%)", padding: "32px", borderRadius: "24px", border: "1.5px dashed #7AAAB4", maxWidth: "400px" }}>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: "24px" }}>
+                <div style={{ width: "80px", height: "80px", borderRadius: "50%", background: "rgba(0, 153, 166, 0.15)", display: "flex", justifyContent: "center", alignItems: "center", marginBottom: "16px", border: "2px solid #C4E8EC" }}>
+                  <User size={36} color="#0099A6" />
+                </div>
+                <div style={{ color: "#0C2830", fontSize: "20px", fontWeight: "700", fontFamily: "Space Grotesk, sans-serif", textAlign: "center" }}>
+                  {user?.name || "Current Name"} 
+                </div>
+                <div style={{ color: "#7AAAB4", fontSize: "14px", fontWeight: "500", fontFamily: "Space Grotesk, sans-serif" }}>
+                  Patient Profile
+                </div>
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "12px", background: "white", padding: "12px 16px", borderRadius: "12px", border: "1px solid #E2E8F0" }}>
+                  <Mail size={18} color="#3A6870" style={{ flexShrink: 0 }} />
+                  <div style={{ overflow: "hidden" }}>
+                    <div style={{ color: "#7AAAB4", fontSize: "12px", fontWeight: "600", textTransform: "uppercase", letterSpacing: "0.5px" }}>Email</div>
+                    <div style={{ color: "#0C2830", fontSize: "14px", fontWeight: "500", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" }}>
+                      {user?.email || "current_email@example.com"}
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ display: "flex", alignItems: "center", gap: "12px", background: "white", padding: "12px 16px", borderRadius: "12px", border: "1px solid #E2E8F0" }}>
+                  <Shield size={18} color="#3A6870" style={{ flexShrink: 0 }} />
+                  <div>
+                    <div style={{ color: "#7AAAB4", fontSize: "12px", fontWeight: "600", textTransform: "uppercase", letterSpacing: "0.5px" }}>Account Status</div>
+                    <div style={{ color: "#4BA882", fontSize: "14px", fontWeight: "700" }}>Active</div>
+                  </div>
+                </div>
+                
+                <div style={{ display: "flex", alignItems: "center", gap: "12px", background: "white", padding: "12px 16px", borderRadius: "12px", border: "1px solid #E2E8F0" }}>
+                  <Calendar size={18} color="#3A6870" style={{ flexShrink: 0 }} />
+                  <div>
+                    <div style={{ color: "#7AAAB4", fontSize: "12px", fontWeight: "600", textTransform: "uppercase", letterSpacing: "0.5px" }}>Member Since</div>
+                    <div style={{ color: "#0C2830", fontSize: "14px", fontWeight: "500" }}>
+                      2026
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div> /* <-- TUTUP WADAH FLEXBOX NYA DI SINI */
         ) : !hasActiveProgram ? (
           /* STATE A: UNASSIGNED PATIENT */
           <div style={{ flex: 1, paddingRight: "10px", overflowY: "auto" }}>
