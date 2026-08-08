@@ -12,7 +12,7 @@ const PatientMonitoring = ({
   handleAssignInitialProgram,
   onRefreshData,
 }) => {
-  const [activeTab, setActiveTab] = useState("Feedback");
+  const [activeTab, setActiveTab] = useState("Plan");
 
   if (!patient) {
     return (

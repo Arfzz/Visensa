@@ -124,12 +124,17 @@ const PatientHeader = ({ patient, activeTab, setActiveTab }) => {
             borderRadius: "16px",
             border: "1.5px solid #C4E8EC",
             boxShadow: "0px 2px 10px rgba(0,0,0,0.02)",
-            opacity: isNewPatient ? 0.6 : 1,
-            pointerEvents: isNewPatient ? "none" : "auto",
+            // 🔍 SKEPTIS: Hapus opacity & pointerEvents dari bungkus div ini
+            // Biar tab "Therapy Plan" tetep keliatan hidup
           }}
         >
+          {/* TOMBOL FEEDBACK (DIMATIIN KALO UNASSIGNED) */}
           <button
-            onClick={() => setActiveTab("Feedback")}
+            onClick={() => {
+              // 🔍 SKEPTIS: Tambahin proteksi ganda di onClick
+              if (!isNewPatient) setActiveTab("Feedback");
+            }}
+            disabled={isNewPatient} // Disable fungsi bawaan HTML
             style={{
               padding: "9px 18px",
               background: activeTab === "Feedback" ? "#F0FAFB" : "transparent",
@@ -139,7 +144,11 @@ const PatientHeader = ({ patient, activeTab, setActiveTab }) => {
               fontSize: "14px",
               fontFamily: "Space Grotesk, sans-serif",
               fontWeight: activeTab === "Feedback" ? "700" : "600",
-              cursor: "pointer",
+              
+              // 🔍 SKEPTIS: Pindahin style disable-nya khusus ke tombol ini aja
+              cursor: isNewPatient ? "not-allowed" : "pointer",
+              opacity: isNewPatient ? 0.4 : 1, 
+              
               display: "flex",
               alignItems: "center",
               gap: "8px",
@@ -150,6 +159,7 @@ const PatientHeader = ({ patient, activeTab, setActiveTab }) => {
             <span>Feedback</span>
           </button>
 
+          {/* TOMBOL THERAPY PLAN (TETEP HIDUP) */}
           <button
             onClick={() => setActiveTab("Plan")}
             style={{
