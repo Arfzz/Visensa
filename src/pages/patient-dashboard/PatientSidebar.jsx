@@ -12,8 +12,9 @@ import {
 } from "lucide-react";
 import visensaLogo from "../../assets/visensa-logo.png";
 import { useStreakStore } from "../../features/gamification/streak/useStreakStore";
+import { ChevronLeft, ChevronRight, PanelLeftClose } from "lucide-react";
 
-export const PatientSidebar = ({ activeMenu, onSelectMenu }) => {
+export const PatientSidebar = ({ activeMenu, onSelectMenu, isSidebarOpen, setIsSidebarOpen }) => {
   // --- STORE & NAVIGATION ---
   const currentStreak = useStreakStore((state) => state.currentStreak);
   const navigate = useNavigate();
@@ -42,25 +43,27 @@ export const PatientSidebar = ({ activeMenu, onSelectMenu }) => {
       <style>
         {`
           .patient-sidebar {
-            width: 300px;
-            min-width: 300px;
+            width: ${isSidebarOpen ? "300px" : "96px"};
+            min-width: ${isSidebarOpen ? "300px" : "96px"};
             background: #151E2C;
             border-radius: 24px;
             display: flex;
             flex-direction: column;
-            padding: 35px 25px;
+            padding: ${isSidebarOpen ? "35px 25px" : "35px 15px"};
             box-sizing: border-box;
             z-index: 10;
             box-shadow: 0px 13px 80px rgba(226, 236, 249, 0.25);
+            transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+            overflow: hidden;
           }
           .logout-btn {
             margin-top: auto; 
           }
           @media (max-width: 1024px) {
             .patient-sidebar {
-              width: 260px;
-              min-width: 260px;
-              padding: 30px 15px;
+              width: ${isSidebarOpen ? "260px" : "96px"};
+              min-width: ${isSidebarOpen ? "260px" : "96px"};
+              padding: ${isSidebarOpen ? "30px 15px" : "30px 10px"};
             }
           }
           @media (max-width: 768px) {
@@ -122,12 +125,35 @@ export const PatientSidebar = ({ activeMenu, onSelectMenu }) => {
         `}
       </style>
       <div className="patient-sidebar">
-        {/* --- SIDEBAR HEADER LOGO --- */}
-        <div className="sidebar-header" style={{ display: "flex", alignItems: "center", gap: "12px", paddingLeft: "15px", marginBottom: "45px" }}>
-          <img src={visensaLogo} alt="VISENSA" style={{ width: "24px", height: "auto" }} />
-          <div style={{ color: "#F0FAFB", fontSize: "26px", fontWeight: "800", letterSpacing: "1px", fontFamily: "Space Grotesk, sans-serif" }}>
-            VISENSA
+        {/* --- SIDEBAR HEADER LOGO & TOGGLE --- */}
+        <div className="sidebar-header" style={{ display: "flex", alignItems: "center", justifyContent: isSidebarOpen ? "space-between" : "center", paddingLeft: isSidebarOpen ? "5px" : "0", marginBottom: "45px", transition: "all 0.3s" }}>
+          <div onClick={() => !isSidebarOpen && setIsSidebarOpen(true)} style={{ display: "flex", alignItems: "center", gap: "12px", cursor: isSidebarOpen ? "default" : "pointer" }} title={!isSidebarOpen ? "Expand sidebar" : undefined}>
+            <img src={visensaLogo} alt="VISENSA" style={{ width: "24px", height: "auto", flexShrink: 0 }} />
+            {isSidebarOpen && (
+              <div style={{ color: "#F0FAFB", fontSize: "26px", fontWeight: "800", letterSpacing: "1px", fontFamily: "Space Grotesk, sans-serif", whiteSpace: "nowrap" }}>
+                VISENSA
+              </div>
+            )}
           </div>
+          
+          {isSidebarOpen && (
+            <div
+              onClick={() => setIsSidebarOpen(false)}
+              style={{
+                cursor: "pointer",
+                color: "#7AAAB4",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                padding: "4px",
+                borderRadius: "6px",
+                transition: "all 0.2s",
+              }}
+              title="Collapse sidebar"
+            >
+              <PanelLeftClose size={20} />
+            </div>
+          )}
         </div>
 
         {/* --- MENU NAVIGATION LIST WITH ICONS --- */}
@@ -142,17 +168,18 @@ export const PatientSidebar = ({ activeMenu, onSelectMenu }) => {
                 className={`menu-item-container ${isActive ? "active" : ""}`}
                 onClick={() => onSelectMenu(item.id)}
                 style={{
-                  padding: "16px 20px",
+                  padding: isSidebarOpen ? "16px 20px" : "16px 0",
                   background: isActive ? "linear-gradient(135deg, #C8F135 0%, #96C000 100%)" : "transparent",
                   borderRadius: "16px",
                   display: "flex",
                   alignItems: "center",
-                  justifyContent: "space-between",
+                  justifyContent: isSidebarOpen ? "space-between" : "center",
                   gap: "12px",
                   cursor: "pointer",
                   boxShadow: isActive ? "0px 5px 17px rgba(31, 168, 143, 0.30)" : "none",
                   transition: "all 0.2s ease",
                 }}
+                title={!isSidebarOpen ? item.label : undefined}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
                   <IconComponent
@@ -161,21 +188,23 @@ export const PatientSidebar = ({ activeMenu, onSelectMenu }) => {
                     strokeWidth={2.5}
                     style={{ flexShrink: 0 }}
                   />
-                  <div
-                    className="menu-item-text"
-                    style={{
-                      color: isActive ? "#1A2332" : "#7AAAB4",
-                      fontSize: "16.5px",
-                      fontWeight: isActive ? "700" : "500",
-                      fontFamily: "Space Grotesk, sans-serif",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {item.label}
-                  </div>
+                  {isSidebarOpen && (
+                    <div
+                      className="menu-item-text"
+                      style={{
+                        color: isActive ? "#1A2332" : "#7AAAB4",
+                        fontSize: "16.5px",
+                        fontWeight: isActive ? "700" : "500",
+                        fontFamily: "Space Grotesk, sans-serif",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {item.label}
+                    </div>
+                  )}
                 </div>
 
-                {item.hasBadge && (
+                {isSidebarOpen && item.hasBadge && (
                   <div
                     className="menu-badge"
                     style={{
@@ -206,49 +235,81 @@ export const PatientSidebar = ({ activeMenu, onSelectMenu }) => {
                     </span>
                   </div>
                 )}
+                {!isSidebarOpen && item.hasBadge && (
+                   <div style={{ position: "absolute", top: "12px", right: "12px", width: "8px", height: "8px", borderRadius: "50%", background: "#F59E0B" }} />
+                )}
               </div>
             );
           })}
 
           {/* TOMBOL LOGOUT */}
-          <div
-            className="menu-item-container logout-btn"
-            onClick={handleLogout}
-            style={{
-              padding: "16px 20px",
-              background: "transparent",
-              borderRadius: "16px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "flex-start",
-              gap: "12px",
-              cursor: "pointer",
-              transition: "all 0.2s ease",
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(239, 68, 68, 0.1)")}
-            onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+          {isSidebarOpen ? (
+            <div
+              className="menu-item-container logout-btn"
+              onClick={handleLogout}
+              style={{
+                padding: "16px 20px",
+                background: "transparent",
+                borderRadius: "16px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "flex-start",
+                gap: "12px",
+                cursor: "pointer",
+                transition: "all 0.2s ease",
+                marginTop: "auto"
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(239, 68, 68, 0.1)")}
+              onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+                <LogOut
+                  size={20}
+                  color="#EF4444"
+                  strokeWidth={2.5}
+                  style={{ flexShrink: 0 }}
+                />
+                <div
+                  className="menu-item-text"
+                  style={{
+                    color: "#EF4444",
+                    fontSize: "16.5px",
+                    fontWeight: "600",
+                    fontFamily: "Space Grotesk, sans-serif",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  Log Out
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div
+              className="menu-item-container logout-btn"
+              onClick={handleLogout}
+              title="Log Out"
+              style={{
+                padding: "16px 0",
+                background: "transparent",
+                borderRadius: "16px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+                transition: "all 0.2s ease",
+                marginTop: "auto"
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(239, 68, 68, 0.1)")}
+              onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+            >
               <LogOut
                 size={20}
                 color="#EF4444"
                 strokeWidth={2.5}
                 style={{ flexShrink: 0 }}
               />
-              <div
-                className="menu-item-text"
-                style={{
-                  color: "#EF4444",
-                  fontSize: "16.5px",
-                  fontWeight: "600",
-                  fontFamily: "Space Grotesk, sans-serif",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                Log Out
-              </div>
             </div>
-          </div>
+          )}
           {/* END LOGOUT */}
 
         </div>
