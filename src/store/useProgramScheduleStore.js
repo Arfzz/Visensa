@@ -83,7 +83,11 @@ export const useProgramScheduleStore = create((set, get) => ({
       console.warn("Fetch program DB notice:", err.message);
     }
 
-    set({ isLoadingApi: false });
+    set({ 
+      activeProgram: null, 
+      weeklySchedule: null, 
+      isLoadingApi: false 
+    });
     return null;
   },
 
