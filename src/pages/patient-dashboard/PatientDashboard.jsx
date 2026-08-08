@@ -9,7 +9,7 @@ import PatientMonthlyPlanModal from "../../components/patient/dashboard/PatientM
 import InteractivePracticeHub from "../../features/gamification/interactive-practice/InteractivePracticeHub";
 import { useProgramScheduleStore } from "../../store/useProgramScheduleStore";
 import { useStreakStore } from "../../features/gamification/streak/useStreakStore";
-import { LogOut, Save, Music, Gamepad2 } from "lucide-react";
+import { Save, Music, User, Mail, Shield, Calendar } from "lucide-react";
 
 const API_BASE = import.meta.env.VITE_API_URL || "https://visensa-production.up.railway.app/api/v1";
 
@@ -454,7 +454,52 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
                 </div>
               </div>
             </div>
-          </div>
+
+            {/* KANAN: CURRENT BIODATA CARD */}
+            <div style={{ flex: "1 1 300px", background: "linear-gradient(180deg, #FFFFFF 0%, #F4FAFB 100%)", padding: "32px", borderRadius: "24px", border: "1.5px dashed #7AAAB4", maxWidth: "400px" }}>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: "24px" }}>
+                <div style={{ width: "80px", height: "80px", borderRadius: "50%", background: "rgba(0, 153, 166, 0.15)", display: "flex", justifyContent: "center", alignItems: "center", marginBottom: "16px", border: "2px solid #C4E8EC" }}>
+                  <User size={36} color="#0099A6" />
+                </div>
+                <div style={{ color: "#0C2830", fontSize: "20px", fontWeight: "700", fontFamily: "Space Grotesk, sans-serif", textAlign: "center" }}>
+                  {user?.name || "Current Name"} 
+                </div>
+                <div style={{ color: "#7AAAB4", fontSize: "14px", fontWeight: "500", fontFamily: "Space Grotesk, sans-serif" }}>
+                  Patient Profile
+                </div>
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "12px", background: "white", padding: "12px 16px", borderRadius: "12px", border: "1px solid #E2E8F0" }}>
+                  <Mail size={18} color="#3A6870" style={{ flexShrink: 0 }} />
+                  <div style={{ overflow: "hidden" }}>
+                    <div style={{ color: "#7AAAB4", fontSize: "12px", fontWeight: "600", textTransform: "uppercase", letterSpacing: "0.5px" }}>Email</div>
+                    <div style={{ color: "#0C2830", fontSize: "14px", fontWeight: "500", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" }}>
+                      {user?.email || "current_email@example.com"}
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ display: "flex", alignItems: "center", gap: "12px", background: "white", padding: "12px 16px", borderRadius: "12px", border: "1px solid #E2E8F0" }}>
+                  <Shield size={18} color="#3A6870" style={{ flexShrink: 0 }} />
+                  <div>
+                    <div style={{ color: "#7AAAB4", fontSize: "12px", fontWeight: "600", textTransform: "uppercase", letterSpacing: "0.5px" }}>Account Status</div>
+                    <div style={{ color: "#4BA882", fontSize: "14px", fontWeight: "700" }}>Active</div>
+                  </div>
+                </div>
+                
+                <div style={{ display: "flex", alignItems: "center", gap: "12px", background: "white", padding: "12px 16px", borderRadius: "12px", border: "1px solid #E2E8F0" }}>
+                  <Calendar size={18} color="#3A6870" style={{ flexShrink: 0 }} />
+                  <div>
+                    <div style={{ color: "#7AAAB4", fontSize: "12px", fontWeight: "600", textTransform: "uppercase", letterSpacing: "0.5px" }}>Member Since</div>
+                    <div style={{ color: "#0C2830", fontSize: "14px", fontWeight: "500" }}>
+                      2026
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div> /* <-- TUTUP WADAH FLEXBOX NYA DI SINI */
         ) : !hasActiveProgram ? (
           /* STATE A: UNASSIGNED PATIENT */
           <div style={{ flex: 1, paddingRight: "10px", overflowY: "auto" }}>
