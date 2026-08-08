@@ -616,7 +616,7 @@ const ScheduleConfigurationForm = ({
           }}
         >
           <Save size={18} />
-          <span>Save Initial Program & Publish</span>
+          <span>{activeProgram ? "Update Therapy Program" : "Save Initial Program & Publish"}</span>
         </button>
       </div>
     </div>
