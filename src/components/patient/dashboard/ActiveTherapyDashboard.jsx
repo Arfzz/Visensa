@@ -181,7 +181,11 @@ const ActiveTherapyDashboard = ({
           currentPain={currentPain}
           initialPain={startPain}
           sessionsThisMonth={sessionsThisMonth}
-          monthlyGoal={monthlyGoal}
+          monthlyGoal={
+            monthlyGoal > 0
+              ? monthlyGoal
+              : (schedule?.frequencyPerWeek || program?.frequency_per_week || 3) * 4
+          }
         />
 
         {/* F. SECTION 3: WEEKLY DATE CALENDAR STRIP */}
