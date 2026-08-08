@@ -185,15 +185,34 @@ const patientService = {
   /**
    * Get patient's own profile.
    */
-  async getMyProfile(userId) {
-    const { data, error } = await supabase
+async getMyProfile(userId) {
+    // 1. Tarik data profil dari tabel public.patient (Kayak kodingan asli lu)
+    const { data: patient, error } = await supabase
       .from('patient')
       .select('id, user_id, name, condition, notes, doctor_id, created_at')
       .eq('user_id', userId)
       .single();
 
-    if (error || !data) throw new AppError('Profile not found.', 404);
-    return data;
+    if (error || !patient) throw new AppError('Profile not found.', 404);
+
+    // 2. Tarik email dari Supabase Auth khusus buat user ini
+    let userEmail = null;
+    try {
+      // Pake fungsi admin buat nembus schema auth.users
+      const { data: authData, error: authErr } = await supabase.auth.admin.getUserById(userId);
+      
+      if (!authErr && authData?.user) {
+        userEmail = authData.user.email;
+      }
+    } catch (err) {
+      console.warn("Gagal narik email dari auth.users:", err.message);
+    }
+
+    // 3. Gabungin data patient sama emailnya
+    return {
+      ...patient,
+      email: userEmail
+    };
   },
 
   /**
