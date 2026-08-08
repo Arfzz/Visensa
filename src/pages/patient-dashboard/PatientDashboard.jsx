@@ -5,6 +5,7 @@ import PatientOnboardingCard from "../../components/patient/dashboard/PatientOnb
 import ActiveTherapyDashboard from "../../components/patient/dashboard/ActiveTherapyDashboard";
 import PatientSessionsView from "../../components/patient/dashboard/PatientSessionsView";
 import PatientSessionDetail from "../../components/patient/dashboard/PatientSessionDetail";
+import PatientMonthlyPlanModal from "../../components/patient/dashboard/PatientMonthlyPlanModal";
 import InteractivePracticeHub from "../../features/gamification/interactive-practice/InteractivePracticeHub";
 import { useProgramScheduleStore } from "../../store/useProgramScheduleStore";
 import { useStreakStore } from "../../features/gamification/streak/useStreakStore";
@@ -21,6 +22,7 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
     location.state?.activeMenu || initialTab,
   );
   const [selectedSession, setSelectedSession] = useState(null);
+  const [isMonthlyPlanModalOpen, setIsMonthlyPlanModalOpen] = useState(false);
 
   // --- DYNAMIC DATA STATES ---
   const [user, setUser] = useState(() => {
@@ -291,6 +293,16 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
           <div style={{ flex: 1, overflowY: "auto" }}>
             <InteractivePracticeHub />
           </div>
+        ) : activeMenu === "My Plan" ? (
+          /* MY PLAN / MONTHLY CALENDAR TAB */
+          <div style={{ flex: 1, height: "100%", overflowY: "auto", paddingRight: "10px" }}>
+            <PatientMonthlyPlanModal
+              isEmbeddedView={true}
+              sessionLogs={sessionLogs}
+              activeProgram={activeProgram}
+              weeklySchedule={weeklySchedule}
+            />
+          </div>
         ) : activeMenu === "Sessions" ? (
           /* SESSIONS TAB */
           selectedSession ? (
@@ -428,8 +440,19 @@ const PatientDashboard = ({ initialTab = "Dashboard" }) => {
             onOpenPractice={() => setActiveMenu("Interactive Practice")}
             onStartSession={() => navigate("/intro")}
             onMarkAllRead={handleMarkAllNotificationsRead}
+            onOpenMonthlyPlan={() => setIsMonthlyPlanModalOpen(true)}
           />
         )}
+
+        {/* MODAL POPUP FOR QUICK MONTHLY PLAN ACCESS */}
+        <PatientMonthlyPlanModal
+          isOpen={isMonthlyPlanModalOpen}
+          onClose={() => setIsMonthlyPlanModalOpen(false)}
+          sessionLogs={sessionLogs}
+          activeProgram={activeProgram}
+          weeklySchedule={weeklySchedule}
+          isEmbeddedView={false}
+        />
 
       </div>
     </>
