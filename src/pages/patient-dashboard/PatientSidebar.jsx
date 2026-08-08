@@ -31,7 +31,7 @@ export const PatientSidebar = ({ activeMenu, onSelectMenu, isSidebarOpen, setIsS
     () => [
       { id: "Dashboard", label: "Dashboard", icon: LayoutDashboard },
       { id: "Sessions", label: "Sessions", icon: Clock },
-      { id: "Interactive Practice", label: "Interactive Practice", icon: Gamepad2, hasBadge: true },
+      { id: "Interactive Practice", label: "Practice", icon: Gamepad2, hasBadge: true },
       { id: "Game History", label: "Practice History", icon: Clock10Icon },
       { id: "Settings", label: "Settings", icon: Settings },
     ],
@@ -193,10 +193,12 @@ export const PatientSidebar = ({ activeMenu, onSelectMenu, isSidebarOpen, setIsS
                       className="menu-item-text"
                       style={{
                         color: isActive ? "#1A2332" : "#7AAAB4",
-                        fontSize: "16.5px",
+                        fontSize: "16px",
                         fontWeight: isActive ? "700" : "500",
                         fontFamily: "Space Grotesk, sans-serif",
                         whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
                       }}
                     >
                       {item.label}
